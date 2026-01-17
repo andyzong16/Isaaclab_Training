@@ -150,9 +150,9 @@ class PhysicsCallbackAction(ActionTerm):
         body_ang_vel = self.body_ang_vel.clone()
         self.contact_solver.update(body_pos, body_quat, body_lin_vel, body_ang_vel)
         
-        # self.contact_wrench = self.contact_solver.contact_wrench # (num_envs, num_bodies, 6)
-        self.contact_wrench_b = self.contact_solver.contact_wrench_b # (num_envs, num_bodies, 6)
-        self._asset.set_external_force_and_torque(
+        self.contact_wrench = self.contact_solver.contact_wrench # global wrench (num_envs, num_bodies, 6)
+        self.contact_wrench_b = self.contact_solver.contact_wrench_b # body wrench (num_envs, num_bodies, 6)
+        self._asset.permanent_wrench_composer.set_forces_and_torques(
             forces = self.contact_wrench_b[:, :, :3],
             torques = self.contact_wrench_b[:, :, 3:6],
             body_ids = self._body_ids,
@@ -175,7 +175,7 @@ class PhysicsCallbackAction(ActionTerm):
             
         #     # self.contact_wrench = self.contact_solver.contact_wrench # (num_envs, num_bodies, 6)
         #     self.contact_wrench_b = self.contact_solver.contact_wrench_b # (num_envs, num_bodies, 6)
-        #     self._asset.set_external_force_and_torque(
+        #     self._asset.permanent_wrench_composer.set_forces_and_torques(
         #         forces = self.contact_wrench_b[:, :, :3],
         #         torques = self.contact_wrench_b[:, :, 3:6],
         #         body_ids = self._body_ids,

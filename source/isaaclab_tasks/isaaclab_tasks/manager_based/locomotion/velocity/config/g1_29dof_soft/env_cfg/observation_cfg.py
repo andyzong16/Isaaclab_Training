@@ -13,10 +13,6 @@ import isaaclab.envs.mdp as mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof_soft.mdp as g1_mdp
 
-"""
-leggedlab
-"""
-
 @configclass
 class PolicyCfg(ObsGroup):
     """Observations for policy group."""
@@ -263,38 +259,6 @@ class CriticCfg(ObsGroup):
 """
 obs for logging
 """
-        
-@configclass
-class ContactCfg(ObsGroup):
-    """Observations for policy group."""
-
-    # observation terms (order preserved)
-    
-    # hard_contact_forces_lf = ObsTerm(
-    #     func=g1_mdp.foot_hard_contact_forces, 
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces_LF", 
-    #                                          )},
-    # )
-    # hard_contact_forces_rf = ObsTerm(
-    #     func=g1_mdp.foot_hard_contact_forces, 
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces_RF", 
-    #                                          )},
-    # )
-    
-    # soft_contact_forces = ObsTerm(
-    #     func=g1_mdp.soft_contact_forces, 
-    #     params={"action_term_name": "physics_callback"},
-    # )
-
-    foot_pos = ObsTerm(
-        func=g1_mdp.foot_pos_w, 
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
-    )
-    
-
-    def __post_init__(self):
-        self.enable_corruption = True
-        self.concatenate_terms = True
     
 @configclass
 class LoggingObsCfg(ObsGroup):
@@ -306,42 +270,46 @@ class LoggingObsCfg(ObsGroup):
         func=mdp.generated_commands,
         params={"command_name": "base_velocity"},
     )
+    soft_contact_forces = ObsTerm(
+        func=g1_mdp.soft_contact_forces, 
+        params={"action_term_name": "physics_callback"},
+    )
 
-    joint_pos = ObsTerm(
-        func=mdp.joint_pos_rel,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot",
-            joint_names=[
-                # waist
-                "waist_yaw_joint", 
-                "waist_roll_joint", 
-                "waist_pitch_joint", 
+    # joint_pos = ObsTerm(
+    #     func=mdp.joint_pos_rel,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #         joint_names=[
+    #             # waist
+    #             "waist_yaw_joint", 
+    #             "waist_roll_joint", 
+    #             "waist_pitch_joint", 
 
-                # left arm
-                "left_shoulder_pitch_joint", 
-                "left_shoulder_roll_joint", 
-                "left_shoulder_yaw_joint", 
-                "left_elbow_joint", 
+    #             # left arm
+    #             "left_shoulder_pitch_joint", 
+    #             "left_shoulder_roll_joint", 
+    #             "left_shoulder_yaw_joint", 
+    #             "left_elbow_joint", 
 
-                "left_wrist_roll_joint", 
-                "left_wrist_pitch_joint", 
-                "left_wrist_yaw_joint", 
+    #             "left_wrist_roll_joint", 
+    #             "left_wrist_pitch_joint", 
+    #             "left_wrist_yaw_joint", 
 
-                # right arm
-                "right_shoulder_pitch_joint", 
-                "right_shoulder_roll_joint", 
-                "right_shoulder_yaw_joint", 
-                "right_elbow_joint", 
+    #             # right arm
+    #             "right_shoulder_pitch_joint", 
+    #             "right_shoulder_roll_joint", 
+    #             "right_shoulder_yaw_joint", 
+    #             "right_elbow_joint", 
 
-                "right_wrist_roll_joint", 
-                "right_wrist_pitch_joint", 
-                "right_wrist_yaw_joint", 
-            ],
-                preserve_order=True,
-            )
-        },
-        )
+    #             "right_wrist_roll_joint", 
+    #             "right_wrist_pitch_joint", 
+    #             "right_wrist_yaw_joint", 
+    #         ],
+    #             preserve_order=True,
+    #         )
+    #     },
+    #     )
     
 
     def __post_init__(self):
@@ -355,5 +323,4 @@ class G1ObservationsCfg:
     # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
-    contact: ContactCfg = ContactCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

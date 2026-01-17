@@ -45,7 +45,7 @@ class G1RoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 @configclass
 class G1FlatPPORunnerCfg(G1RoughPPORunnerCfg):
     def __post_init__(self):
-        super().__post_init__()
+        super().__post_init__() # type: ignore
 
         self.max_iterations = 30_000
 

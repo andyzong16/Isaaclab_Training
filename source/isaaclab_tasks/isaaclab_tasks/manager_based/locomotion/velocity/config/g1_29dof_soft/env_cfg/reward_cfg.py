@@ -27,13 +27,11 @@ class G1RewardsCfg:
     """
     track_lin_vel_xy = RewTerm(
         func=vel_mdp.track_lin_vel_xy_yaw_frame_exp, 
-        # weight=2.0, # better ang track, but stops at high speed
         weight=4.0, 
         params={"command_name": "base_velocity", "std": math.sqrt(0.5)}, 
     )
     track_ang_vel_z = RewTerm(
         func=vel_mdp.track_ang_vel_z_world_exp, 
-        # weight=1.0, 
         weight=4.0, 
         params={"command_name": "base_velocity", "std": math.sqrt(0.5)}, 
     )
@@ -74,7 +72,6 @@ class G1RewardsCfg:
         func=mdp.undesired_contacts,
         weight=-1.0,
         params={
-            # "sensor_cfg": SceneEntityCfg("contact_forces", body_names="(?!.*ankle.*).*"), 
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*"), 
             "threshold": 1.0},
     )
@@ -117,9 +114,10 @@ class G1RewardsCfg:
                 ".*waist_pitch.*": 0.25, 
 
                 # arms
-                ".*shoulder_pitch.*": 0.2, 
-                # ".*shoulder_pitch.*": 0.3, 
-                ".*elbow.*": 0.15, 
+                # ".*shoulder_pitch.*": 0.2, 
+                ".*shoulder_pitch.*": 0.3, 
+                # ".*elbow.*": 0.15, 
+                ".*elbow.*": 0.075, 
                 # ".*shoulder_roll.*": 0.25,
                 ".*shoulder_roll.*": 0.4,
                 # ".*shoulder_yaw.*": 0.25,
@@ -142,9 +140,10 @@ class G1RewardsCfg:
                 ".*waist_pitch.*": 0.25, 
 
                 # arms
-                ".*shoulder_pitch.*": 0.2, 
-                # ".*shoulder_pitch.*": 0.3, 
-                ".*elbow.*": 0.15, 
+                # ".*shoulder_pitch.*": 0.2, 
+                ".*shoulder_pitch.*": 0.3, 
+                # ".*elbow.*": 0.15, 
+                ".*elbow.*": 0.075, 
                 # ".*shoulder_roll.*": 0.25,
                 ".*shoulder_roll.*": 0.4,
                 # ".*shoulder_yaw.*": 0.25,
@@ -359,7 +358,8 @@ class G1RewardsCfg:
             "swing_period": 0.2,
             "action_term_name": "physics_callback",
             "cmd_threshold": 0.05, # or 0.1
-            "contact_threshold": 5.0,
+            # "contact_threshold": 5.0,
+            "contact_threshold": 200.0, # peak GRF is around 600N on soft terrain
             "command_name": "base_velocity",
         },
     )
@@ -374,7 +374,7 @@ class G1RewardsCfg:
     fly_soft = RewTerm(
         func=g1_mdp.fly_soft,
         weight=-1.0,
-        params={"action_term_name": "physics_callback", "threshold": 5.0},
+        params={"action_term_name": "physics_callback", "threshold": 200.0},
     )
 
     """

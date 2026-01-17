@@ -167,7 +167,7 @@ class RFT_2D:
     def __init__(self, 
                  num_envs: int,
                  num_bodies: int, 
-                 device: torch.device,
+                 device: torch.device | str,
                  dt:float, 
                  history_length: int = 3,
                  contact_threshold: float = 10,
@@ -665,7 +665,7 @@ class RFT_3D:
     def __init__(self, 
                  num_envs: int,
                  num_bodies: int, 
-                 device: torch.device,
+                 device: torch.device | str,
                  dt:float, 
                  history_length: int = 3,
                  contact_threshold: float = 10, 
@@ -1104,11 +1104,9 @@ class RFT_3D:
         force_vec = alpha * depth[:, :, None] * dA * is_contact[:, :, None] # more consistent with original paper
         
         # NOTE: orthogonal base is {x, y, z} here.
-        kd = 0.0
-        z_damp = kd * foot_velocity[:, :, 2:3] * is_contact[:, :, None]
         force = force_vec[:, :, 0:1] * self.r_dir.reshape(self.num_envs, -1, 3) + \
                 force_vec[:, :, 1:2] * self.t_dir.reshape(self.num_envs, -1, 3) * sign_fy.unsqueeze(-1) + \
-                (force_vec[:, :, 2:3] - z_damp) * self.z_dir.reshape(self.num_envs, -1, 3)
+                force_vec[:, :, 2:3] * self.z_dir.reshape(self.num_envs, -1, 3)
 
         return force
     

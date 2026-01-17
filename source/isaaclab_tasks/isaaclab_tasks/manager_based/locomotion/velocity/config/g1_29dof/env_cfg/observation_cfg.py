@@ -13,10 +13,6 @@ import isaaclab.envs.mdp as mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof.mdp as g1_mdp
 
-"""
-leggedlab
-"""
-
 @configclass
 class PolicyCfg(ObsGroup):
     """Observations for policy group."""
@@ -263,38 +259,6 @@ class CriticCfg(ObsGroup):
 """
 obs for logging
 """
-        
-@configclass
-class ContactCfg(ObsGroup):
-    """Observations for policy group."""
-
-    # observation terms (order preserved)
-    
-    # hard_contact_forces_lf = ObsTerm(
-    #     func=g1_mdp.foot_hard_contact_forces, 
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces_LF", 
-    #                                          )},
-    # )
-    # hard_contact_forces_rf = ObsTerm(
-    #     func=g1_mdp.foot_hard_contact_forces, 
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces_RF", 
-    #                                          )},
-    # )
-    
-    # soft_contact_forces = ObsTerm(
-    #     func=g1_mdp.soft_contact_forces, 
-    #     params={"action_term_name": "physics_callback"},
-    # )
-
-    foot_pos = ObsTerm(
-        func=g1_mdp.foot_pos_w, 
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
-    )
-    
-
-    def __post_init__(self):
-        self.enable_corruption = True
-        self.concatenate_terms = True
     
 @configclass
 class LoggingObsCfg(ObsGroup):
@@ -319,5 +283,4 @@ class G1ObservationsCfg:
     # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
-    contact: ContactCfg = ContactCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
