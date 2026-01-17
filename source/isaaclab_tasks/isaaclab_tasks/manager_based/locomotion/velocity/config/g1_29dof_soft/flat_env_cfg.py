@@ -27,9 +27,9 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.scene.terrain = vel_mdp.CurriculumSoftTerrain
         
         # no height scan
-        self.scene.height_scanner = None
-        self.observations.policy.height_scan = None
-        self.observations.critic.height_scan = None
+        self.scene.height_scanner = None # type: ignore
+        self.observations.policy.height_scan = None # type: ignore
+        self.observations.critic.height_scan = None # type: ignore
         
         # select contact solver backend
         self.actions.physics_callback.backend = "3D"
@@ -63,7 +63,7 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
-        self.terminations.terrain_out_of_bounds = None
+        self.terminations.terrain_out_of_bounds = None # type: ignore
 
 
 class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
@@ -98,17 +98,17 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
 
         # disable curriculum 
-        self.curriculum.terrain_levels = None
-        self.curriculum.command_vel = None
+        self.curriculum.terrain_levels = None # type: ignore
+        self.curriculum.command_vel = None # type: ignore
         
         # disable randomization for play
         self.observations.policy.enable_corruption = False
         
         # remove random events
-        self.events.add_base_mass = None
-        self.events.push_robot = None
-        self.events.physics_material = None
-        self.events.scale_actuator_gains = None
+        self.events.add_base_mass = None # type: ignore
+        self.events.push_robot = None # type: ignore
+        self.events.physics_material = None # type: ignore
+        self.events.scale_actuator_gains = None # type: ignore
         
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.0)

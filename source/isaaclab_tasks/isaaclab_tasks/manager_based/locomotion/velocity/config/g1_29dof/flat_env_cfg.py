@@ -29,13 +29,13 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.scene.terrain.terrain_generator = None
         
         # curriculum settings
-        self.curriculum.terrain_levels = None
+        self.curriculum.terrain_levels = None # type: ignore
         # self.curriculum.command_vel = None # no running
         
         # no height scan
-        self.scene.height_scanner = None
-        self.observations.policy.height_scan = None
-        self.observations.critic.height_scan = None
+        self.scene.height_scanner = None # type: ignore
+        self.observations.policy.height_scan = None # type: ignore
+        self.observations.critic.height_scan = None # type: ignore
         
         # Randomization 
         self.events.reset_base.params = {
@@ -78,17 +78,17 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.scene.env_spacing = 2.5
 
         # disable curriculum 
-        self.curriculum.terrain_levels = None
-        self.curriculum.command_vel = None
+        self.curriculum.terrain_levels = None # type: ignore
+        self.curriculum.command_vel = None # type: ignore
         
         # disable randomization for play
         self.observations.policy.enable_corruption = False
         
         # remove random pushing
-        self.events.add_base_mass = None
-        self.events.push_robot = None
-        self.events.physics_material = None
-        self.events.scale_actuator_gains = None
+        self.events.add_base_mass = None # type: ignore
+        self.events.push_robot = None # type: ignore
+        self.events.physics_material = None  # type: ignore
+        self.events.scale_actuator_gains = None  # type: ignore
         
         # Commands
         # self.commands.base_velocity.ranges.lin_vel_x = (0.5, 1.0)

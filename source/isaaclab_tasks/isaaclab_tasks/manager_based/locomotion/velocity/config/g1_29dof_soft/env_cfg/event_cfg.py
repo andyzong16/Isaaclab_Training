@@ -22,7 +22,7 @@ class G1EventCfg:
 
     # startup
     physics_material = EventTerm(
-        func=mdp.randomize_rigid_body_material,
+        func=mdp.randomize_rigid_body_material, # type: ignore
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
@@ -34,7 +34,7 @@ class G1EventCfg:
     )
 
     add_base_mass = EventTerm(
-        func=mdp.randomize_rigid_body_mass, 
+        func=mdp.randomize_rigid_body_mass, # type: ignore
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
@@ -51,36 +51,10 @@ class G1EventCfg:
     #         "com_range": {"x": (-0.05, 0.05), "y": (-0.05, 0.05), "z": (-0.01, 0.01)},
     #     },
     # )
-    
-    # scale_actuator_gains = EventTerm(
-    #     func=mdp.randomize_actuator_gains, # type: ignore
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg(
-    #             "robot",
-    #             joint_names=".*"
-    #         ),
-    #         "operation": "scale",
-    #         "distribution": "uniform",
-    #         # "stiffness_distribution_params": (0.9, 1.1),
-    #         # "damping_distribution_params": (0.9, 1.1),
-    #         "stiffness_distribution_params": (0.75, 1.25),
-    #         "damping_distribution_params": (0.75, 1.25),
-    #     },
-    # )
 
     """
     reset
     """
-    # base_external_force_torque = EventTerm(
-    #     func=mdp.apply_external_force_torque,
-    #     mode="reset",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
-    #         "force_range": (0.0, 0.0),
-    #         "torque_range": (-0.0, 0.0),
-    #     },
-    # )
 
     reset_base = EventTerm(
         func=mdp.reset_root_state_uniform, 

@@ -23,7 +23,6 @@ class G1ActionsCfg:
 
     joint_pos = mdp.JointPositionActionCfg(
         asset_name="robot", 
-        # joint_names=[".*"], 
         joint_names=[
             "left_hip_pitch_joint", 
             "left_hip_roll_joint", 

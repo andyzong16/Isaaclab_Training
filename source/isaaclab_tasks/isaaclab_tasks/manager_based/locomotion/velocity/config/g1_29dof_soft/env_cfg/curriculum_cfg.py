@@ -15,10 +15,10 @@ import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 class G1CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    terrain_levels = CurrTerm(func=vel_mdp.terrain_levels_vel)
+    terrain_levels = CurrTerm(func=vel_mdp.terrain_levels_vel)  # type: ignore
 
     command_vel = CurrTerm(
-        func=vel_mdp.commands_vel, 
+        func=vel_mdp.commands_vel, # type: ignore
         params={
             "command_name": "base_velocity",
             "velocity_stages": [

@@ -122,7 +122,7 @@ class variable_posture(ManagerTermBase):
         _, joint_names = asset.find_joints(cfg.params["asset_cfg"].joint_names)
 
         _, _, weight_standing = resolve_matching_names_values(
-        data=cfg.params["weight_standing"],
+        data=cfg.params["weight_standing"], # type: ignore
         list_of_strings=joint_names,
         )
         self.weight_standing = torch.tensor(
@@ -130,13 +130,13 @@ class variable_posture(ManagerTermBase):
         )
 
         _, _, weight_walking = resolve_matching_names_values(
-        data=cfg.params["weight_walking"],
+        data=cfg.params["weight_walking"], # type: ignore
         list_of_strings=joint_names,
         )
         self.weight_walking = torch.tensor(weight_walking, device=env.device, dtype=torch.float32)
 
         _, _, weight_running = resolve_matching_names_values(
-        data=cfg.params["weight_running"],
+        data=cfg.params["weight_running"], # type: ignore
         list_of_strings=joint_names,
         )
         self.weight_running = torch.tensor(weight_running, device=env.device, dtype=torch.float32)

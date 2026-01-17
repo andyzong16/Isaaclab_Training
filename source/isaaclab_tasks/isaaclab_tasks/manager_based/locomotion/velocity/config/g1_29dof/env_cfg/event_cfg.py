@@ -22,7 +22,7 @@ class G1EventCfg:
 
     # startup
     physics_material = EventTerm(
-        func=mdp.randomize_rigid_body_material,
+        func=mdp.randomize_rigid_body_material, # type: ignore
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
@@ -34,7 +34,7 @@ class G1EventCfg:
     )
 
     add_base_mass = EventTerm(
-        func=mdp.randomize_rigid_body_mass, 
+        func=mdp.randomize_rigid_body_mass, # type: ignore
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),

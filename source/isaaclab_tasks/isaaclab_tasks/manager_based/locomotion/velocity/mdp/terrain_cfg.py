@@ -10,7 +10,7 @@ from isaaclab.utils.assets import ISAACLAB_NUCLEUS_DIR
 from isaaclab_assets import ISAACLAB_ASSETS_DATA_DIR # type: ignore
 
 """
-base flat terrain.
+terrain collections
 """
 
 CurriculumSoftTerrain = TerrainImporterCfg(
