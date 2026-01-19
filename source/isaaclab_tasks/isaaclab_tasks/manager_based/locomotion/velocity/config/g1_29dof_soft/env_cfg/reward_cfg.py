@@ -32,7 +32,7 @@ class G1RewardsCfg:
     )
     track_ang_vel_z = RewTerm(
         func=vel_mdp.track_ang_vel_z_world_exp, 
-        weight=4.0, 
+        weight=3.0, 
         params={"command_name": "base_velocity", "std": math.sqrt(0.5)}, 
     )
     
@@ -55,13 +55,11 @@ class G1RewardsCfg:
     base_height = RewTerm(func=mdp.base_height_l2, weight=-10, params={"target_height": 0.78})
     flat_orientation_l2 = RewTerm(
         func=mdp.flat_orientation_l2, 
-        # weight=-1.0, 
         weight=-2.0, 
         ) 
     body_orientation_l2 = RewTerm(
         func=vel_mdp.body_orientation_l2, 
         params={"asset_cfg": SceneEntityCfg("robot", body_names=".*torso.*")}, 
-        # weight=-2.0, 
         weight=-4.0
     )
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0) 
@@ -80,7 +78,7 @@ class G1RewardsCfg:
     joint regularization.
     """
     energy = RewTerm(func=g1_mdp.energy, weight=-1e-3)
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-4) # optional
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-2e-4)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
     
     # penalize joint limits
