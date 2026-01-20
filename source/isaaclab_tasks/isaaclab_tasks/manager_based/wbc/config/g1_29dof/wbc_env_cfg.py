@@ -59,6 +59,9 @@ class G1WBCEnvCfg(ManagerBasedRLEnvCfg):
         # viewer settings
         self.viewer.eye = (3.0, 3.0, 3.0)
 
+        # disable debug vis
+        # self.commands.motion.debug_vis = False
+
         # # check if we are running headless
         # # if yes, we want to remove the dummy entities for performance reasons
         # carb_settings_iface = carb.settings.get_settings()

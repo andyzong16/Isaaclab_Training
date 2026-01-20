@@ -6,6 +6,7 @@
 from isaaclab.utils import configclass
 
 import isaaclab.envs.mdp as mdp
+from isaaclab_assets import UNITREE_G1_29DOF_MIMIC_ACTION_SCALE
 
 @configclass
 class G1ActionsCfg:
@@ -48,7 +49,7 @@ class G1ActionsCfg:
             "right_wrist_pitch_joint", 
             "right_wrist_yaw_joint", 
         ],
-        scale=0.25, 
+        scale=UNITREE_G1_29DOF_MIMIC_ACTION_SCALE, 
         use_default_offset=True, 
         preserve_order=True,
         )
