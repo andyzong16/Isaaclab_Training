@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+# Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -13,6 +13,9 @@ import omni.log
 import isaaclab.utils.string as string_utils
 from isaaclab.assets.articulation import Articulation
 from isaaclab.managers.action_manager import ActionTerm
+
+from isaaclab.markers import VisualizationMarkersCfg, VisualizationMarkers
+from isaaclab.markers.config import BLUE_ARROW_X_MARKER_CFG, GREEN_ARROW_X_MARKER_CFG
 
 from isaaclab_tasks.manager_based.soft_contact.soft_contact_model import (
     PoppySeedCPCfg, PoppySeedLPCfg, RFT_2D, Material3DRFTCfg, RFT_3D
@@ -91,6 +94,19 @@ class PhysicsCallbackAction(ActionTerm):
                 )
         else:
             raise ValueError(f"Unsupported RFT backend: {self.cfg.backend}")
+    
+    def _set_debug_vis_impl(self, debug_vis: bool):
+        # set visibility of markers
+        # note: parent only deals with callbacks. not their visibility
+        if debug_vis:
+            # create markers if necessary for the first time
+            if not hasattr(self, "contact_visualizer"):
+                self.contact_visualizer = VisualizationMarkers(self.cfg.contact_visualizer_cfg)
+            # set their visibility to true
+            self.contact_visualizer.set_visibility(True)
+        else:
+            if hasattr(self, "contact_visualizer"):
+                self.contact_visualizer.set_visibility(False)
         
     """
     properties.
@@ -181,6 +197,31 @@ class PhysicsCallbackAction(ActionTerm):
         #         body_ids = self._body_ids,
         #         # is_global=True,
         #     )
+
+    def _debug_vis_callback(self, event):
+        # check if robot is initialized
+        # note: this is needed in-case the robot is de-initialized. we can't access the data
+        if not self._asset.is_initialized:
+            return
+        # get marker location
+        body_pos_w = self.body_pos.clone()
+        body_pos_w[:, :, 2] += 0.04
+        body_quat_w = self.body_quat.clone()
+
+        # get scale
+        # TODO: handle tangential components too
+        grf_scale = self.contact_wrench_b[:, :, :3] / self.cfg.contact_vis_max_force
+        scale = torch.tensor(
+            self.contact_visualizer.cfg.markers["arrow"].scale, device=self.device # type: ignore
+            ).unsqueeze(0).repeat(self.num_envs * len(self._body_ids), 1)
+        scale[:, 2] = grf_scale[:, :, 2].reshape(-1)
+
+        # display markers
+        self.contact_visualizer.visualize(
+            body_pos_w.reshape(-1, 3), 
+            body_quat_w.reshape(-1, 4), 
+            scale.reshape(-1, 3), 
+        )
     
     def reset(self, env_ids: torch.Tensor):
         self.contact_wrench_b[env_ids] = 0.0

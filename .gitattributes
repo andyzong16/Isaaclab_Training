@@ -17,3 +17,4 @@ source/isaaclab_assets/data/unitree/** filter=lfs diff=lfs merge=lfs -text
 source/isaaclab_assets/data/booster/** filter=lfs diff=lfs merge=lfs -text
 source/isaaclab_assets/data/hector/** filter=lfs diff=lfs merge=lfs -text
 source/isaaclab_assets/data/texture/** filter=lfs diff=lfs merge=lfs -text
+source/isaaclab_assets/data/prop/** filter=lfs diff=lfs merge=lfs -text
