@@ -28,16 +28,17 @@ Reference: https://github.com/unitreerobotics/unitree_ros
 """
 
 import isaaclab.sim as sim_utils
-from isaaclab.actuators import ActuatorNetMLPCfg, DCMotorCfg, ImplicitActuatorCfg
+from isaaclab.actuators import ActuatorNetMLPCfg, DCMotorCfg, DelayedPDActuatorCfg, ImplicitActuatorCfg
 from isaaclab.assets.articulation import ArticulationCfg
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
+
 from isaaclab_assets import ISAACLAB_ASSETS_DATA_DIR
 
 from .unitree_actuators import (
+    UnitreeActuatorCfg_N5010_16,  # noqa: F401
+    UnitreeActuatorCfg_N5020_16,
     UnitreeActuatorCfg_N7520_14p3,
     UnitreeActuatorCfg_N7520_22p5,
-    UnitreeActuatorCfg_N5010_16,
-    UnitreeActuatorCfg_N5020_16,
     UnitreeActuatorCfg_W4010_25,
 )
 
