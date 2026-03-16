@@ -74,8 +74,7 @@ class G1RewardsCfg:
     joint regularization.
     """
     energy = RewTerm(func=vel_mdp.energy, weight=-1e-3)
-    # dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-2e-4)
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-4)
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-2e-4)
     # dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-3)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
 

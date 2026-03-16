@@ -44,6 +44,8 @@ gym.register(
         "rsl_rl_distillation_cfg_entry_point": (
             f"{agents.__name__}.rsl_rl_distillation_cfg:G1FlatDistillationRunnerCfg"
         ),
+        "holosoma_agent_cfg_entry_point": f"{agents.__name__}.holosoma_agent_fastsac_cfg:G1HolosomaFastSACAgentCfg",
+        # "holosoma_agent_cfg_entry_point": f"{agents.__name__}.holosoma_agent_ppo_cfg:G1HolosomaPPOAgentCfg",
     },
 )
 
@@ -59,5 +61,7 @@ gym.register(
         "rsl_rl_distillation_cfg_entry_point": (
             f"{agents.__name__}.rsl_rl_distillation_cfg:G1FlatDistillationRunnerCfg"
         ),
+        "holosoma_agent_cfg_entry_point": f"{agents.__name__}.holosoma_agent_fastsac_cfg:G1HolosomaFastSACAgentCfg",
+        # "holosoma_agent_cfg_entry_point": f"{agents.__name__}.holosoma_agent_ppo_cfg:G1HolosomaPPOAgentCfg",
     },
 )
