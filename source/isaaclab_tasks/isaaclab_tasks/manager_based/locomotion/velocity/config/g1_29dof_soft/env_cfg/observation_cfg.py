@@ -228,8 +228,40 @@ class CriticCfg(ObsGroup):
         clip=(-1.0, 1.0),
     )
 
-    # privileged observations
+    # # privileged observations
+    # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+    # foot_contact = ObsTerm(
+    #     func=g1_mdp.foot_contact,
+    #     params={"action_term_name": "physics_callback", "threshold": 5.0},
+    # )
+    # foot_contact_force = ObsTerm(
+    #     func=g1_mdp.foot_contact_forces,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+    # foot_air_time = ObsTerm(
+    #     func=g1_mdp.foot_air_time,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+    # foot_height = ObsTerm(
+    #     func=vel_mdp.foot_height,
+    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    # )
+
+    def __post_init__(self):
+        self.enable_corruption = False
+        self.concatenate_terms = True
+        self.history_length = 10
+
+
+@configclass
+class PrivilegedObsCfg(ObsGroup):
+    """Observations for policy group."""
+
     base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+    foot_height = ObsTerm(
+        func=vel_mdp.foot_height,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    )
     foot_contact = ObsTerm(
         func=g1_mdp.foot_contact,
         params={"action_term_name": "physics_callback", "threshold": 5.0},
@@ -242,15 +274,10 @@ class CriticCfg(ObsGroup):
         func=g1_mdp.foot_air_time,
         params={"action_term_name": "physics_callback"},
     )
-    foot_height = ObsTerm(
-        func=vel_mdp.foot_height,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
-    )
 
     def __post_init__(self):
-        self.enable_corruption = False
+        self.enable_corruption = True
         self.concatenate_terms = True
-        self.history_length = 10
 
 
 """
@@ -289,4 +316,5 @@ class G1ObservationsCfg:
     # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

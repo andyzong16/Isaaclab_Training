@@ -336,6 +336,8 @@ class G1TeacherObservationsCfg:
     # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
+    # policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    # critic: CriticHistoryCfg = CriticHistoryCfg()
     priviledged: PriviledgedObsCfg = PriviledgedObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
 
@@ -345,6 +347,9 @@ class G1StudentObservationsCfg:
     """Observation specifications for the MDP."""
 
     # observation groups
-    policy: PolicyHistoryCfg = PolicyHistoryCfg()
-    critic: CriticHistoryCfg = CriticHistoryCfg()
+    policy: PolicyCfg = PolicyCfg()
+    critic: CriticCfg = CriticCfg()
+    # policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    # critic: CriticHistoryCfg = CriticHistoryCfg()
+    priviledged: CriticHistoryCfg = CriticHistoryCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

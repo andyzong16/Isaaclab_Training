@@ -168,8 +168,9 @@ class RslRlMLPEncoderModelCfg(RslRlMLPModelCfg):
     encoder_activation: str = MISSING
     """The activation function for the encoder."""
 
+
 @configclass
-class TCNAttentionModelCfg(RslRlMLPModelCfg):
+class RslRlTCNAttentionModelCfg(RslRlMLPModelCfg):
     """Configuration for TCN Attention model."""
 
     class_name: str = "TCNAttentionModel"

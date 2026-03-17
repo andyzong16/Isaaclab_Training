@@ -46,8 +46,9 @@ EXTRAS_REQUIRE = {
         "rl-games @ git+https://github.com/isaac-sim/rl_games.git@python3.11",
         "gym",
     ],  # rl-games still needs gym :(
-    "rsl-rl": ["rsl-rl-lib==5.0.1", "onnxscript>=0.5"],  # linux aarch 64 requires manual onnxscript installation
-    "holosoma-agent": ["holosoma_agent @ git+https://github.com/jnskkmhr/holosoma_agent.git"],
+    # "rsl-rl": ["rsl-rl-lib==5.0.1", "onnxscript>=0.5"],  # linux aarch 64 requires manual onnxscript installation
+    "rsl-rl": ["rsl-rl-lib@git+https://github.com/jnskkmhr/rsl_rl.git@feature/encoder", "onnxscript>=0.5"],
+    "holosoma-agent": ["holosoma_agent@git+https://github.com/jnskkmhr/holosoma_agent.git"],
 }
 # Add the names with hyphens as aliases for convenience
 EXTRAS_REQUIRE["rl_games"] = EXTRAS_REQUIRE["rl-games"]

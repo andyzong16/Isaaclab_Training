@@ -6,10 +6,13 @@
 from isaaclab.utils import configclass
 
 from isaaclab_rl.rsl_rl import (
+    RslRlDistillationAlgorithmCfg,
+    RslRlDistillationRunnerCfg,
     RslRlMLPEncoderModelCfg,
     RslRlMLPModelCfg,
     RslRlOnPolicyRunnerCfg,
     RslRlPpoAlgorithmCfg,
+    RslRlTCNAttentionModelCfg,
 )
 
 
@@ -55,3 +58,49 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     logger = "wandb"
     wandb_project = "g1_29dof_adaptation"
     experiment_name = "g1_29dof_adaptation"
+
+
+@configclass
+class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
+    num_steps_per_env = 120
+    max_iterations = 300
+    save_interval = 50
+    experiment_name = "g1_29dof_adaptation_distillation"
+    obs_groups = {"student": ["policy"], "teacher": ["policy"], "encoder": ["priviledged"]}
+    # student = RslRlMLPModelCfg(
+    #     hidden_dims=[128, 128, 128],
+    #     activation="elu",
+    #     obs_normalization=False,
+    #     distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
+    # )
+    # teacher = RslRlMLPModelCfg(
+    #     hidden_dims=[128, 128, 128],
+    #     activation="elu",
+    #     obs_normalization=False,
+    #     distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.0),
+    # )
+    teacher = RslRlMLPEncoderModelCfg(
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=False,
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
+        encoder_obs_set="encoder",
+        encoder_output_dim=128,
+        encoder_hidden_dims=[512, 256],
+        encoder_activation="elu",
+    )
+    student = RslRlTCNAttentionModelCfg(
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=False,
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
+        encoder_obs_set="encoder",
+        encoder_output_dim=128,
+        encoder_hidden_dims=[512, 256],
+        encoder_activation="elu",
+    )
+    algorithm = RslRlDistillationAlgorithmCfg(
+        num_learning_epochs=2,
+        learning_rate=1.0e-3,
+        gradient_length=15,
+    )
