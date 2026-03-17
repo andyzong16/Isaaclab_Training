@@ -78,7 +78,7 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     angular_norm = torch.abs(env.command_manager.get_command(command_name)[:, 2])
     total_norm = linear_norm + angular_norm
-    reward *= total_norm > 0.01
+    reward *= total_norm > 0.05
     return reward
 
 
@@ -150,6 +150,36 @@ def reward_foot_lateral_symmetry(
         )
     foot_lat_dist = torch.abs(body_pos_in_base[:, 0, 1] - body_pos_in_base[:, 1, 1])
     return torch.square(foot_lat_dist - ref_dist)
+
+
+def reward_soft_landing(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+    command_name: str,
+    command_threshold: float = 0.05,
+) -> torch.Tensor:
+    """Penalize high impact forces at landing to encourage soft footfalls."""
+    contact_sensor: ContactSensor = env.scene[sensor_cfg.name]
+    assert contact_sensor.data.net_forces_w is not None
+
+    forces = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids, :]  # [B, N, 3]
+    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
+    first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]  # [B, N]
+    landing_impact = force_magnitude * first_contact.float()  # [B, N]
+    cost = torch.sum(landing_impact, dim=1)  # [B]
+
+    num_landings = torch.sum(first_contact.float())
+    mean_landing_force = torch.sum(landing_impact) / torch.clamp(num_landings, min=1)
+    env.extras["log"]["Metrics/landing_force_mean"] = mean_landing_force
+
+    if command_name is not None:
+        command = env.command_manager.get_command(command_name)
+        linear_norm = torch.norm(command[:, :2], dim=1)
+        angular_norm = torch.abs(command[:, 2])
+        total_command = linear_norm + angular_norm
+        active = (total_command > command_threshold).float()
+        cost = cost * active
+    return cost
 
 
 """

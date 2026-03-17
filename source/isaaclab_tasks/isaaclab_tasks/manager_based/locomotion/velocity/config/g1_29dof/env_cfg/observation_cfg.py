@@ -123,7 +123,7 @@ class PolicyCfg(ObsGroup):
     def __post_init__(self):
         self.enable_corruption = True
         self.concatenate_terms = True
-        self.history_length = 10
+        self.history_length = 1
 
 
 @configclass
@@ -227,7 +227,47 @@ class CriticCfg(ObsGroup):
         clip=(-1.0, 1.0),
     )
 
-    # privileged observations
+    # # privileged observations
+    # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+    # foot_contact = ObsTerm(
+    #     func=vel_mdp.foot_contact,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"), "threshold": 5.0},
+    # )
+    # foot_contact_force = ObsTerm(
+    #     func=vel_mdp.foot_contact_forces,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
+    # )
+    # foot_air_time = ObsTerm(
+    #     func=vel_mdp.foot_air_time,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
+    # )
+    # foot_height = ObsTerm(
+    #     func=vel_mdp.foot_height,
+    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    # )
+
+    def __post_init__(self):
+        self.enable_corruption = False
+        self.concatenate_terms = True
+        self.history_length = 1
+
+
+@configclass
+class PolicyHistoryCfg(PolicyCfg):
+    def __post_init__(self):
+        self.history_length = 10
+
+
+@configclass
+class CriticHistoryCfg(CriticCfg):
+    def __post_init__(self):
+        self.history_length = 10
+
+
+@configclass
+class PriviledgedObsCfg(ObsGroup):
+    """Observations for policy group."""
+
     base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
     foot_contact = ObsTerm(
         func=vel_mdp.foot_contact,
@@ -247,8 +287,13 @@ class CriticCfg(ObsGroup):
     )
 
     def __post_init__(self):
-        self.enable_corruption = False
+        self.enable_corruption = True
         self.concatenate_terms = True
+
+
+@configclass
+class PriviledgedHistoryCfg(PriviledgedObsCfg):
+    def __post_init__(self):
         self.history_length = 10
 
 
@@ -278,6 +323,28 @@ class G1ObservationsCfg:
     """Observation specifications for the MDP."""
 
     # observation groups
+    policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    critic: CriticHistoryCfg = CriticHistoryCfg()
+    priviledged: PriviledgedHistoryCfg = PriviledgedHistoryCfg()
+    logging: LoggingObsCfg = LoggingObsCfg()
+
+
+@configclass
+class G1TeacherObservationsCfg:
+    """Observation specifications for the MDP."""
+
+    # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
+    priviledged: PriviledgedObsCfg = PriviledgedObsCfg()
+    logging: LoggingObsCfg = LoggingObsCfg()
+
+
+@configclass
+class G1StudentObservationsCfg:
+    """Observation specifications for the MDP."""
+
+    # observation groups
+    policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    critic: CriticHistoryCfg = CriticHistoryCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

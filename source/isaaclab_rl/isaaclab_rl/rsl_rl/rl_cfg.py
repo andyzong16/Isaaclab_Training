@@ -153,6 +153,37 @@ class RslRlCNNModelCfg(RslRlMLPModelCfg):
     """The configuration for the CNN(s)."""
 
 
+@configclass
+class RslRlMLPEncoderModelCfg(RslRlMLPModelCfg):
+    """Configuration for MLP Encoder model."""
+
+    class_name: str = "MLPEncoderModel"
+    """The model class name. Defaults to MLPEncoderModel."""
+    encoder_obs_set: str = MISSING
+    """The observation set for the encoder."""
+    encoder_output_dim: int = MISSING
+    """The output dimension of the encoder."""
+    encoder_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the encoder."""
+    encoder_activation: str = MISSING
+    """The activation function for the encoder."""
+
+@configclass
+class TCNAttentionModelCfg(RslRlMLPModelCfg):
+    """Configuration for TCN Attention model."""
+
+    class_name: str = "TCNAttentionModel"
+    """The model class name. Defaults to TCNAttentionModel."""
+    encoder_obs_set: str = MISSING
+    """The observation set for the encoder."""
+    encoder_output_dim: int = MISSING
+    """The output dimension of the encoder."""
+    encoder_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the encoder."""
+    encoder_activation: str = MISSING
+    """The activation function for the encoder."""
+
+
 ############################
 # Algorithm configurations #
 ############################
