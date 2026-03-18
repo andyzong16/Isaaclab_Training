@@ -137,7 +137,7 @@ def foot_hard_contact_forces(
 
 
 """
-soft contact
+soft contact state
 """
 
 
@@ -183,3 +183,16 @@ def foot_contact_forces_raw(
     contact_forces = action_term.contact_solver.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
     forces_flat = contact_forces.reshape(env.num_envs, -1)
     return forces_flat
+
+
+def terrain_material_parameters(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    contact_solver = action_term.contact_solver
+    friction_coef = contact_solver.terrain_friction
+    rho_c = contact_solver.terrain_density / 3000.0  # max rho = 3000.0
+    mu_int = contact_solver.terrain_stiffness
+    return torch.stack([friction_coef, rho_c, mu_int], dim=-1)

@@ -203,6 +203,18 @@ class RFT_2D:
         return torch.cat(
             (self.contact_point_force, self.contact_point_torque), dim=-1
         )  # (num_envs, num_bodies, num_contact_points, 6)
+    
+    @property
+    def terrain_friction(self) -> torch.Tensor:
+        return self.dynamic_friction_coef
+
+    @property
+    def terrain_density(self) -> torch.Tensor:
+        return self.rho
+
+    @property
+    def terrain_stiffness(self) -> torch.Tensor:
+        return self.lam
 
     """
     operations.
@@ -277,6 +289,69 @@ class RFT_2D:
         """
         self.static_friction_coef[env_ids] = static_friction_coef
         self.dynamic_friction_coef[env_ids] = dynamic_friction_coef
+    
+    """
+    data helper functions.
+    """
+
+    def compute_first_contact(self, dt: float, abs_tol: float = 1.0e-8) -> torch.Tensor:
+        """Checks if bodies that have established contact within the last :attr:`dt` seconds.
+
+        This function checks if the bodies have established contact within the last :attr:`dt` seconds
+        by comparing the current contact time with the given time period. If the contact time is less
+        than the given time period, then the bodies are considered to be in contact.
+
+        Note:
+            The function assumes that :attr:`dt` is a factor of the sensor update time-step. In other
+            words :math:`dt / dt_sensor = n`, where :math:`n` is a natural number. This is always true
+            if the sensor is updated by the physics or the environment stepping time-step and the sensor
+            is read by the environment stepping time-step.
+
+        Args:
+            dt: The time period since the contact was established.
+            abs_tol: The absolute tolerance for the comparison.
+
+        Returns:
+            A boolean tensor indicating the bodies that have established contact within the last
+            :attr:`dt` seconds. Shape is (N, B), where N is the number of sensors and B is the
+            number of bodies in each sensor.
+
+        Raises:
+            RuntimeError: If the sensor is not configured to track contact time.
+        """
+        # check if the bodies are in contact
+        currently_in_contact = self._data.current_contact_time > 0.0
+        less_than_dt_in_contact = self._data.current_contact_time < (dt + abs_tol)
+        return currently_in_contact * less_than_dt_in_contact
+
+    def compute_first_air(self, dt: float, abs_tol: float = 1.0e-8) -> torch.Tensor:
+        """Checks if bodies that have broken contact within the last :attr:`dt` seconds.
+
+        This function checks if the bodies have broken contact within the last :attr:`dt` seconds
+        by comparing the current air time with the given time period. If the air time is less
+        than the given time period, then the bodies are considered to not be in contact.
+
+        Note:
+            It assumes that :attr:`dt` is a factor of the sensor update time-step. In other words,
+            :math:`dt / dt_sensor = n`, where :math:`n` is a natural number. This is always true if
+            the sensor is updated by the physics or the environment stepping time-step and the sensor
+            is read by the environment stepping time-step.
+
+        Args:
+            dt: The time period since the contract is broken.
+            abs_tol: The absolute tolerance for the comparison.
+
+        Returns:
+            A boolean tensor indicating the bodies that have broken contact within the last :attr:`dt` seconds.
+            Shape is (N, B), where N is the number of sensors and B is the number of bodies in each sensor.
+
+        Raises:
+            RuntimeError: If the sensor is not configured to track contact time.
+        """
+        # check if the sensor is configured to track contact time
+        currently_detached = self._data.current_air_time > 0.0
+        less_than_dt_detached = self._data.current_air_time < (dt + abs_tol)
+        return currently_detached * less_than_dt_detached
 
     """
     helper functions.
@@ -330,6 +405,10 @@ class RFT_2D:
             self._data.current_contact_time[env_ids] + elapsed_time.unsqueeze(-1),
             0.0,  # type: ignore
         )
+
+    """
+    helper functions.
+    """
 
     def _eval_contacts(self) -> None:
         """
@@ -765,6 +844,18 @@ class RFT_3D:
         return torch.cat(
             (self.contact_point_force, self.contact_point_torque), dim=-1
         )  # (num_envs, num_bodies, num_contact_points, 6)
+    
+    @property
+    def terrain_friction(self) -> torch.Tensor:
+        return self.dynamic_friction_coef
+
+    @property
+    def terrain_density(self) -> torch.Tensor:
+        return self.rho_c
+
+    @property
+    def terrain_stiffness(self) -> torch.Tensor:
+        return self.mu_int
 
     """
     operations.
@@ -841,8 +932,67 @@ class RFT_3D:
         self.dynamic_friction_coef[env_ids] = dynamic_friction_coef
 
     """
-    helper functions.
+    data helper functions.
     """
+
+    def compute_first_contact(self, dt: float, abs_tol: float = 1.0e-8) -> torch.Tensor:
+        """Checks if bodies that have established contact within the last :attr:`dt` seconds.
+
+        This function checks if the bodies have established contact within the last :attr:`dt` seconds
+        by comparing the current contact time with the given time period. If the contact time is less
+        than the given time period, then the bodies are considered to be in contact.
+
+        Note:
+            The function assumes that :attr:`dt` is a factor of the sensor update time-step. In other
+            words :math:`dt / dt_sensor = n`, where :math:`n` is a natural number. This is always true
+            if the sensor is updated by the physics or the environment stepping time-step and the sensor
+            is read by the environment stepping time-step.
+
+        Args:
+            dt: The time period since the contact was established.
+            abs_tol: The absolute tolerance for the comparison.
+
+        Returns:
+            A boolean tensor indicating the bodies that have established contact within the last
+            :attr:`dt` seconds. Shape is (N, B), where N is the number of sensors and B is the
+            number of bodies in each sensor.
+
+        Raises:
+            RuntimeError: If the sensor is not configured to track contact time.
+        """
+        # check if the bodies are in contact
+        currently_in_contact = self._data.current_contact_time > 0.0
+        less_than_dt_in_contact = self._data.current_contact_time < (dt + abs_tol)
+        return currently_in_contact * less_than_dt_in_contact
+
+    def compute_first_air(self, dt: float, abs_tol: float = 1.0e-8) -> torch.Tensor:
+        """Checks if bodies that have broken contact within the last :attr:`dt` seconds.
+
+        This function checks if the bodies have broken contact within the last :attr:`dt` seconds
+        by comparing the current air time with the given time period. If the air time is less
+        than the given time period, then the bodies are considered to not be in contact.
+
+        Note:
+            It assumes that :attr:`dt` is a factor of the sensor update time-step. In other words,
+            :math:`dt / dt_sensor = n`, where :math:`n` is a natural number. This is always true if
+            the sensor is updated by the physics or the environment stepping time-step and the sensor
+            is read by the environment stepping time-step.
+
+        Args:
+            dt: The time period since the contract is broken.
+            abs_tol: The absolute tolerance for the comparison.
+
+        Returns:
+            A boolean tensor indicating the bodies that have broken contact within the last :attr:`dt` seconds.
+            Shape is (N, B), where N is the number of sensors and B is the number of bodies in each sensor.
+
+        Raises:
+            RuntimeError: If the sensor is not configured to track contact time.
+        """
+        # check if the sensor is configured to track contact time
+        currently_detached = self._data.current_air_time > 0.0
+        less_than_dt_detached = self._data.current_air_time < (dt + abs_tol)
+        return currently_detached * less_than_dt_detached
 
     def _update_data(self, env_ids: torch.Tensor) -> None:
         """
@@ -892,6 +1042,11 @@ class RFT_3D:
             self._data.current_contact_time[env_ids] + elapsed_time.unsqueeze(-1),
             0.0,  # type: ignore
         )
+    
+    
+    """
+    helper functions.
+    """
 
     def _eval_contacts(self) -> None:
         """

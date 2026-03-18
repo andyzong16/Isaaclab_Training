@@ -269,6 +269,12 @@ class PriviledgedObsCfg(ObsGroup):
     """Observations for policy group."""
 
     base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+    foot_height = ObsTerm(
+        func=vel_mdp.foot_height,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    )
+
+    # contact
     foot_contact = ObsTerm(
         func=vel_mdp.foot_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"), "threshold": 5.0},
@@ -280,10 +286,6 @@ class PriviledgedObsCfg(ObsGroup):
     foot_air_time = ObsTerm(
         func=vel_mdp.foot_air_time,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
-    )
-    foot_height = ObsTerm(
-        func=vel_mdp.foot_height,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
     )
 
     def __post_init__(self):

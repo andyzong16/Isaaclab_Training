@@ -79,8 +79,7 @@ class G1RewardsCfg:
     joint regularization.
     """
     energy = RewTerm(func=vel_mdp.energy, weight=-1e-3)
-    # dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-2e-4)
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-3)
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-2e-4)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
 
     # penalize joint limits
@@ -112,16 +111,11 @@ class G1RewardsCfg:
                 ".*waist_roll.*": 0.8,
                 ".*waist_pitch.*": 0.5,
                 # arms
-                ".*shoulder_pitch.*": 0.3,
-                ".*elbow.*": 0.1,
+                ".*shoulder_pitch.*": 0.5,
+                ".*elbow.*": 0.25,
                 ".*shoulder_roll.*": 0.4,
                 ".*shoulder_yaw.*": 0.35,
                 ".*wrist.*": 0.5,
-                # ".*shoulder_pitch.*": 0.5,
-                # ".*elbow.*": 0.2,
-                # ".*shoulder_roll.*": 0.4,
-                # ".*shoulder_yaw.*": 0.35,
-                # ".*wrist.*": 0.5,
             },
             "weight_running": {
                 # leg
@@ -136,16 +130,11 @@ class G1RewardsCfg:
                 ".*waist_roll.*": 0.8,
                 ".*waist_pitch.*": 0.5,
                 # arms
-                ".*shoulder_pitch.*": 0.3,
-                ".*elbow.*": 0.1,
+                ".*shoulder_pitch.*": 0.5,
+                ".*elbow.*": 0.25,
                 ".*shoulder_roll.*": 0.4,
                 ".*shoulder_yaw.*": 0.35,
                 ".*wrist.*": 0.5,
-                # ".*shoulder_pitch.*": 0.5,
-                # ".*elbow.*": 0.2,
-                # ".*shoulder_roll.*": 0.4,
-                # ".*shoulder_yaw.*": 0.35,
-                # ".*wrist.*": 0.5,
             },
             "walking_threshold": 0.05,
             "running_threshold": 1.5,
@@ -314,6 +303,7 @@ class G1RewardsCfg:
     feet_air_time = RewTerm(
         func=vel_mdp.feet_air_time_positive_biped,
         weight=0.5,
+        # weight=1.0,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
@@ -323,6 +313,7 @@ class G1RewardsCfg:
     feet_air_time_soft = RewTerm(
         func=vel_mdp.feet_air_time_positive_biped_soft,
         weight=0.5,
+        # weight=1.0,
         params={
             "command_name": "base_velocity",
             "action_term_name": "physics_callback",
@@ -363,24 +354,44 @@ class G1RewardsCfg:
         },
     )
 
-    feet_force = RewTerm(
-        func=vel_mdp.foot_force,
-        # weight=-5e-3,
-        weight=-1e-2,
+    # feet_force = RewTerm(
+    #     func=vel_mdp.foot_force,
+    #     # weight=-5e-3,
+    #     weight=-1e-2,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    #         "threshold": 300,
+    #         "max_reward": 300,
+    #     },
+    # )
+    # feet_force_soft = RewTerm(
+    #     func=vel_mdp.foot_force_soft,
+    #     # weight=-5e-3,
+    #     weight=-1e-2,
+    #     params={
+    #         "action_term_name": "physics_callback",
+    #         "threshold": 300,
+    #         "max_reward": 300,
+    #     },
+    # )
+
+    contact_impulse = RewTerm(
+        func=vel_mdp.reward_soft_landing,
+        weight=-5e-3,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-            "threshold": 300,
-            "max_reward": 300,
+            "command_name": "base_velocity",
+            "command_threshold": 0.05,
         },
     )
-    feet_force_soft = RewTerm(
-        func=vel_mdp.foot_force_soft,
-        # weight=-5e-3,
-        weight=-1e-2,
+
+    contact_impulse_soft = RewTerm(
+        func=vel_mdp.reward_soft_landing_soft,
+        weight=-5e-3,
         params={
             "action_term_name": "physics_callback",
-            "threshold": 300,
-            "max_reward": 300,
+            "command_name": "base_velocity",
+            "command_threshold": 0.05,
         },
     )
 
@@ -410,24 +421,11 @@ class G1RewardsCfg:
         func=vel_mdp.foot_clearance_reward,
         weight=5.0,
         params={
-            "target_height": 0.12,
-            "std": 0.05,
+            "target_height": 0.1,
+            # "std": 0.05,
+            "std": 0.01,
             "tanh_mult": 2.0,
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
             "standing_position_foot_z": 0.03539,
         },
     )
-
-    # cubic bezier curve to form swing foot trajectory
-    # foot_clearance_bezier = RewTerm(
-    #     func=vel_mdp.track_foot_height_bezier,
-    #     weight=5.0,
-    #     params={
-    #         "std": 0.08,
-    #         "tanh_mult": 2.0,
-    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
-    #         "standing_position_foot_z": 0.03539,
-    #         "gait_command_name": "locomotion_gait",
-    #         "target_height_command_name": "foot_height",
-    #     },
-    # )

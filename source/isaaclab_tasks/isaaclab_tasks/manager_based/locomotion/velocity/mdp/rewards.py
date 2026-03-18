@@ -720,7 +720,7 @@ def feet_air_time_positive_biped_soft(
     linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     angular_norm = torch.abs(env.command_manager.get_command(command_name)[:, 2])
     total_norm = linear_norm + angular_norm
-    reward *= total_norm > 0.01
+    reward *= total_norm > 0.05
     return reward
 
 
@@ -766,3 +766,33 @@ def foot_force_soft(
     reward[reward > threshold] -= threshold
     reward = reward.clamp(min=0, max=max_reward)
     return reward
+
+
+def reward_soft_landing_soft(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+    command_name: str = "base_velocity",
+    command_threshold: float = 0.05,
+) -> torch.Tensor:
+    """Penalize high impact forces at landing to encourage soft footfalls."""
+    contact_solver = env.action_manager.get_term(action_term_name).contact_solver
+    assert contact_solver.data.net_forces_w is not None
+
+    forces = contact_solver.data.net_forces_w  # [B, N, 3]
+    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
+    first_contact = contact_solver.compute_first_contact(env.step_dt)  # [B, N]
+    landing_impact = force_magnitude * first_contact.float()  # [B, N]
+    cost = torch.sum(landing_impact, dim=1)  # [B]
+
+    num_landings = torch.sum(first_contact.float())
+    mean_landing_force = torch.sum(landing_impact) / torch.clamp(num_landings, min=1)
+    env.extras["log"]["Metrics/soft_landing_force_mean"] = mean_landing_force
+
+    if command_name is not None:
+        command = env.command_manager.get_command(command_name)
+        linear_norm = torch.norm(command[:, :2], dim=1)
+        angular_norm = torch.abs(command[:, 2])
+        total_command = linear_norm + angular_norm
+        active = (total_command > command_threshold).float()
+        cost = cost * active
+    return cost

@@ -88,5 +88,5 @@ class G1ActionsCfg:
         intruder_geometry_cfg=g1_foot_geometry_cfg,
         enable_ema_filter=True,
         contact_threshold=5.0,
-        debug_vis=True,
+        # debug_vis=True,
     )

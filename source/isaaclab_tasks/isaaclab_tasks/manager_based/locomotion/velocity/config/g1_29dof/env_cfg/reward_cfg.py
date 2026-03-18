@@ -106,11 +106,6 @@ class G1RewardsCfg:
                 ".*waist_roll.*": 0.8,
                 ".*waist_pitch.*": 0.5,
                 # # arms
-                # ".*shoulder_pitch.*": 0.3,
-                # ".*elbow.*": 0.1,
-                # ".*shoulder_roll.*": 0.4,
-                # ".*shoulder_yaw.*": 0.35,
-                # ".*wrist.*": 0.5,
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,
                 ".*shoulder_roll.*": 0.4,
@@ -130,13 +125,8 @@ class G1RewardsCfg:
                 ".*waist_roll.*": 0.8,
                 ".*waist_pitch.*": 0.5,
                 # arms
-                # ".*shoulder_pitch.*": 0.3,
-                # ".*elbow.*": 0.1,
-                # ".*shoulder_roll.*": 0.4,
-                # ".*shoulder_yaw.*": 0.35,
-                # ".*wrist.*": 0.5,
                 ".*shoulder_pitch.*": 0.5,
-                ".*elbow.*": 0.2,
+                ".*elbow.*": 0.25,
                 ".*shoulder_roll.*": 0.4,
                 ".*shoulder_yaw.*": 0.35,
                 ".*wrist.*": 0.5,
@@ -240,6 +230,12 @@ class G1RewardsCfg:
         },
     )
 
+    fly = RewTerm(
+        func=vel_mdp.fly,
+        weight=-1.0,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"), "threshold": 5.0},
+    )
+
     """
     stance foot
     """
@@ -267,37 +263,32 @@ class G1RewardsCfg:
         },
     )
 
-    feet_force = RewTerm(
-        func=vel_mdp.foot_force,
-        weight=-5e-3,
-        # weight=-1e-2,
-        params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-            # "threshold": 300,
-            # "max_reward": 300,
-            "threshold": 250,
-            "max_reward": 250,
-        },
-    )
-
-    # contact_impulse = RewTerm(
-    #     func=vel_mdp.reward_soft_landing,
+    # feet_force = RewTerm(
+    #     func=vel_mdp.foot_force,
     #     weight=-5e-3,
+    #     # weight=-1e-2,
     #     params={
     #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "command_name": "base_velocity",
-    #         "command_threshold": 0.05,
+    #         # "threshold": 300,
+    #         # "max_reward": 300,
+    #         "threshold": 250,
+    #         "max_reward": 250,
     #     },
     # )
+
+    contact_impulse = RewTerm(
+        func=vel_mdp.reward_soft_landing,
+        weight=-5e-3,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+            "command_name": "base_velocity",
+            "command_threshold": 0.05,
+        },
+    )
 
     """
     swing foot
     """
-    fly = RewTerm(
-        func=vel_mdp.fly,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"), "threshold": 5.0},
-    )
 
     # encourage specific foot clearance value
     foot_clearance = RewTerm(

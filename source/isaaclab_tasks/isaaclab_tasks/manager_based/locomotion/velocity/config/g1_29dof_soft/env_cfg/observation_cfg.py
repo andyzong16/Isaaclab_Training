@@ -262,22 +262,43 @@ class PrivilegedObsCfg(ObsGroup):
         func=vel_mdp.foot_height,
         params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
     )
-    foot_contact = ObsTerm(
+
+    # # rigid contact
+    # foot_contact = ObsTerm(
+    #     func=vel_mdp.foot_contact,
+    #     params={"action_term_name": "physics_callback", "threshold": 5.0},
+    # )
+    # foot_contact_force = ObsTerm(
+    #     func=vel_mdp.foot_contact_forces,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+    # foot_air_time = ObsTerm(
+    #     func=vel_mdp.foot_air_time,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+
+    # soft contact
+    foot_contact_soft = ObsTerm(
         func=g1_mdp.foot_contact,
         params={"action_term_name": "physics_callback", "threshold": 5.0},
     )
-    foot_contact_force = ObsTerm(
+    foot_contact_force_soft = ObsTerm(
         func=g1_mdp.foot_contact_forces,
         params={"action_term_name": "physics_callback"},
     )
-    foot_air_time = ObsTerm(
+    foot_air_time_soft = ObsTerm(
         func=g1_mdp.foot_air_time,
+        params={"action_term_name": "physics_callback"},
+    )
+    terrain_material_parameters = ObsTerm(
+        func=g1_mdp.terrain_material_parameters,
         params={"action_term_name": "physics_callback"},
     )
 
     def __post_init__(self):
         self.enable_corruption = True
         self.concatenate_terms = True
+        self.history_length = 10
 
 
 """

@@ -79,31 +79,37 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         super().__post_init__()
 
         # change timestep
-        self.sim.dt = 1 / 200  # 200Hz
-        self.decimation = 4  # 50Hz
+        # self.sim.dt = 1 / 200  # 200Hz
+        # self.decimation = 4  # 50Hz
+        self.sim.dt = 1 / 400  # 400Hz
+        self.decimation = 8  # 50Hz
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 10.0
+        self.episode_length_s = 15.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
+        # terrain with hole
+        self.scene.terrain = vel_mdp.RigidSoftTerrain
+        self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
+
         # make soft terrain
-        self.scene.terrain = vel_mdp.SoftTerrain
-        self.scene.terrain.disable_collider = True  # enable soft terrain
+        # self.scene.terrain = vel_mdp.SoftTerrain
+        # self.scene.rigid_floor = vel_mdp.RigidPatch
+        # self.scene.terrain.disable_collider = True  # enable soft terrain
         # self.scene.terrain = vel_mdp.RoughTerrain
         # self.actions.physics_callback.disable = True # disable soft contact
-        self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
         # self.actions.physics_callback.backend = "3D"
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.577, 0.577)
-        self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
-        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
-        # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.577, 0.577)
+        # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
+        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
+        # self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
@@ -139,11 +145,11 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
             "pose_range": {
                 "x": (-0.0, 0.0),
                 "y": (-0.0, 0.0),
-                # "yaw": (-math.pi, math.pi),
+                "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
                 # "yaw": (-math.pi/4, -math.pi/4),
                 # "yaw": (0, 0),
-                "yaw": (math.pi / 2, math.pi / 2),
+                # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
                 "x": (0.0, 0.0),
