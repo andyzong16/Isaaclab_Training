@@ -227,25 +227,6 @@ class CriticCfg(ObsGroup):
         clip=(-1.0, 1.0),
     )
 
-    # # privileged observations
-    # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
-    # foot_contact = ObsTerm(
-    #     func=vel_mdp.foot_contact,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"), "threshold": 5.0},
-    # )
-    # foot_contact_force = ObsTerm(
-    #     func=vel_mdp.foot_contact_forces,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
-    # )
-    # foot_air_time = ObsTerm(
-    #     func=vel_mdp.foot_air_time,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
-    # )
-    # foot_height = ObsTerm(
-    #     func=vel_mdp.foot_height,
-    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
-    # )
-
     def __post_init__(self):
         self.enable_corruption = False
         self.concatenate_terms = True
@@ -265,7 +246,7 @@ class CriticHistoryCfg(CriticCfg):
 
 
 @configclass
-class PriviledgedObsCfg(ObsGroup):
+class PrivilegedObsCfg(ObsGroup):
     """Observations for policy group."""
 
     base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
@@ -294,7 +275,7 @@ class PriviledgedObsCfg(ObsGroup):
 
 
 @configclass
-class PriviledgedHistoryCfg(PriviledgedObsCfg):
+class PrivilegedHistoryCfg(PrivilegedObsCfg):
     def __post_init__(self):
         self.history_length = 10
 
@@ -327,7 +308,7 @@ class G1ObservationsCfg:
     # observation groups
     policy: PolicyHistoryCfg = PolicyHistoryCfg()
     critic: CriticHistoryCfg = CriticHistoryCfg()
-    priviledged: PriviledgedHistoryCfg = PriviledgedHistoryCfg()
+    privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
 
 
@@ -340,7 +321,7 @@ class G1TeacherObservationsCfg:
     critic: CriticCfg = CriticCfg()
     # policy: PolicyHistoryCfg = PolicyHistoryCfg()
     # critic: CriticHistoryCfg = CriticHistoryCfg()
-    priviledged: PriviledgedObsCfg = PriviledgedObsCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
 
 
@@ -353,5 +334,5 @@ class G1StudentObservationsCfg:
     critic: CriticCfg = CriticCfg()
     # policy: PolicyHistoryCfg = PolicyHistoryCfg()
     # critic: CriticHistoryCfg = CriticHistoryCfg()
-    priviledged: CriticHistoryCfg = CriticHistoryCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

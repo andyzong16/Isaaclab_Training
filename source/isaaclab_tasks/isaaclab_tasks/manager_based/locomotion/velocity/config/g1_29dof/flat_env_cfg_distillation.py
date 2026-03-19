@@ -35,8 +35,8 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
             self.observations.policy.height_scan = None  # type: ignore
         if hasattr(self.observations.critic, "height_scan"):
             self.observations.critic.height_scan = None  # type: ignore
-        if hasattr(self.observations.priviledged, "height_scan"):
-            self.observations.priviledged.height_scan = None  # type: ignore
+        if hasattr(self.observations.privileged, "height_scan"):
+            self.observations.privileged.height_scan = None  # type: ignore
 
         # Randomization
         self.events.reset_base.params = {
@@ -158,8 +158,8 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
             self.observations.policy.height_scan = None  # type: ignore
         if hasattr(self.observations.critic, "height_scan"):
             self.observations.critic.height_scan = None  # type: ignore
-        if hasattr(self.observations.priviledged, "height_scan"):
-            self.observations.priviledged.height_scan = None  # type: ignore
+        if hasattr(self.observations.privileged, "height_scan"):
+            self.observations.privileged.height_scan = None  # type: ignore
 
         # Randomization
         self.events.reset_base.params = {
