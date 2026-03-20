@@ -167,6 +167,26 @@ class RslRlMLPEncoderModelCfg(RslRlMLPModelCfg):
     """The hidden dimensions of the encoder."""
     encoder_activation: str = MISSING
     """The activation function for the encoder."""
+    encoder_obs_normalization: bool = False
+    """Whether to use observation normalization for the encoder. Defaults to False."""
+
+
+@configclass
+class RslRlTCNModelCfg(RslRlMLPModelCfg):
+    """Configuration for TCN model."""
+
+    class_name: str = "TCNModel"
+    """The model class name. Defaults to TCNModel."""
+    encoder_obs_set: str = MISSING
+    """The observation set for the encoder."""
+    encoder_output_dim: int = MISSING
+    """The output dimension of the encoder."""
+    encoder_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the encoder."""
+    encoder_activation: str = MISSING
+    """The activation function for the encoder."""
+    encoder_obs_normalization: bool = False
+    """Whether to use observation normalization for the encoder. Defaults to False."""
 
 
 @configclass
@@ -183,6 +203,8 @@ class RslRlTCNAttentionModelCfg(RslRlMLPModelCfg):
     """The hidden dimensions of the encoder."""
     encoder_activation: str = MISSING
     """The activation function for the encoder."""
+    encoder_obs_normalization: bool = False
+    """Whether to use observation normalization for the encoder. Defaults to False."""
 
 
 ############################

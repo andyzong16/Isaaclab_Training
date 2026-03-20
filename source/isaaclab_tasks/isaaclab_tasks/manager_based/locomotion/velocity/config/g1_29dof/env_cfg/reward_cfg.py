@@ -114,12 +114,12 @@ class G1RewardsCfg:
             },
             "weight_running": {
                 # leg
-                ".*hip_pitch.*": 0.02,
+                ".*hip_pitch.*": 0.01,
                 ".*hip_roll.*": 0.15,
                 ".*hip_yaw.*": 0.15,
-                ".*knee.*": 0.02,
-                ".*ankle_pitch.*": 0.02,
-                ".*ankle_roll.*": 0.02,
+                ".*knee.*": 0.01,
+                ".*ankle_pitch.*": 0.01,
+                ".*ankle_roll.*": 0.01,
                 # waist
                 ".*waist_yaw.*": 0.15,
                 ".*waist_roll.*": 0.8,
@@ -132,7 +132,7 @@ class G1RewardsCfg:
                 ".*wrist.*": 0.5,
             },
             "walking_threshold": 0.05,
-            "running_threshold": 1.5,
+            "running_threshold": 2.0,
         },
     )
 
@@ -222,7 +222,6 @@ class G1RewardsCfg:
     feet_air_time = RewTerm(
         func=vel_mdp.feet_air_time_positive_biped,
         weight=0.5,
-        # weight=1.0,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),

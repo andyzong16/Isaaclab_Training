@@ -246,6 +246,13 @@ class CriticHistoryCfg(CriticCfg):
 
 
 @configclass
+class HistoryObsCfg(CriticCfg):
+    def __post_init__(self):
+        self.history_length = 10
+        self.flatten_history_dim = False
+
+
+@configclass
 class PrivilegedObsCfg(ObsGroup):
     """Observations for policy group."""
 
@@ -270,7 +277,7 @@ class PrivilegedObsCfg(ObsGroup):
     )
 
     def __post_init__(self):
-        self.enable_corruption = True
+        self.enable_corruption = False
         self.concatenate_terms = True
 
 
@@ -297,7 +304,7 @@ class LoggingObsCfg(ObsGroup):
     )
 
     def __post_init__(self):
-        self.enable_corruption = True
+        self.enable_corruption = False
         self.concatenate_terms = True
 
 
@@ -317,11 +324,12 @@ class G1TeacherObservationsCfg:
     """Observation specifications for the MDP."""
 
     # observation groups
-    policy: PolicyCfg = PolicyCfg()
-    critic: CriticCfg = CriticCfg()
-    # policy: PolicyHistoryCfg = PolicyHistoryCfg()
-    # critic: CriticHistoryCfg = CriticHistoryCfg()
-    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    # policy: PolicyCfg = PolicyCfg()
+    # critic: CriticCfg = CriticCfg()
+    # privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    critic: CriticHistoryCfg = CriticHistoryCfg()
+    privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
 
 
@@ -334,5 +342,5 @@ class G1StudentObservationsCfg:
     critic: CriticCfg = CriticCfg()
     # policy: PolicyHistoryCfg = PolicyHistoryCfg()
     # critic: CriticHistoryCfg = CriticHistoryCfg()
-    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    privileged: HistoryObsCfg = HistoryObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

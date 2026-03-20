@@ -13,6 +13,7 @@ from isaaclab_rl.rsl_rl import (
     RslRlOnPolicyRunnerCfg,
     RslRlPpoAlgorithmCfg,
     RslRlTCNAttentionModelCfg,
+    RslRlTCNModelCfg,
 )
 
 
@@ -21,25 +22,22 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 20_000
     save_interval = 500
-    obs_groups = {"actor": ["policy"], "critic": ["critic"], "encoder": ["privileged"]}
+    obs_groups = {"actor": ["policy"], "critic": ["critic", "privileged"], "privileged": ["privileged"]}
     actor = RslRlMLPEncoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
-        encoder_obs_set="encoder",
-        encoder_output_dim=16,
-        encoder_hidden_dims=[128, 64],
+        encoder_obs_set="privileged",
+        encoder_output_dim=64,
+        encoder_hidden_dims=[256, 128],
         encoder_activation="elu",
+        encoder_obs_normalization=False,
     )
-    critic = RslRlMLPEncoderModelCfg(
+    critic = RslRlMLPModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
-        encoder_obs_set="encoder",
-        encoder_output_dim=16,
-        encoder_hidden_dims=[128, 64],
-        encoder_activation="elu",
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,
@@ -66,37 +64,25 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
     max_iterations = 300
     save_interval = 50
     experiment_name = "g1_29dof_adaptation_distillation"
-    obs_groups = {"student": ["policy"], "teacher": ["policy"], "encoder": ["privileged"]}
-    # student = RslRlMLPModelCfg(
-    #     hidden_dims=[128, 128, 128],
-    #     activation="elu",
-    #     obs_normalization=False,
-    #     distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-    # )
-    # teacher = RslRlMLPModelCfg(
-    #     hidden_dims=[128, 128, 128],
-    #     activation="elu",
-    #     obs_normalization=False,
-    #     distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.0),
-    # )
+    obs_groups = {"student": ["policy"], "teacher": ["policy"], "privileged": ["privileged"]}
     teacher = RslRlMLPEncoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-        encoder_obs_set="encoder",
-        encoder_output_dim=128,
-        encoder_hidden_dims=[512, 256],
+        encoder_obs_set="privileged",
+        encoder_output_dim=64,
+        encoder_hidden_dims=[256, 128],
         encoder_activation="elu",
     )
-    student = RslRlTCNAttentionModelCfg(
+    student = RslRlTCNModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-        encoder_obs_set="encoder",
-        encoder_output_dim=128,
-        encoder_hidden_dims=[512, 256],
+        encoder_obs_set="privileged",
+        encoder_output_dim=64,
+        encoder_hidden_dims=[256, 128],
         encoder_activation="elu",
     )
     algorithm = RslRlDistillationAlgorithmCfg(
