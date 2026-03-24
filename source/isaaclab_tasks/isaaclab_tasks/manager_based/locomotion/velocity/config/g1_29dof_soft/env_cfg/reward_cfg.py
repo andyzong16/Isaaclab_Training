@@ -12,7 +12,7 @@ from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 
-SOFT_CONTACT_THRESHOLD = 200.0
+SOFT_CONTACT_THRESHOLD = 5.0
 
 
 @configclass
@@ -54,17 +54,8 @@ class G1RewardsCfg:
     )
 
     # -- base penalties
-    base_height = RewTerm(func=mdp.base_height_l2, weight=-10, params={"target_height": 0.78})
-    # flat_orientation_l2 = RewTerm(
-    #     func=mdp.flat_orientation_l2,
-    #     weight=-2.0,
-    # )
-    # body_orientation_l2 = RewTerm(
-    #     func=vel_mdp.body_orientation_l2,
-    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*torso.*")},
-    #     weight=-4.0,
-    # )
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-10, params={"target_height": 0.75})
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-10.0)
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
 
@@ -119,10 +110,12 @@ class G1RewardsCfg:
             },
             "weight_running": {
                 # leg
-                ".*hip_pitch.*": 0.02,
+                # ".*hip_pitch.*": 0.02,
+                ".*hip_pitch.*": 0.005,
                 ".*hip_roll.*": 0.15,
                 ".*hip_yaw.*": 0.15,
-                ".*knee.*": 0.02,
+                # ".*knee.*": 0.02,
+                ".*knee.*": 0.005,
                 ".*ankle_pitch.*": 0.02,
                 ".*ankle_roll.*": 0.02,
                 # waist
@@ -137,7 +130,7 @@ class G1RewardsCfg:
                 ".*wrist.*": 0.5,
             },
             "walking_threshold": 0.05,
-            "running_threshold": 1.5,
+            "running_threshold": 2.0,
         },
     )
 
@@ -303,7 +296,6 @@ class G1RewardsCfg:
     feet_air_time = RewTerm(
         func=vel_mdp.feet_air_time_positive_biped,
         weight=0.5,
-        # weight=1.0,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
@@ -313,7 +305,6 @@ class G1RewardsCfg:
     feet_air_time_soft = RewTerm(
         func=vel_mdp.feet_air_time_positive_biped_soft,
         weight=0.5,
-        # weight=1.0,
         params={
             "command_name": "base_velocity",
             "action_term_name": "physics_callback",
@@ -321,16 +312,16 @@ class G1RewardsCfg:
         },
     )
 
-    fly = RewTerm(
-        func=vel_mdp.fly,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"), "threshold": 5.0},
-    )
-    fly_soft = RewTerm(
-        func=vel_mdp.fly_soft,
-        weight=-1.0,
-        params={"action_term_name": "physics_callback", "threshold": SOFT_CONTACT_THRESHOLD},
-    )
+    # no_fly = RewTerm(
+    #     func=vel_mdp.fly,
+    #     weight=-1.0,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"), "threshold": 5.0},
+    # )
+    # no_fly_soft = RewTerm(
+    #     func=vel_mdp.fly_soft,
+    #     weight=-1.0,
+    #     params={"action_term_name": "physics_callback", "threshold": SOFT_CONTACT_THRESHOLD},
+    # )
 
     """
     Stance foot
@@ -422,8 +413,7 @@ class G1RewardsCfg:
         weight=5.0,
         params={
             "target_height": 0.1,
-            # "std": 0.05,
-            "std": 0.01,
+            "std": 0.05,
             "tanh_mult": 2.0,
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
             "standing_position_foot_z": 0.03539,

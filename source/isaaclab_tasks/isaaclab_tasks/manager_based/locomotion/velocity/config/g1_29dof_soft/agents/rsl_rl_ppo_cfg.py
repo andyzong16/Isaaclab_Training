@@ -57,8 +57,8 @@ class G1FlatPPORunnerCfg(G1RoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 20_000
-        # self.max_iterations = 25_000
+        # self.max_iterations = 20_000 # walking
+        self.max_iterations = 30_000  # running
         self.wandb_project = "g1_29dof_soft_flat"
         self.experiment_name = "g1_29dof_soft_flat"
 

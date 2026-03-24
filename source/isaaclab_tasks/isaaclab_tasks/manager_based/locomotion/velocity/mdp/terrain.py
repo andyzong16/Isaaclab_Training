@@ -29,11 +29,11 @@ CurriculumSoftTerrain = TerrainImporterCfg(
         curriculum=True,
         sub_terrains={
             "hard_ground": terrain_gen.MeshPlaneTerrainCfg(
-                proportion=0.2,
+                proportion=0.5,
                 ground_height_range=(0.0, 0.0),
             ),
             "soft_ground": terrain_gen.MeshPlaneTerrainCfg(
-                proportion=0.8,
+                proportion=0.5,
                 ground_height_range=(0.0, -0.12),
             ),
         },
@@ -53,6 +53,7 @@ CurriculumSoftTerrain = TerrainImporterCfg(
         albedo_brightness=0.2,
     ),
     max_init_terrain_level=0,
+    debug_vis=True,
 )
 
 # CurriculumSoftTerrainPlatform = TerrainImporterCfg(
@@ -166,6 +167,10 @@ RigidPatch = TerrainImporterCfg(
         albedo_brightness=0.2,
     ),
 )
+
+"""
+Rigid+Soft terrain
+"""
 
 RigidSoftTerrain = TerrainImporterCfg(
     prim_path="/World/ground",

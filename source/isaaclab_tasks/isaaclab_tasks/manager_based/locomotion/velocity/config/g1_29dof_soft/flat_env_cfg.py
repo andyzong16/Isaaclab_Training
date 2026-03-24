@@ -44,8 +44,8 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
         self.events.reset_base.params = {
             "pose_range": {
-                "x": (-0.0, 0.0),
-                "y": (-0.0, 0.0),
+                "x": (-0.5, 0.5),
+                "y": (-0.5, 0.5),
                 "yaw": (-math.pi, math.pi),
             },
             "velocity_range": {
@@ -60,17 +60,28 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
 
         # disable curriculum for walking only
-        self.curriculum.command_vel = None
+        # self.curriculum.command_vel = None
 
         # edit command range
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.5)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        # self.commands.base_velocity.ranges.ang_vel_z = (-0.5, 0.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
         self.terminations.terrain_out_of_bounds = None
+
+        # rendering
+        self.sim.render.enable_dlssg = True
+        self.sim.render.dlss_mode = "performance"  # type: ignore
+        self.viewer = ViewerCfg(
+            eye=(0.0, 15.0, 0.5),
+            lookat=(0.0, 0.0, 0.2),
+            # resolution=(1920, 1080),
+            resolution=(1080, 720),
+            origin_type="asset_root",
+            asset_name="robot",
+        )
 
 
 class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
@@ -84,7 +95,7 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.sim.dt = 1 / 400  # 400Hz
         self.decimation = 8  # 50Hz
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 15.0
+        self.episode_length_s = 10.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -131,12 +142,12 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.events.scale_actuator_gains = None  # type: ignore
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
         self.commands.base_velocity.heading_command = False
-        self.commands.base_velocity.rel_standing_envs = 0.0
+        self.commands.base_velocity.rel_standing_envs = 0.2
         self.commands.base_velocity.resampling_time_range = (self.episode_length_s, self.episode_length_s)
         # self.commands.base_velocity.debug_vis = False
 

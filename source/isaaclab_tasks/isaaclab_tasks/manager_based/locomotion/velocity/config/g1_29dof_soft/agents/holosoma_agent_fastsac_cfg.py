@@ -10,7 +10,7 @@ from isaaclab_rl.holosoma_agent import FastSACConfig, SymmetryConfig
 
 @configclass
 class G1HolosomaFastSACAgentCfg(FastSACConfig):
-    num_learning_iterations = 50_000
+    num_learning_iterations = 150_000
     learning_starts = 10
     save_interval = 1000
 
@@ -33,10 +33,10 @@ class G1HolosomaFastSACAgentCfg(FastSACConfig):
     num_steps = 1
     batch_size = 8192
 
-    gamma = 0.97
+    gamma = 0.98
     tau = 0.125
     policy_frequency = 4
-    num_updates = 8
+    num_updates = 5
 
     alpha_init = 0.001
     use_autotune = True
@@ -152,5 +152,5 @@ class G1HolosomaFastSACAgentCfg(FastSACConfig):
 
     logging_interval = 100
     logger = "wandb"
-    experiment_name = "g1_29dof_rigid_fastsac"
-    wandb_project = "g1_29dof_rigid_fastsac"
+    experiment_name = "g1_29dof_soft_fastsac"
+    wandb_project = "g1_29dof_soft_fastsac"

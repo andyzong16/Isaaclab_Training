@@ -112,7 +112,7 @@ class G1EventCfg:
             "contact_solver_name": "physics_callback",
         },
     )
-
+    # randomize material density
     randomize_material_density = EventTerm(
         func=g1_mdp.randomize_material_density,
         mode="reset",

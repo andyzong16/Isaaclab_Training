@@ -103,7 +103,7 @@ class G1RewardsCfg:
                 ".*ankle_roll.*": 0.02,
                 # waist
                 ".*waist_yaw.*": 0.15,
-                ".*waist_roll.*": 0.8,
+                ".*waist_roll.*": 1.0,
                 ".*waist_pitch.*": 0.5,
                 # # arms
                 ".*shoulder_pitch.*": 0.5,
@@ -122,7 +122,7 @@ class G1RewardsCfg:
                 ".*ankle_roll.*": 0.01,
                 # waist
                 ".*waist_yaw.*": 0.15,
-                ".*waist_roll.*": 0.8,
+                ".*waist_roll.*": 1.0,
                 ".*waist_pitch.*": 0.5,
                 # arms
                 ".*shoulder_pitch.*": 0.5,
@@ -189,29 +189,29 @@ class G1RewardsCfg:
         },
     )
 
-    feet_pitch = RewTerm(
-        func=vel_mdp.reward_feet_pitch,
-        weight=-1.0,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot",
-                body_names=[".*ankle_roll.*"],
-                preserve_order=True,
-            ),
-        },
-    )
+    # feet_pitch = RewTerm(
+    #     func=vel_mdp.reward_feet_pitch,
+    #     weight=-1.0,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             body_names=[".*ankle_roll.*"],
+    #             preserve_order=True,
+    #         ),
+    #     },
+    # )
 
-    feet_pitch_diff = RewTerm(
-        func=vel_mdp.reward_feet_pitch_diff,
-        weight=-1.0,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot",
-                body_names=[".*ankle_roll.*"],
-                preserve_order=True,
-            ),
-        },
-    )
+    # feet_pitch_diff = RewTerm(
+    #     func=vel_mdp.reward_feet_pitch_diff,
+    #     weight=-1.0,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             body_names=[".*ankle_roll.*"],
+    #             preserve_order=True,
+    #         ),
+    #     },
+    # )
 
     """
     gait
@@ -227,12 +227,6 @@ class G1RewardsCfg:
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "threshold": 0.5,
         },
-    )
-
-    fly = RewTerm(
-        func=vel_mdp.fly,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"), "threshold": 5.0},
     )
 
     """

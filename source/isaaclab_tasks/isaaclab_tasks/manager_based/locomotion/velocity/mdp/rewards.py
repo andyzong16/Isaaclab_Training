@@ -163,8 +163,9 @@ def reward_soft_landing(
     assert contact_sensor.data.net_forces_w is not None
 
     forces = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids, :]  # [B, N, 3]
-    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
     first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]  # [B, N]
+
+    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
     landing_impact = force_magnitude * first_contact.float()  # [B, N]
     cost = torch.sum(landing_impact, dim=1)  # [B]
 
@@ -779,8 +780,9 @@ def reward_soft_landing_soft(
     assert contact_solver.data.net_forces_w is not None
 
     forces = contact_solver.data.net_forces_w  # [B, N, 3]
-    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
     first_contact = contact_solver.compute_first_contact(env.step_dt)  # [B, N]
+
+    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
     landing_impact = force_magnitude * first_contact.float()  # [B, N]
     cost = torch.sum(landing_impact, dim=1)  # [B]
 

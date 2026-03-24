@@ -123,7 +123,7 @@ class PolicyCfg(ObsGroup):
     def __post_init__(self):
         self.enable_corruption = True
         self.concatenate_terms = True
-        self.history_length = 10
+        self.history_length = 1
 
 
 @configclass
@@ -139,7 +139,6 @@ class CriticCfg(ObsGroup):
         func=mdp.projected_gravity,
     )
     velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-    # foot_target_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "foot_height"})
     joint_pos = ObsTerm(
         func=mdp.joint_pos_rel,
         params={
@@ -228,29 +227,67 @@ class CriticCfg(ObsGroup):
         clip=(-1.0, 1.0),
     )
 
-    # # privileged observations
     # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
-    # foot_contact = ObsTerm(
-    #     func=g1_mdp.foot_contact,
-    #     params={"action_term_name": "physics_callback", "threshold": 5.0},
-    # )
-    # foot_contact_force = ObsTerm(
-    #     func=g1_mdp.foot_contact_forces,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-    # foot_air_time = ObsTerm(
-    #     func=g1_mdp.foot_air_time,
-    #     params={"action_term_name": "physics_callback"},
-    # )
     # foot_height = ObsTerm(
     #     func=vel_mdp.foot_height,
     #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
     # )
 
+    # # rigid contact
+    # foot_contact = ObsTerm(
+    #     func=vel_mdp.foot_contact,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"), "threshold": 5.0},
+    # )
+    # foot_contact_force = ObsTerm(
+    #     func=vel_mdp.foot_contact_forces,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
+    # )
+    # foot_air_time = ObsTerm(
+    #     func=vel_mdp.foot_air_time,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
+    # )
+
+    # # soft contact
+    # foot_contact_soft = ObsTerm(
+    #     func=g1_mdp.foot_contact,
+    #     params={"action_term_name": "physics_callback", "threshold": 5.0},
+    # )
+    # foot_contact_force_soft = ObsTerm(
+    #     func=g1_mdp.foot_contact_forces,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+    # foot_air_time_soft = ObsTerm(
+    #     func=g1_mdp.foot_air_time,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+    # terrain_material_parameters = ObsTerm(
+    #     func=g1_mdp.terrain_material_parameters,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+
     def __post_init__(self):
         self.enable_corruption = False
         self.concatenate_terms = True
+        self.history_length = 1
+
+
+@configclass
+class PolicyHistoryCfg(PolicyCfg):
+    def __post_init__(self):
         self.history_length = 10
+
+
+@configclass
+class CriticHistoryCfg(CriticCfg):
+    def __post_init__(self):
+        self.history_length = 10
+
+
+@configclass
+class HistoryObsCfg(CriticCfg):
+    def __post_init__(self):
+        self.history_length = 10
+        self.flatten_history_dim = False
 
 
 @configclass
@@ -263,19 +300,19 @@ class PrivilegedObsCfg(ObsGroup):
         params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
     )
 
-    # # rigid contact
-    # foot_contact = ObsTerm(
-    #     func=vel_mdp.foot_contact,
-    #     params={"action_term_name": "physics_callback", "threshold": 5.0},
-    # )
-    # foot_contact_force = ObsTerm(
-    #     func=vel_mdp.foot_contact_forces,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-    # foot_air_time = ObsTerm(
-    #     func=vel_mdp.foot_air_time,
-    #     params={"action_term_name": "physics_callback"},
-    # )
+    # rigid contact
+    foot_contact = ObsTerm(
+        func=vel_mdp.foot_contact,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"), "threshold": 5.0},
+    )
+    foot_contact_force = ObsTerm(
+        func=vel_mdp.foot_contact_forces,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
+    )
+    foot_air_time = ObsTerm(
+        func=vel_mdp.foot_air_time,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
+    )
 
     # soft contact
     foot_contact_soft = ObsTerm(
@@ -298,6 +335,12 @@ class PrivilegedObsCfg(ObsGroup):
     def __post_init__(self):
         self.enable_corruption = True
         self.concatenate_terms = True
+        self.history_length = 1
+
+
+@configclass
+class PrivilegedHistoryCfg(PrivilegedObsCfg):
+    def __post_init__(self):
         self.history_length = 10
 
 
@@ -335,7 +378,32 @@ class G1ObservationsCfg:
     """Observation specifications for the MDP."""
 
     # observation groups
+    # policy: PolicyCfg = PolicyCfg()
+    # critic: CriticCfg = CriticCfg()
+    # privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    critic: CriticHistoryCfg = CriticHistoryCfg()
+    privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
+    logging: LoggingObsCfg = LoggingObsCfg()
+
+
+@configclass
+class G1TeacherObservationsCfg:
+    """Observation specifications for the MDP."""
+
+    # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
     privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    logging: LoggingObsCfg = LoggingObsCfg()
+
+
+@configclass
+class G1StudentObservationsCfg:
+    """Observation specifications for the MDP."""
+
+    # observation groups
+    policy: PolicyCfg = PolicyCfg()
+    critic: CriticCfg = CriticCfg()
+    privileged: HistoryObsCfg = HistoryObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
