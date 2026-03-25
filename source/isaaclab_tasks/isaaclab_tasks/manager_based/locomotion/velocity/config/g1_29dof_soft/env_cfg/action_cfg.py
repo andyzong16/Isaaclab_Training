@@ -33,6 +33,8 @@ g1_foot_geometry_cfg = BoxColliderCfg(
 #     resolution=(8, 8),
 # )
 
+SOFT_CONTACT_THRESHOLD = 40.0
+
 
 @configclass
 class G1ActionsCfg:
@@ -72,7 +74,6 @@ class G1ActionsCfg:
             "right_wrist_yaw_joint",
         ],
         scale=0.25,
-        # scale=0.5,
         use_default_offset=True,
         preserve_order=True,
     )
@@ -88,6 +89,6 @@ class G1ActionsCfg:
         backend="3D-warp",
         intruder_geometry_cfg=g1_foot_geometry_cfg,
         enable_ema_filter=True,
-        contact_threshold=5.0,
+        contact_threshold=SOFT_CONTACT_THRESHOLD,
         debug_vis=True,
     )

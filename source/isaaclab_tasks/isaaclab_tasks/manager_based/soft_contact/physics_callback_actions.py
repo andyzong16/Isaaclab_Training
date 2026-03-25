@@ -266,8 +266,8 @@ class PhysicsCallbackAction(ActionTerm):
             .unsqueeze(0)
             .repeat(force.shape[0], 1)
         )
-        force_magnitude = torch.norm(force, dim=-1) / self.cfg.contact_vis_max_force
-        force_magnitude[force_magnitude < 1.0] = 0.0
+        force_magnitude = torch.norm(force, dim=-1) / self.cfg.contact_vis_scale
+        force_magnitude[force_magnitude < (self.cfg.contact_vis_force_threshold / self.cfg.contact_vis_scale)] = 0.0
         scale = base_scale.clone()
         scale[:, 2] = force_magnitude  # Z = length
         self.contact_force_visualizer.visualize(

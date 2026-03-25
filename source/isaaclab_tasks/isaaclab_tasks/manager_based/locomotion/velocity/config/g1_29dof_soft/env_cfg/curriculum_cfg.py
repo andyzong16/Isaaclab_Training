@@ -6,6 +6,7 @@
 from isaaclab.managers import CurriculumTermCfg as CurrTerm
 from isaaclab.utils import configclass
 
+import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof_soft.mdp as g1_mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 
 
@@ -59,24 +60,46 @@ class G1CurriculumCfg:
 
     track_lin_vel = CurrTerm(
         func=vel_mdp.modify_reward_std,
-        params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 15000 * 24},
+        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 15000 * 24},
         # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 10000 * 24},
-        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 20000 * 24},
-        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 50_000},
+        params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 20000 * 24},
+        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 50_000}, # fastSAC
     )
 
     track_ang_vel = CurrTerm(
         func=vel_mdp.modify_reward_std,
-        params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 15000 * 24},
+        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 15000 * 24},
         # params={"term_name": "track_ang_vel_z", "std": 0.25, "num_steps": 10000 * 24},
-        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 20000 * 24},
-        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 50_000},
+        params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 20000 * 24},
+        # params={"term_name": "track_lin_vel_xy", "std": 0.25, "num_steps": 50_000}, # fastSAC
     )
 
     track_heading = CurrTerm(
         func=vel_mdp.modify_reward_std,
-        params={"term_name": "track_heading", "std": 0.25, "num_steps": 15000 * 24},
+        # params={"term_name": "track_heading", "std": 0.25, "num_steps": 15000 * 24},
         # params={"term_name": "track_heading", "std": 0.25, "num_steps": 10000 * 24},
-        # params={"term_name": "track_heading", "std": 0.25, "num_steps": 20000 * 24},
-        # params={"term_name": "track_heading", "std": 0.25, "num_steps": 50_000},
+        params={"term_name": "track_heading", "std": 0.25, "num_steps": 20000 * 24},
+        # params={"term_name": "track_heading", "std": 0.25, "num_steps": 50_000}, # fastSAC
     )
+
+    # terrain_friction_levels = CurrTerm(
+    #     func=g1_mdp.terrain_friction_levels,
+    #     params={
+    #         "friction_range": (0.1, 1.0),
+    #     },
+    # )
+
+    # terrain_stiffness_levels = CurrTerm(
+    #     func=g1_mdp.terrain_stiffness_levels,
+    #     params={
+    #         "stiffness_range": (0.2, 0.9),
+    #     },
+    # )
+
+    # terrain_density_levels = CurrTerm(
+    #     func=g1_mdp.terrain_density_levels,
+    #     params={
+    #         "density_range": (1000.0, 3000.0),
+    #         "packing_ratio_range": (0.5, 1.0),
+    #     },
+    # )

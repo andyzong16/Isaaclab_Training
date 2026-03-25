@@ -4,8 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import isaaclab.envs.mdp as mdp
-from isaaclab.managers import SceneEntityCfg
-from isaaclab.managers import TerminationTermCfg as DoneTerm
+from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
 from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
@@ -15,8 +14,8 @@ import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 class G1TerminationsCfg:
     """Termination terms for the MDP."""
 
-    time_out = DoneTerm(func=mdp.time_out, time_out=True)
-    base_too_low = DoneTerm(
+    time_out = TerminationTermCfg(func=mdp.time_out, time_out=True)
+    base_too_low = TerminationTermCfg(
         func=vel_mdp.root_height_below_minimum_adaptive,
         params={
             # "minimum_height": 0.5,
@@ -24,8 +23,8 @@ class G1TerminationsCfg:
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
         },
     )
-    bad_orientation = DoneTerm(func=mdp.bad_orientation, params={"limit_angle": 0.8})
-    terrain_out_of_bounds = DoneTerm(
+    bad_orientation = TerminationTermCfg(func=mdp.bad_orientation, params={"limit_angle": 0.8})
+    terrain_out_of_bounds = TerminationTermCfg(
         func=vel_mdp.terrain_out_of_bounds,
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),

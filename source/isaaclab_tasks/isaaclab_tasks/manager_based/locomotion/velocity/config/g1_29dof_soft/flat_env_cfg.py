@@ -69,7 +69,7 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
-        self.terminations.terrain_out_of_bounds = None
+        # self.terminations.terrain_out_of_bounds = None
 
         # rendering
         self.sim.render.enable_dlssg = True
@@ -119,10 +119,10 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
-        # self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
+        self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
+        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # self.actions.physics_callback.backend = "2D"
         # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
@@ -142,7 +142,7 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.events.scale_actuator_gains = None  # type: ignore
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.5)
+        self.commands.base_velocity.ranges.lin_vel_x = (1, 1)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
@@ -156,10 +156,10 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
             "pose_range": {
                 "x": (-0.0, 0.0),
                 "y": (-0.0, 0.0),
-                "yaw": (-math.pi, math.pi),
+                # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
                 # "yaw": (-math.pi/4, -math.pi/4),
-                # "yaw": (0, 0),
+                "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
@@ -176,10 +176,10 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.sim.render.enable_dlssg = True
         self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            # eye=(-0.0, -3.5, 0.5),
-            # lookat=(0.0, -0.0, 0.2),
-            eye=(3.5, 0.0, 0.5),
-            lookat=(0.0, 0.0, 0.2),
+            eye=(-0.0, -3.5, 0.5),
+            lookat=(0.0, -0.0, 0.2),
+            # eye=(3.5, 0.0, 0.5),
+            # lookat=(0.0, 0.0, 0.2),
             # resolution=(1920, 1080),
             resolution=(1080, 720),
             origin_type="asset_root",

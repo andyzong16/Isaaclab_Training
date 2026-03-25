@@ -69,7 +69,7 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
-        self.terminations.terrain_out_of_bounds = None
+        # self.terminations.terrain_out_of_bounds = None
 
         # rendering
         self.sim.render.enable_dlssg = True
@@ -83,7 +83,7 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         )
 
 
-class G1FlatEnvCfg_PLAY(G1FlatTeacherEnvCfg):
+class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()
@@ -94,7 +94,7 @@ class G1FlatEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.sim.dt = 1 / 400  # 400Hz
         self.decimation = 8  # 50Hz
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 15.0
+        self.episode_length_s = 20.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -118,8 +118,9 @@ class G1FlatEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
-        # self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
+
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.7, 0.7)
+        # self.events.randomize_friction.params["friction_range"] = (0.7, 0.7)
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
@@ -127,23 +128,29 @@ class G1FlatEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
         # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
 
+        # revert terrain termination
+        self.terminations.terrain_out_of_bounds.func = vel_mdp.terrain_out_of_bounds
+
         # disable curriculum
-        self.curriculum.terrain_levels = None  # type: ignore
-        self.curriculum.command_vel = None  # type: ignore
+        self.curriculum.terrain_levels = None
+        self.curriculum.command_vel = None
+        # self.curriculum.terrain_friction_levels = None
+        # self.curriculum.terrain_stiffness_levels = None
+        # self.curriculum.terrain_density_levels = None
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False
 
         # remove random events
-        self.events.add_base_mass = None  # type: ignore
-        self.events.push_robot = None  # type: ignore
-        self.events.physics_material = None  # type: ignore
-        self.events.scale_actuator_gains = None  # type: ignore
+        self.events.add_base_mass = None
+        self.events.push_robot = None
+        self.events.physics_material = None
+        self.events.scale_actuator_gains = None
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, -0.0)
 
         self.commands.base_velocity.heading_command = False
         self.commands.base_velocity.rel_standing_envs = 0.0
@@ -155,10 +162,10 @@ class G1FlatEnvCfg_PLAY(G1FlatTeacherEnvCfg):
             "pose_range": {
                 "x": (-0.0, 0.0),
                 "y": (-0.0, 0.0),
-                "yaw": (-math.pi, math.pi),
+                # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                # "yaw": (-math.pi/4, -math.pi/4),
-                # "yaw": (0, 0),
+                # "yaw": (-math.pi / 4, -math.pi / 4),
+                "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
@@ -175,10 +182,10 @@ class G1FlatEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.sim.render.enable_dlssg = True
         self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            # eye=(-0.0, -3.5, 0.5),
-            # lookat=(0.0, -0.0, 0.2),
-            eye=(3.5, 0.0, 0.5),
-            lookat=(0.0, 0.0, 0.2),
+            eye=(-0.0, -3.5, 0.5),
+            lookat=(0.0, -0.0, 0.2),
+            # eye=(3.5, 0.0, 0.5),
+            # lookat=(0.0, 0.0, 0.2),
             # resolution=(1920, 1080),
             resolution=(1080, 720),
             origin_type="asset_root",

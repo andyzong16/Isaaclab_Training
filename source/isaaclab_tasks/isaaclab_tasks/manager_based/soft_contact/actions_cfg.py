@@ -61,7 +61,9 @@ class PhysicsCallbackActionCfg(ActionTermCfg):
         prim_path="/Visuals/Contact/force",
     )
     """Configuration for the contact force visualization markers."""
-    contact_vis_max_force: float = 100.0
+    contact_vis_scale: float = 100.0
     """Maximum force to visualize (N)."""
+    contact_vis_force_threshold: float = 40.0
+    """Threshold for contact force visualization (N)."""
     contact_force_visualizer_cfg.markers["arrow"].scale = (0.3, 0.3, 0.3)
     """Scale of the contact force visualization marker."""

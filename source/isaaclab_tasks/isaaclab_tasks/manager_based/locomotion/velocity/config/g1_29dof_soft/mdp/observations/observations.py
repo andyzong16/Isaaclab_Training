@@ -144,10 +144,12 @@ soft contact state
 def foot_air_time(
     env: ManagerBasedRLEnv,
     action_term_name: str = "physics_callback",
+    filter_time: float = 0.5,
 ) -> torch.Tensor:
     # extract the used quantities (to enable type-hinting)
     action_term = env.action_manager.get_term(action_term_name)
     air_time = action_term.contact_solver.data.current_air_time
+    air_time = torch.where(air_time > filter_time, 0.0, air_time)  # remove the air time larger than filter_time
     return air_time
 
 
@@ -166,10 +168,12 @@ def foot_contact(
 def foot_contact_forces(
     env: ManagerBasedRLEnv,
     action_term_name: str = "physics_callback",
+    threshold: float = 1.0,
 ) -> torch.Tensor:
     # extract the used quantities (to enable type-hinting)
     action_term = env.action_manager.get_term(action_term_name)
     contact_forces = action_term.contact_solver.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
+    contact_forces = contact_forces * (contact_forces > threshold).float()
     forces_flat = contact_forces.reshape(env.num_envs, -1)
     return torch.sign(forces_flat) * torch.log1p(torch.abs(forces_flat))
 
@@ -177,10 +181,12 @@ def foot_contact_forces(
 def foot_contact_forces_raw(
     env: ManagerBasedRLEnv,
     action_term_name: str = "physics_callback",
+    threshold: float = 1.0,
 ) -> torch.Tensor:
     # extract the used quantities (to enable type-hinting)
     action_term = env.action_manager.get_term(action_term_name)
     contact_forces = action_term.contact_solver.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
+    contact_forces = contact_forces * (contact_forces > threshold).float()
     forces_flat = contact_forces.reshape(env.num_envs, -1)
     return forces_flat
 
@@ -195,4 +201,100 @@ def terrain_material_parameters(
     friction_coef = contact_solver.terrain_friction
     rho_c = contact_solver.terrain_density / 3000.0  # max rho = 3000.0
     mu_int = contact_solver.terrain_stiffness
+    return torch.stack([friction_coef, rho_c, mu_int], dim=-1)
+
+
+"""
+soft contact + rigid contact mixed
+"""
+
+
+def foot_air_time_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    air_time_rigid = contact_sensor.data.current_air_time[:, rigid_contact_sensor_cfg.body_ids]
+    air_time_soft = soft_contact_sensor.data.current_air_time
+
+    return torch.minimum(air_time_rigid, air_time_soft)
+
+
+def foot_contact_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+    rigid_force_threshold: float = 1.0,
+    soft_force_threshold: float = 1.0,
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    rigid_contact_forces = contact_sensor.data.net_forces_w[
+        :, rigid_contact_sensor_cfg.body_ids, :
+    ]  # (num_envs, num_body_ids, 3)
+    rigid_contact = (torch.norm(rigid_contact_forces, dim=-1) > rigid_force_threshold).float()
+
+    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
+    soft_contact = (torch.norm(soft_contact_forces, dim=-1) > soft_force_threshold).float()
+    return (rigid_contact + soft_contact).clamp(0, 1)
+
+
+def foot_contact_forces_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+    rigid_force_filter_threshold: float = 1.0,
+    soft_force_filter_threshold: float = 1.0,
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    rigid_contact_forces = contact_sensor.data.net_forces_w[
+        :, rigid_contact_sensor_cfg.body_ids, :
+    ]  # (num_envs, num_body_ids, 3)
+    rigid_contact_forces = rigid_contact_forces.reshape(env.num_envs, -1)
+    rigid_contact_forces = rigid_contact_forces * (rigid_contact_forces > rigid_force_filter_threshold).float()
+
+    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
+    soft_contact_forces = soft_contact_forces.reshape(env.num_envs, -1)
+    soft_contact_forces = soft_contact_forces * (soft_contact_forces > soft_force_filter_threshold).float()
+
+    rigid_contact_forces_processed = torch.sign(rigid_contact_forces) * torch.log1p(torch.abs(rigid_contact_forces))
+    soft_contact_forces_processed = torch.sign(soft_contact_forces) * torch.log1p(torch.abs(soft_contact_forces))
+
+    return rigid_contact_forces_processed + soft_contact_forces_processed
+
+
+def terrain_material_parameters_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    rigid_contact_forces = contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :]
+    rigid_contact_forces_norm = torch.norm(rigid_contact_forces, dim=-1).sum(dim=-1)
+    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]
+    soft_contact_forces_norm = torch.norm(soft_contact_forces, dim=-1).sum(dim=-1)
+
+    on_soft_ground = (soft_contact_forces_norm > rigid_contact_forces_norm).float()
+
+    mu_rigid = 1.0
+    friction_rigid = 1.0
+    rho_c_rigid = 3000.0
+
+    friction_coef = soft_contact_sensor.terrain_friction * on_soft_ground + (1 - on_soft_ground) * friction_rigid
+    rho_c = (soft_contact_sensor.terrain_density / 3000.0) * on_soft_ground + (1 - on_soft_ground) * (
+        rho_c_rigid / 3000.0
+    )
+    mu_int = soft_contact_sensor.terrain_stiffness * on_soft_ground + (1 - on_soft_ground) * mu_rigid
     return torch.stack([friction_coef, rho_c, mu_int], dim=-1)

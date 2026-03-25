@@ -82,11 +82,20 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     return reward
 
 
-def fly(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
+def fly(
+    env: ManagerBasedRLEnv,
+    threshold: float,
+    sensor_cfg: SceneEntityCfg,
+    command_name: str = "base_velocity",
+    velocity_threshold: float = 1.5,
+) -> torch.Tensor:
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     net_contact_forces = contact_sensor.data.net_forces_w_history
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
-    return torch.sum(is_contact, dim=-1) < 0.5
+    linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
+    is_active = linear_norm < velocity_threshold
+    reward = torch.sum(is_contact, dim=-1) < 0.5
+    return reward * is_active
 
 
 """
@@ -729,11 +738,16 @@ def fly_soft(
     env: ManagerBasedRLEnv,
     threshold: float,
     action_term_name: str = "physics_callback",
+    command_name: str = "base_velocity",
+    velocity_threshold: float = 1.5,
 ) -> torch.Tensor:
     contact_solver = env.action_manager.get_term(action_term_name).contact_solver
     net_contact_forces = contact_solver.data.net_forces_w_history
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, :, :], dim=-1), dim=1)[0] > threshold
-    return torch.sum(is_contact, dim=-1) < 0.5
+    linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
+    is_active = linear_norm < velocity_threshold
+    reward = torch.sum(is_contact, dim=-1) < 0.5
+    return reward * is_active
 
 
 def feet_slide_soft(

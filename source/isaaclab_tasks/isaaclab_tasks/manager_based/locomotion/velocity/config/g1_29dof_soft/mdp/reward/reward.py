@@ -20,6 +20,7 @@ from isaaclab.assets import Articulation
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers.manager_base import ManagerTermBase
 from isaaclab.managers.manager_term_cfg import RewardTermCfg
+from isaaclab.sensors import ContactSensor
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
@@ -102,3 +103,156 @@ class angular_momentum_l2(ManagerTermBase):
         # whole body centroidal angular momentum wrt global frame
         self.centroidal_ang_momentum = self.cusadi_func.getDenseOutput(0).squeeze(-1).float()
         return torch.sqrt(torch.square(self.centroidal_ang_momentum).sum(dim=-1))
+
+
+"""
+contact reward
+"""
+
+
+def feet_air_time_positive_biped_hybrid(
+    env,
+    command_name: str,
+    threshold: float,
+    rigid_contact_sensor_cfg: SceneEntityCfg,
+    soft_contact_sensor_name: str = "physics_callback",
+) -> torch.Tensor:
+    rigid_contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    # combine air time: whichever solver is active has the correct (smaller) value
+    air_time_rigid = rigid_contact_sensor.data.current_air_time[:, rigid_contact_sensor_cfg.body_ids]
+    air_time_soft = soft_contact_sensor.data.current_air_time
+    air_time = torch.minimum(air_time_rigid, air_time_soft)
+
+    # combine contact time: whichever solver is active has the non-zero value
+    contact_time_rigid = rigid_contact_sensor.data.current_contact_time[:, rigid_contact_sensor_cfg.body_ids]
+    contact_time_soft = soft_contact_sensor.data.current_contact_time
+    contact_time = torch.maximum(contact_time_rigid, contact_time_soft)  # pick whichever active
+
+    in_contact = contact_time > 0.0
+    in_mode_time = torch.where(in_contact, contact_time, air_time)
+    single_stance = torch.sum(in_contact.int(), dim=1) == 1
+    reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]
+    reward = torch.clamp(reward, max=threshold)
+
+    linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
+    angular_norm = torch.abs(env.command_manager.get_command(command_name)[:, 2])
+    total_norm = linear_norm + angular_norm
+    reward *= total_norm > 0.05
+
+    return reward
+
+
+def feet_slide_hybrid(
+    env,
+    rigid_contact_sensor_cfg: SceneEntityCfg,
+    soft_contact_sensor_name: str = "physics_callback",
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    rigid_contact_threshold: float = 1.0,
+    soft_contact_threshold: float = 5.0,
+) -> torch.Tensor:
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    contact_solver = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    rigid_contacts = (
+        contact_sensor.data.net_forces_w_history[:, :, rigid_contact_sensor_cfg.body_ids, :].norm(dim=-1).max(dim=1)[0]
+        > rigid_contact_threshold
+    )
+    soft_contacts = (
+        contact_solver.data.net_forces_w_history[:, :, :, :].norm(dim=-1).max(dim=1)[0] > soft_contact_threshold
+    )
+    contacts = torch.maximum(rigid_contacts, soft_contacts)  # pick whichever active
+
+    asset = env.scene[asset_cfg.name]
+    body_vel = asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2]
+    return torch.sum(body_vel.norm(dim=-1) * contacts, dim=1)
+
+
+def no_fly_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg,
+    soft_contact_sensor_name: str = "physics_callback",
+    rigid_contact_threshold: float = 5.0,
+    soft_contact_threshold: float = 5.0,
+    command_name: str = "base_velocity",
+    velocity_threshold: float = 1.5,
+) -> torch.Tensor:
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    contact_solver = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    rigid_contact = (
+        torch.max(
+            torch.norm(contact_sensor.data.net_forces_w_history[:, :, rigid_contact_sensor_cfg.body_ids], dim=-1), dim=1
+        )[0]
+        > rigid_contact_threshold
+    )
+    soft_contact = (
+        torch.max(torch.norm(contact_solver.data.net_forces_w_history, dim=-1), dim=1)[0] > soft_contact_threshold
+    )
+    is_contact = torch.maximum(rigid_contact, soft_contact)  # pick whichever active
+
+    linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
+    is_active = linear_norm < velocity_threshold
+    reward = torch.sum(is_contact, dim=-1) < 0.5
+    return reward * is_active
+
+
+def foot_force_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg,
+    soft_contact_sensor_name: str = "physics_callback",
+    threshold: float = 500,
+    max_reward: float = 400,
+) -> torch.Tensor:
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    contact_solver = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    # sum: mutually exclusive per terrain type
+    rigid_fz = contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, 2]
+    soft_fz = contact_solver.data.net_forces_w[:, :, 2]
+    reward = (rigid_fz + soft_fz).norm(dim=-1)
+
+    reward[reward < threshold] = 0
+    reward[reward > threshold] -= threshold
+    return reward.clamp(min=0, max=max_reward)
+
+
+def reward_soft_landing_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg,
+    soft_contact_sensor_name: str = "physics_callback",
+    command_name: str = "base_velocity",
+    command_threshold: float = 0.05,
+) -> torch.Tensor:
+    """Penalize high impact forces at landing to encourage soft footfalls."""
+    contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    contact_solver = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    # forces: sum (mutually exclusive per terrain)
+    rigid_forces = contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :]  # [B, N, 3]
+    soft_forces = contact_solver.data.net_forces_w  # [B, N, 3]
+    forces = rigid_forces + soft_forces
+
+    # first_contact: OR (landing event on either terrain)
+    rigid_first_contact = contact_sensor.compute_first_contact(env.step_dt)[
+        :, rigid_contact_sensor_cfg.body_ids
+    ]  # [B, N]
+    soft_first_contact = contact_solver.compute_first_contact(env.step_dt)  # [B, N]
+    first_contact = torch.maximum(rigid_first_contact, soft_first_contact)
+
+    force_magnitude = torch.norm(forces, dim=-1)  # [B, N]
+    landing_impact = force_magnitude * first_contact.float()  # [B, N]
+    cost = torch.sum(landing_impact, dim=1)  # [B]
+
+    num_landings = torch.sum(first_contact.float())
+    mean_landing_force = torch.sum(landing_impact) / torch.clamp(num_landings, min=1)
+    env.extras["log"]["Metrics/landing_force_mean"] = mean_landing_force
+
+    if command_name is not None:
+        command = env.command_manager.get_command(command_name)
+        linear_norm = torch.norm(command[:, :2], dim=1)
+        angular_norm = torch.abs(command[:, 2])
+        active = ((linear_norm + angular_norm) > command_threshold).float()
+        cost = cost * active
+    return cost

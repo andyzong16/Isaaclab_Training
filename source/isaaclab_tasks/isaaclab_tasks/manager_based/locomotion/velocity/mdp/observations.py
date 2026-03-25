@@ -83,9 +83,11 @@ def foot_height(
 def foot_air_time(
     env: ManagerBasedRLEnv,
     sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    filter_time: float = 0.5,
 ) -> torch.Tensor:
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+    air_time = torch.where(air_time > filter_time, 0.0, air_time)  # filter out the air time larger than filter_time
     return air_time
 
 

@@ -110,11 +110,35 @@ class FastSACVecEnvWrapper(FastSACVecEnv):
             obs_dict = self.unwrapped._get_observations()
         return TensorDict(obs_dict, batch_size=[self.num_envs])
 
+    # def step(self, actions: torch.Tensor) -> tuple[TensorDict, torch.Tensor, torch.Tensor, dict]:
+    #     # record step information
+    #     obs_dict, rew, terminated, truncated, info_dict = self.env.step(actions)
+    #     actor_obs = obs_dict["policy"]
+    #     critic_obs = obs_dict["critic"]
+    #     # merge termination and timeout into single done flag
+    #     dones = (terminated | truncated).to(dtype=torch.long)
+    #     # move time out information to the extras dict
+    #     # this is only needed for infinite horizon tasks
+    #     if not self.unwrapped.cfg.is_finite_horizon:
+    #         info_dict["time_outs"] = truncated
+    #     extras = {
+    #         "log": info_dict["log"],
+    #         "time_outs": info_dict["time_outs"],
+    #         "observations": {
+    #             "actor": actor_obs,
+    #             "critic": critic_obs,
+    #             "final": {
+    #                 "actor_obs": actor_obs,
+    #                 "critic_obs": critic_obs,
+    #             },
+    #         },
+    #     }
+    #     # return the step information
+    #     return TensorDict(obs_dict, batch_size=[self.num_envs]), rew, dones, extras
+
     def step(self, actions: torch.Tensor) -> tuple[TensorDict, torch.Tensor, torch.Tensor, dict]:
         # record step information
         obs_dict, rew, terminated, truncated, info_dict = self.env.step(actions)
-        actor_obs = obs_dict["policy"]
-        critic_obs = obs_dict["critic"]
         # merge termination and timeout into single done flag
         dones = (terminated | truncated).to(dtype=torch.long)
         # move time out information to the extras dict
@@ -124,14 +148,7 @@ class FastSACVecEnvWrapper(FastSACVecEnv):
         extras = {
             "log": info_dict["log"],
             "time_outs": info_dict["time_outs"],
-            "observations": {
-                "actor": actor_obs,
-                "critic": critic_obs,
-                "final": {
-                    "actor_obs": actor_obs,
-                    "critic_obs": critic_obs,
-                },
-            },
+            "observations": {"final": obs_dict},
         }
         # return the step information
         return TensorDict(obs_dict, batch_size=[self.num_envs]), rew, dones, extras

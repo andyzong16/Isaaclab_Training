@@ -27,7 +27,7 @@ class G1HolosomaFastSACAgentCfg(FastSACConfig):
     encoder_hidden_dim = (1, 13, 9)
 
     actor_obs_keys = ["policy"]
-    critic_obs_keys = ["critic"]
+    critic_obs_keys = ["critic", "privileged"]
 
     buffer_size = 1024
     num_steps = 1
