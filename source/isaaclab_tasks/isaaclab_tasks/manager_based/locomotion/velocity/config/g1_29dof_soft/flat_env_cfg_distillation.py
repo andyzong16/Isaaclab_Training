@@ -69,7 +69,7 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
-        # self.terminations.terrain_out_of_bounds = None
+        self.terminations.terrain_out_of_bounds = None
 
         # rendering
         self.sim.render.enable_dlssg = True
@@ -101,8 +101,9 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.RigidSoftTerrain
-        self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
+        # self.scene.terrain = vel_mdp.RigidSoftTerrain
+        self.scene.terrain = vel_mdp.SoftTerrainVisual
+        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
         # make soft terrain
         # self.scene.terrain = vel_mdp.SoftTerrain
@@ -127,9 +128,6 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.actions.physics_callback.backend = "2D"
         # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
         # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
-
-        # revert terrain termination
-        self.terminations.terrain_out_of_bounds.func = vel_mdp.terrain_out_of_bounds
 
         # disable curriculum
         self.curriculum.terrain_levels = None

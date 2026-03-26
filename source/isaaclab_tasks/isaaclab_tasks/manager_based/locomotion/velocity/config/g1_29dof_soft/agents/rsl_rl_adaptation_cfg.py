@@ -65,13 +65,18 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
     max_iterations = 300
     save_interval = 50
     experiment_name = "g1_29dof_soft_adaptation_distillation"
-    obs_groups = {"student": ["policy"], "teacher": ["policy"], "privileged": ["privileged"]}
+    obs_groups = {
+        "student": ["policy"],
+        "teacher": ["policy"],
+        "teacher_privileged": ["teacher_privileged"],
+        "student_encoder": ["student_encoder"],
+    }
     teacher = RslRlMLPEncoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-        encoder_obs_set="privileged",
+        encoder_obs_set="teacher_privileged",
         encoder_output_dim=64,
         encoder_hidden_dims=[256, 128],
         encoder_activation="elu",
@@ -81,7 +86,7 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-        encoder_obs_set="privileged",
+        encoder_obs_set="student_encoder",
         encoder_output_dim=64,
         encoder_hidden_dims=[256, 128],
         encoder_activation="elu",

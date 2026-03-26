@@ -309,18 +309,20 @@ class G1RewardsCfg:
         },
     )
 
-    no_fly = RewTerm(
-        func=g1_mdp.no_fly_hybrid,
-        weight=0.5,
-        params={
-            "command_name": "base_velocity",
-            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-            "soft_contact_sensor_name": "physics_callback",
-            "rigid_contact_threshold": 5.0,
-            "soft_contact_threshold": SOFT_CONTACT_THRESHOLD,
-            "velocity_threshold": 1.5,
-        },
-    )
+    # no_fly = RewTerm(
+    #     func=g1_mdp.no_fly_hybrid,
+    #     weight=0.5,
+    #     params={
+    #         "command_name": "base_velocity",
+    #         "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    #         "soft_contact_sensor_name": "physics_callback",
+    #         "rigid_contact_threshold": 5.0,
+    #         "soft_contact_threshold": SOFT_CONTACT_THRESHOLD,
+    #         "velocity_threshold": 1.5,
+    #     },
+    # )
+
+    # # old ones
 
     # feet_air_time = RewTerm(
     #     func=vel_mdp.feet_air_time_positive_biped,
@@ -341,26 +343,26 @@ class G1RewardsCfg:
     #     },
     # )
 
-    # no_fly = RewTerm(
-    #     func=vel_mdp.fly,
-    #     weight=-1.0,
-    #     params={
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "threshold": 5.0,
-    #         "command_name": "base_velocity",
-    #         "velocity_threshold": 1.5,
-    #     },
-    # )
-    # no_fly_soft = RewTerm(
-    #     func=vel_mdp.fly_soft,
-    #     weight=-1.0,
-    #     params={
-    #         "action_term_name": "physics_callback",
-    #         "threshold": SOFT_CONTACT_THRESHOLD,
-    #         "command_name": "base_velocity",
-    #         "velocity_threshold": 1.5,
-    #     },
-    # )
+    # # no_fly = RewTerm(
+    # #     func=vel_mdp.fly,
+    # #     weight=-1.0,
+    # #     params={
+    # #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    # #         "threshold": 5.0,
+    # #         "command_name": "base_velocity",
+    # #         "velocity_threshold": 1.5,
+    # #     },
+    # # )
+    # # no_fly_soft = RewTerm(
+    # #     func=vel_mdp.fly_soft,
+    # #     weight=-1.0,
+    # #     params={
+    # #         "action_term_name": "physics_callback",
+    # #         "threshold": SOFT_CONTACT_THRESHOLD,
+    # #         "command_name": "base_velocity",
+    # #         "velocity_threshold": 1.5,
+    # #     },
+    # # )
 
     """
     Stance foot
@@ -391,6 +393,8 @@ class G1RewardsCfg:
         },
     )
 
+    # # old ones
+
     # feet_slide = RewTerm(
     #     func=vel_mdp.feet_slide,
     #     weight=-0.25,
@@ -406,6 +410,26 @@ class G1RewardsCfg:
     #         "action_term_name": "physics_callback",
     #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
     #         "contact_threshold": SOFT_CONTACT_THRESHOLD,  # peak GRF is around 600N on soft terrain
+    #     },
+    # )
+
+    # contact_impulse = RewTerm(
+    #     func=vel_mdp.reward_soft_landing,
+    #     weight=-5e-3,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    #         "command_name": "base_velocity",
+    #         "command_threshold": 0.05,
+    #     },
+    # )
+
+    # contact_impulse_soft = RewTerm(
+    #     func=vel_mdp.reward_soft_landing_soft,
+    #     weight=-5e-3,
+    #     params={
+    #         "action_term_name": "physics_callback",
+    #         "command_name": "base_velocity",
+    #         "command_threshold": 0.05,
     #     },
     # )
 
@@ -427,26 +451,6 @@ class G1RewardsCfg:
     #         "action_term_name": "physics_callback",
     #         "threshold": 300,
     #         "max_reward": 300,
-    #     },
-    # )
-
-    # contact_impulse = RewTerm(
-    #     func=vel_mdp.reward_soft_landing,
-    #     weight=-5e-3,
-    #     params={
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "command_name": "base_velocity",
-    #         "command_threshold": 0.05,
-    #     },
-    # )
-
-    # contact_impulse_soft = RewTerm(
-    #     func=vel_mdp.reward_soft_landing_soft,
-    #     weight=-5e-3,
-    #     params={
-    #         "action_term_name": "physics_callback",
-    #         "command_name": "base_velocity",
-    #         "command_threshold": 0.05,
     #     },
     # )
 

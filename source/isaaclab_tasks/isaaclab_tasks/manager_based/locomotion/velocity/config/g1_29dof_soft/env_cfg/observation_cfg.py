@@ -238,44 +238,6 @@ class CriticCfg(ObsGroup):
         clip=(-1.0, 1.0),
     )
 
-    # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
-    # foot_height = ObsTerm(
-    #     func=vel_mdp.foot_height,
-    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
-    # )
-
-    # # rigid contact
-    # foot_contact = ObsTerm(
-    #     func=vel_mdp.foot_contact,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"), "threshold": 5.0},
-    # )
-    # foot_contact_force = ObsTerm(
-    #     func=vel_mdp.foot_contact_forces,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
-    # )
-    # foot_air_time = ObsTerm(
-    #     func=vel_mdp.foot_air_time,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
-    # )
-
-    # # soft contact
-    # foot_contact_soft = ObsTerm(
-    #     func=g1_mdp.foot_contact,
-    #     params={"action_term_name": "physics_callback", "threshold": 5.0},
-    # )
-    # foot_contact_force_soft = ObsTerm(
-    #     func=g1_mdp.foot_contact_forces,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-    # foot_air_time_soft = ObsTerm(
-    #     func=g1_mdp.foot_air_time,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-    # terrain_material_parameters = ObsTerm(
-    #     func=g1_mdp.terrain_material_parameters,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-
     def __post_init__(self):
         self.enable_corruption = False
         self.concatenate_terms = True
@@ -345,7 +307,7 @@ class PrivilegedObsCfg(ObsGroup):
         },
     )
 
-    # # old ones
+    # # # old ones
     # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
     # foot_height = ObsTerm(
     #     func=vel_mdp.foot_height,
@@ -500,8 +462,8 @@ class G1TeacherObservationsCfg:
     # policy: PolicyHistoryCfg = PolicyHistoryCfg()
     # critic: CriticHistoryCfg = CriticHistoryCfg()
     # privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
-    logging: LoggingObsCfg = LoggingObsCfg()
-    log_privileged: LogPrivilegedObsCfg = LogPrivilegedObsCfg()
+    # logging: LoggingObsCfg = LoggingObsCfg()
+    # log_privileged: LogPrivilegedObsCfg = LogPrivilegedObsCfg()
 
 
 @configclass
@@ -510,6 +472,6 @@ class G1StudentObservationsCfg:
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
-    critic: CriticCfg = CriticCfg()
-    privileged: HistoryObsCfg = HistoryObsCfg()
+    teacher_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    student_encoder: HistoryObsCfg = HistoryObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
