@@ -241,6 +241,17 @@ class G1RewardsCfg:
         },
     )
 
+    no_fly = RewTerm(
+        func=vel_mdp.fly,
+        weight=-1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+            "threshold": 5.0,
+            "command_name": "base_velocity",
+            "velocity_threshold": 1.5,
+        },
+    )
+
     """
     stance foot
     """

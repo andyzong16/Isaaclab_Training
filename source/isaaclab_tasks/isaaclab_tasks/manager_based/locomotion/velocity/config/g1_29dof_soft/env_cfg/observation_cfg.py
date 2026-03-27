@@ -396,7 +396,6 @@ class LogPrivilegedObsCfg(ObsGroup):
         params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
     )
 
-    # contact
     foot_contact = ObsTerm(
         func=g1_mdp.foot_contact_hybrid,
         params={
@@ -420,7 +419,6 @@ class LogPrivilegedObsCfg(ObsGroup):
         params={
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
             "soft_contact_sensor_name": "physics_callback",
-            "soft_force_threshold": SOFT_CONTACT_THRESHOLD,
         },
     )
 
@@ -429,7 +427,6 @@ class LogPrivilegedObsCfg(ObsGroup):
         params={
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
             "soft_contact_sensor_name": "physics_callback",
-            "soft_force_threshold": SOFT_CONTACT_THRESHOLD,
         },
     )
 
@@ -469,7 +466,7 @@ class G1TeacherObservationsCfg:
     # privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
 
     logging: LoggingObsCfg = LoggingObsCfg()
-    # log_privileged: LogPrivilegedObsCfg = LogPrivilegedObsCfg()
+    log_privileged: LogPrivilegedObsCfg = LogPrivilegedObsCfg()
 
 
 @configclass

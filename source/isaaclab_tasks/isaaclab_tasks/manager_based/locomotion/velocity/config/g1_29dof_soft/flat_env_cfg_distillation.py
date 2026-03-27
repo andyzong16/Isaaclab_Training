@@ -135,10 +135,10 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
 
-        # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
-        # self.events.randomize_friction.params["friction_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.9, 0.9)
+        self.events.randomize_friction.params["friction_range"] = (0.9, 0.9)
+        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # self.actions.physics_callback.backend = "2D"
         # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
@@ -161,7 +161,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.events.scale_actuator_gains = None
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.5)
+        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, -0.0)
 
@@ -177,7 +177,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
                 "y": (-0.0, 0.0),
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                # "yaw": (-math.pi / 4, -math.pi / 4),
+                # "yaw": (-math.pi / 6, -math.pi / 6),
                 "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },

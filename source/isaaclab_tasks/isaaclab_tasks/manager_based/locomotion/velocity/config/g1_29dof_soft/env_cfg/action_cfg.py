@@ -23,7 +23,7 @@ from isaaclab_tasks.manager_based.soft_contact import (
 g1_foot_geometry_cfg = BoxColliderCfg(
     contact_edge_x=(-0.065, 0.141),
     contact_edge_y=(-0.0368, 0.0368),
-    contact_edge_z=(-0.03539, 0.0),
+    contact_edge_z=(-0.03339, 0.0),
     resolution=(5, 5),
 )
 
@@ -92,6 +92,6 @@ class G1ActionsCfg:
         enable_ema_filter=True,
         contact_threshold=SOFT_CONTACT_THRESHOLD,
         debug_vis=True,
-        contact_data_history_length=80,  # physics 200Hz, window=0.4s -> int(0.4 * 200) = 80
+        contact_data_history_length=100,  # physics 200Hz, window=0.4s -> int(0.4 * 200) = 80
         contact_vis_force_threshold=SOFT_CONTACT_THRESHOLD,
     )
