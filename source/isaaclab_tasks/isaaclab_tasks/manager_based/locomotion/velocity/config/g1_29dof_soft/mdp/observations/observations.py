@@ -18,8 +18,6 @@ import torch
 import isaaclab.utils.math as math_utils
 from isaaclab.assets import Articulation
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.managers.manager_base import ManagerTermBase
-from isaaclab.managers.manager_term_cfg import ObservationTermCfg
 from isaaclab.sensors import ContactSensor
 
 if TYPE_CHECKING:
@@ -211,171 +209,88 @@ soft contact + rigid contact mixed
 """
 
 
-class foot_air_time_hybrid(ManagerTermBase):
-    """Hybrid foot air time observation with per-foot solver authority tracking."""
+def foot_air_time_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+) -> torch.Tensor:
+    """Hybrid foot air time observation selecting from the authoritative solver."""
+    rigid_contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
 
-    def __init__(self, cfg: ObservationTermCfg, env: ManagerBasedRLEnv):
-        super().__init__(cfg, env)
-        self.last_active_is_soft: torch.Tensor | None = None
+    air_time_rigid = rigid_contact_sensor.data.current_air_time[:, rigid_contact_sensor_cfg.body_ids]
+    air_time_soft = soft_contact_sensor.data.current_air_time
 
-    def __call__(
-        self,
-        env: ManagerBasedRLEnv,
-        rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
-        soft_contact_sensor_name: str = "physics_callback",
-    ) -> torch.Tensor:
-        contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
-        soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
-
-        air_time_rigid = contact_sensor.data.current_air_time[:, rigid_contact_sensor_cfg.body_ids]
-        air_time_soft = soft_contact_sensor.data.current_air_time
-        contact_time_rigid = contact_sensor.data.current_contact_time[:, rigid_contact_sensor_cfg.body_ids]
-        contact_time_soft = soft_contact_sensor.data.current_contact_time
-
-        # lazy init
-        if self.last_active_is_soft is None:
-            self.last_active_is_soft = torch.zeros(
-                env.num_envs, air_time_rigid.shape[1], dtype=torch.bool, device=self.device
-            )
-
-        # update authority based on which solver reports contact
-        self.last_active_is_soft[contact_time_rigid > 0] = False
-        self.last_active_is_soft[contact_time_soft > 0] = True
-
-        # select air_time from authoritative solver
-        return torch.where(self.last_active_is_soft, air_time_soft, air_time_rigid)
+    return torch.where(soft_contact_sensor.data.is_sensor_active, air_time_soft, air_time_rigid)
 
 
-class foot_contact_hybrid(ManagerTermBase):
-    """Hybrid foot contact observation with per-foot solver authority tracking."""
+def foot_contact_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+    rigid_force_threshold: float = 1.0,
+    soft_force_threshold: float = 1.0,
+) -> torch.Tensor:
+    """Hybrid foot contact observation selecting from the authoritative solver."""
+    rigid_contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
 
-    def __init__(self, cfg: ObservationTermCfg, env: ManagerBasedRLEnv):
-        super().__init__(cfg, env)
-        self.last_active_is_soft: torch.Tensor | None = None
+    rigid_contact_forces = rigid_contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :]
+    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]
+    rigid_contact = (torch.norm(rigid_contact_forces, dim=-1) > rigid_force_threshold).float()
+    soft_contact = (torch.norm(soft_contact_forces, dim=-1) > soft_force_threshold).float()
 
-    def __call__(
-        self,
-        env: ManagerBasedRLEnv,
-        rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
-        soft_contact_sensor_name: str = "physics_callback",
-        rigid_force_threshold: float = 1.0,
-        soft_force_threshold: float = 1.0,
-    ) -> torch.Tensor:
-        contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
-        soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
-
-        rigid_contact_forces = contact_sensor.data.net_forces_w[
-            :, rigid_contact_sensor_cfg.body_ids, :
-        ]  # (num_envs, num_body_ids, 3)
-        rigid_contact = (torch.norm(rigid_contact_forces, dim=-1) > rigid_force_threshold).float()
-
-        soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
-        soft_contact = (torch.norm(soft_contact_forces, dim=-1) > soft_force_threshold).float()
-
-        # lazy init
-        if self.last_active_is_soft is None:
-            self.last_active_is_soft = torch.zeros(
-                env.num_envs, rigid_contact.shape[1], dtype=torch.bool, device=self.device
-            )
-
-        # update authority based on which solver reports contact
-        self.last_active_is_soft[rigid_contact > 0] = False
-        self.last_active_is_soft[soft_contact > 0] = True
-
-        # select contact from authoritative solver
-        return torch.where(self.last_active_is_soft, soft_contact, rigid_contact)
+    return torch.where(soft_contact_sensor.data.is_sensor_active, soft_contact, rigid_contact)
 
 
-class foot_contact_forces_hybrid(ManagerTermBase):
-    """Hybrid foot contact forces observation with per-foot solver authority tracking."""
+def foot_contact_forces_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+    rigid_force_filter_threshold: float = 1.0,
+    soft_force_filter_threshold: float = 1.0,
+) -> torch.Tensor:
+    """Hybrid foot contact forces observation selecting from the authoritative solver."""
+    rigid_contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
 
-    def __init__(self, cfg: ObservationTermCfg, env: ManagerBasedRLEnv):
-        super().__init__(cfg, env)
-        self.last_active_is_soft: torch.Tensor | None = None
+    rigid_contact_forces = rigid_contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :]
+    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]
 
-    def __call__(
-        self,
-        env: ManagerBasedRLEnv,
-        rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
-        soft_contact_sensor_name: str = "physics_callback",
-        rigid_force_filter_threshold: float = 1.0,
-        soft_force_filter_threshold: float = 1.0,
-    ) -> torch.Tensor:
-        contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
-        soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+    is_soft = soft_contact_sensor.data.is_sensor_active  # [B, N_feet]
 
-        rigid_contact_forces = contact_sensor.data.net_forces_w[
-            :, rigid_contact_sensor_cfg.body_ids, :
-        ]  # (num_envs, num_body_ids, 3)
-        soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]  # (num_envs, num_body_ids, 3)
+    forces = torch.where(is_soft.unsqueeze(-1), soft_contact_forces, rigid_contact_forces)
 
-        # lazy init (use per-foot authority, before reshape)
-        if self.last_active_is_soft is None:
-            self.last_active_is_soft = torch.zeros(
-                env.num_envs, rigid_contact_forces.shape[1], dtype=torch.bool, device=self.device
-            )
+    threshold = (
+        torch.where(is_soft, soft_force_filter_threshold, rigid_force_filter_threshold)
+        .unsqueeze(-1)
+        .expand(-1, -1, 3)
+        .reshape(env.num_envs, -1)
+    )
+    forces = forces.reshape(env.num_envs, -1)
+    forces = forces * (forces > threshold).float()
 
-        # update authority: use contact_time from underlying sensors
-        contact_time_rigid = contact_sensor.data.current_contact_time[:, rigid_contact_sensor_cfg.body_ids]
-        contact_time_soft = soft_contact_sensor.data.current_contact_time
-        self.last_active_is_soft[contact_time_rigid > 0] = False
-        self.last_active_is_soft[contact_time_soft > 0] = True
-
-        # select forces from authoritative solver (per foot, then threshold & process)
-        forces = torch.where(
-            self.last_active_is_soft.unsqueeze(-1), soft_contact_forces, rigid_contact_forces
-        )  # (num_envs, num_body_ids, 3)
-
-        # expand per-foot threshold to match (num_envs, num_body_ids * 3) flattened forces
-        threshold = (
-            torch.where(self.last_active_is_soft, soft_force_filter_threshold, rigid_force_filter_threshold)
-            .unsqueeze(-1)
-            .expand(-1, -1, 3)
-            .reshape(env.num_envs, -1)
-        )
-        forces = forces.reshape(env.num_envs, -1)
-        forces = forces * (forces > threshold).float()
-
-        return torch.sign(forces) * torch.log1p(torch.abs(forces))
+    return torch.sign(forces) * torch.log1p(torch.abs(forces))
 
 
-class terrain_material_parameters_hybrid(ManagerTermBase):
-    """Hybrid terrain material parameters observation with per-foot solver authority tracking."""
+def terrain_material_parameters_hybrid(
+    env: ManagerBasedRLEnv,
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+) -> torch.Tensor:
+    """Hybrid terrain material parameters observation selecting from the authoritative solver."""
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
 
-    def __init__(self, cfg: ObservationTermCfg, env: ManagerBasedRLEnv):
-        super().__init__(cfg, env)
-        self.last_active_is_soft: torch.Tensor | None = None
+    on_soft_ground = soft_contact_sensor.data.is_sensor_active.any(dim=-1).float()
 
-    def __call__(
-        self,
-        env: ManagerBasedRLEnv,
-        rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
-        soft_contact_sensor_name: str = "physics_callback",
-    ) -> torch.Tensor:
-        contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
-        soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+    mu_rigid = 1.0
+    friction_rigid = 1.0
+    rho_c_rigid = 3000.0
+    rho_c_max = 3000.0
 
-        # lazy init
-        if self.last_active_is_soft is None:
-            num_feet = contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :].shape[1]
-            self.last_active_is_soft = torch.zeros(env.num_envs, num_feet, dtype=torch.bool, device=self.device)
-
-        # update authority using contact_time
-        contact_time_rigid = contact_sensor.data.current_contact_time[:, rigid_contact_sensor_cfg.body_ids]
-        contact_time_soft = soft_contact_sensor.data.current_contact_time
-        self.last_active_is_soft[contact_time_rigid > 0] = False
-        self.last_active_is_soft[contact_time_soft > 0] = True
-
-        # aggregate per-env: soft if ANY foot is on soft terrain
-        on_soft_ground = self.last_active_is_soft.any(dim=-1).float()
-
-        mu_rigid = 1.0
-        friction_rigid = 1.0
-        rho_c_rigid = 3000.0
-
-        friction_coef = soft_contact_sensor.terrain_friction * on_soft_ground + (1 - on_soft_ground) * friction_rigid
-        rho_c = (soft_contact_sensor.terrain_density / 3000.0) * on_soft_ground + (1 - on_soft_ground) * (
-            rho_c_rigid / 3000.0
-        )
-        mu_int = soft_contact_sensor.terrain_stiffness * on_soft_ground + (1 - on_soft_ground) * mu_rigid
-        return torch.stack([friction_coef, rho_c, mu_int], dim=-1)
+    friction_coef = soft_contact_sensor.terrain_friction * on_soft_ground + (1 - on_soft_ground) * friction_rigid
+    rho_c = (soft_contact_sensor.terrain_density / rho_c_max) * on_soft_ground + (1 - on_soft_ground) * (
+        rho_c_rigid / rho_c_max
+    )
+    mu_int = soft_contact_sensor.terrain_stiffness * on_soft_ground + (1 - on_soft_ground) * mu_rigid
+    return torch.stack([friction_coef, rho_c, mu_int], dim=-1)

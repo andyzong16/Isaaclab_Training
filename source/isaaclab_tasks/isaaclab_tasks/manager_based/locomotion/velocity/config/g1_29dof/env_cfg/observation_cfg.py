@@ -10,6 +10,7 @@ from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
+import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof.mdp as g1_mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 
 
@@ -23,9 +24,14 @@ class PolicyCfg(ObsGroup):
         noise=Unoise(n_min=-0.2, n_max=0.2),
         scale=0.25,
     )
-    projected_gravity = ObsTerm(
-        func=mdp.projected_gravity,
-        noise=Unoise(n_min=-0.05, n_max=0.05),
+    # projected_gravity = ObsTerm(
+    #     func=mdp.projected_gravity,
+    #     noise=Unoise(n_min=-0.05, n_max=0.05),
+    # )
+    base_quat = ObsTerm(
+        func=mdp.root_quat_w,
+        noise=Unoise(n_min=-0.01, n_max=0.01),
+        params={"make_quat_unique": True},
     )
     velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
     joint_pos = ObsTerm(
@@ -135,8 +141,12 @@ class CriticCfg(ObsGroup):
         func=mdp.base_ang_vel,
         scale=0.25,
     )
-    projected_gravity = ObsTerm(
-        func=mdp.projected_gravity,
+    # projected_gravity = ObsTerm(
+    #     func=mdp.projected_gravity,
+    # )
+    base_quat = ObsTerm(
+        func=mdp.root_quat_w,
+        params={"make_quat_unique": True},
     )
     velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
     joint_pos = ObsTerm(
@@ -275,6 +285,7 @@ class PrivilegedObsCfg(ObsGroup):
         func=vel_mdp.foot_air_time,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
     )
+    terrain_material_parameters = ObsTerm(func=g1_mdp.terrain_material_parameters)
 
     def __post_init__(self):
         self.enable_corruption = False
@@ -324,12 +335,14 @@ class G1TeacherObservationsCfg:
     """Observation specifications for the MDP."""
 
     # observation groups
-    # policy: PolicyCfg = PolicyCfg()
-    # critic: CriticCfg = CriticCfg()
-    # privileged: PrivilegedObsCfg = PrivilegedObsCfg()
-    policy: PolicyHistoryCfg = PolicyHistoryCfg()
-    critic: CriticHistoryCfg = CriticHistoryCfg()
-    privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
+    policy: PolicyCfg = PolicyCfg()
+    critic: CriticCfg = CriticCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+
+    # policy: PolicyHistoryCfg = PolicyHistoryCfg()
+    # critic: CriticHistoryCfg = CriticHistoryCfg()
+    # privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
+
     logging: LoggingObsCfg = LoggingObsCfg()
 
 

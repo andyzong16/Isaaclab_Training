@@ -53,13 +53,7 @@ class G1RewardsCfg:
 
     # -- base penalties
     base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.75})
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
-    body_orientation_l2 = RewTerm(
-        func=vel_mdp.body_orientation_l2,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*torso.*")},
-        weight=-2.0,
-    )
-    # flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-2.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
 
@@ -103,8 +97,8 @@ class G1RewardsCfg:
                 ".*ankle_roll.*": 0.02,
                 # waist
                 ".*waist_yaw.*": 0.15,
-                ".*waist_roll.*": 1.0,
-                ".*waist_pitch.*": 0.5,
+                ".*waist_roll.*": 1.5,
+                ".*waist_pitch.*": 1.0,
                 # # arms
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,
@@ -114,16 +108,16 @@ class G1RewardsCfg:
             },
             "weight_running": {
                 # leg
-                ".*hip_pitch.*": 0.01,
+                ".*hip_pitch.*": 0.005,
                 ".*hip_roll.*": 0.15,
                 ".*hip_yaw.*": 0.15,
-                ".*knee.*": 0.01,
+                ".*knee.*": 0.005,
                 ".*ankle_pitch.*": 0.01,
                 ".*ankle_roll.*": 0.01,
                 # waist
                 ".*waist_yaw.*": 0.15,
-                ".*waist_roll.*": 1.0,
-                ".*waist_pitch.*": 0.5,
+                ".*waist_roll.*": 1.5,
+                ".*waist_pitch.*": 1.0,
                 # arms
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,
@@ -132,7 +126,7 @@ class G1RewardsCfg:
                 ".*wrist.*": 0.5,
             },
             "walking_threshold": 0.05,
-            "running_threshold": 2.0,
+            "running_threshold": 1.5,
         },
     )
 
@@ -141,29 +135,29 @@ class G1RewardsCfg:
     """
 
     # -- foot orientation penalities
-    feet_yaw_diff = RewTerm(
-        func=vel_mdp.reward_feet_yaw_diff,
-        weight=-1.0,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot",
-                body_names=[".*ankle_roll.*"],
-                preserve_order=True,
-            ),
-        },
-    )
+    # feet_yaw_diff = RewTerm(
+    #     func=vel_mdp.reward_feet_yaw_diff,
+    #     weight=-1.0,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             body_names=[".*ankle_roll.*"],
+    #             preserve_order=True,
+    #         ),
+    #     },
+    # )
 
-    feet_yaw_mean = RewTerm(
-        func=vel_mdp.reward_feet_yaw_mean,
-        weight=-1.0,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot",
-                body_names=[".*ankle_roll.*"],
-                preserve_order=True,
-            ),
-        },
-    )
+    # feet_yaw_mean = RewTerm(
+    #     func=vel_mdp.reward_feet_yaw_mean,
+    #     weight=-1.0,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             body_names=[".*ankle_roll.*"],
+    #             preserve_order=True,
+    #         ),
+    #     },
+    # )
 
     feet_roll = RewTerm(
         func=vel_mdp.reward_feet_roll,
@@ -213,6 +207,23 @@ class G1RewardsCfg:
     #     },
     # )
 
+    feet_pitch_contact = RewTerm(
+        func=vel_mdp.reward_feet_pitch_contact,
+        weight=-1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg(
+                "contact_forces",
+                body_names=[".*ankle_roll.*"],
+                preserve_order=True,
+            ),
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=[".*ankle_roll.*"],
+                preserve_order=True,
+            ),
+        },
+    )
+
     """
     gait
     """
@@ -226,6 +237,7 @@ class G1RewardsCfg:
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "threshold": 0.5,
+            "velocity_threshold": 0.01,
         },
     )
 
@@ -290,7 +302,8 @@ class G1RewardsCfg:
         params={
             "target_height": 0.1,
             "std": 0.05,
-            "tanh_mult": 2.0,
+            # "tanh_mult": 2.0,
+            "tanh_mult": 10.0,
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
             "standing_position_foot_z": 0.03539,
         },

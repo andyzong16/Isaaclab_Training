@@ -56,7 +56,9 @@ def feet_air_time(
     return reward
 
 
-def feet_air_time_positive_biped(env, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
+def feet_air_time_positive_biped(
+    env, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg, velocity_threshold: float = 0.05
+) -> torch.Tensor:
     """Reward long steps taken by the feet for bipeds.
 
     This function rewards the agent for taking steps up to a specified threshold and also keep one foot at
@@ -78,7 +80,7 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     angular_norm = torch.abs(env.command_manager.get_command(command_name)[:, 2])
     total_norm = linear_norm + angular_norm
-    reward *= total_norm > 0.05
+    reward *= total_norm > velocity_threshold
     return reward
 
 
@@ -411,14 +413,10 @@ def reward_feet_roll(
     # feet_index: list[int] = [22, 23]
 ) -> torch.Tensor:
 
-    asset = env.scene[asset_cfg.name]
-
     # Calculate roll angles from quaternions for the feet
-    # feet_index = asset_cfg.body_ids
     feet_roll, _, _ = _feet_rpy(
         env,
         asset_cfg=asset_cfg,
-        # feet_index=feet_index
     )
 
     return torch.sum(torch.square(feet_roll), dim=-1)
@@ -430,13 +428,10 @@ def reward_feet_roll_diff(
     # feet_index: list[int] = [22, 23]):
 ) -> torch.Tensor:
 
-    asset = env.scene[asset_cfg.name]
-
     # Calculate pitch angles from quaternions for the feet
     feet_roll, _, _ = _feet_rpy(
         env,
         asset_cfg=asset_cfg,
-        # feet_index=feet_index
     )
     roll_rel_diff = torch.abs((feet_roll[:, 1] - feet_roll[:, 0] + torch.pi) % (2 * torch.pi) - torch.pi)
     return roll_rel_diff
@@ -448,31 +443,42 @@ def reward_feet_pitch(
     # feet_index: list[int] = [22, 23]
 ) -> torch.Tensor:
 
-    asset = env.scene[asset_cfg.name]
-
     # Calculate roll angles from quaternions for the feet
-    # feet_index = asset_cfg.body_ids
     _, feet_pitch, _ = _feet_rpy(
         env,
         asset_cfg=asset_cfg,
-        # feet_index=feet_index
     )
     return torch.sum(torch.square(feet_pitch), dim=-1)
+
+
+def reward_feet_pitch_contact(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize foot pitch angle only at the moment of first contact.
+
+    During swing the penalty is zero, so knee flexion is not penalized.
+    At touchdown, pitch² is penalized to encourage flat foot landings.
+    """
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]  # [B, N_feet] bool
+
+    _, feet_pitch, _ = _feet_rpy(env, asset_cfg=asset_cfg)  # [B, N_feet]
+
+    # penalize pitch² only on the landing step
+    return torch.sum(torch.square(feet_pitch) * first_contact.float(), dim=-1)
 
 
 def reward_feet_pitch_diff(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-    # feet_index: list[int] = [22, 23]):
 ) -> torch.Tensor:
-
-    asset = env.scene[asset_cfg.name]
 
     # Calculate pitch angles from quaternions for the feet
     _, feet_pitch, _ = _feet_rpy(
         env,
         asset_cfg=asset_cfg,
-        # feet_index=feet_index
     )
     pitch_rel_diff = torch.abs((feet_pitch[:, 1] - feet_pitch[:, 0] + torch.pi) % (2 * torch.pi) - torch.pi)
     return pitch_rel_diff
@@ -481,7 +487,6 @@ def reward_feet_pitch_diff(
 def reward_feet_yaw_diff(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-    # feet_index: list[int] = [22, 23]):
 ) -> torch.Tensor:
     """Reward minimizing the difference between feet yaw angles.
 
@@ -497,13 +502,10 @@ def reward_feet_yaw_diff(
         torch.Tensor: Reward based on similarity of feet yaw angles.
     """
 
-    asset = env.scene[asset_cfg.name]
-
     # Calculate yaw angles from quaternions for the feet
     _, _, feet_yaw = _feet_rpy(
         env,
         asset_cfg=asset_cfg,
-        # feet_index=feet_index
     )
     yaw_rel_diff = torch.abs((feet_yaw[:, 1] - feet_yaw[:, 0] + torch.pi) % (2 * torch.pi) - torch.pi)
     return yaw_rel_diff
@@ -512,17 +514,12 @@ def reward_feet_yaw_diff(
 def reward_feet_yaw_mean(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-    # feet_index: list[int] = [22, 23]
 ) -> torch.Tensor:
-
-    # Get the entity
-    entity = env.scene[asset_cfg.name]
 
     # Calculate yaw angles from quaternions for the feet
     _, _, feet_yaw = _feet_rpy(
         env,
         asset_cfg=asset_cfg,
-        # feet_index=feet_index
     )
 
     _, _, base_yaw = _base_rpy(env, asset_cfg=asset_cfg, base_index=[0])

@@ -242,6 +242,7 @@ class RFT_3D:
         self._data.current_air_time = torch.zeros((self.num_envs, self.num_bodies), device=self.device)
         self._data.last_contact_time = torch.zeros((self.num_envs, self.num_bodies), device=self.device)
         self._data.current_contact_time = torch.zeros((self.num_envs, self.num_bodies), device=self.device)
+        self._data.is_sensor_active = torch.zeros((self.num_envs, self.num_bodies), dtype=torch.bool, device=self.device)
 
     """
     properties.

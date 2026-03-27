@@ -80,6 +80,7 @@ class PhysicsCallbackAction(ActionTerm):
                 contact_threshold=self.cfg.contact_threshold,
                 enable_ema_filter=self.cfg.enable_ema_filter,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
+                history_length=self.cfg.contact_data_history_length,
             )
         elif self.cfg.backend == "3D":
             material_cfg = Material3DRFTCfg()
@@ -93,6 +94,7 @@ class PhysicsCallbackAction(ActionTerm):
                 contact_threshold=self.cfg.contact_threshold,
                 enable_ema_filter=self.cfg.enable_ema_filter,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
+                history_length=self.cfg.contact_data_history_length,
             )
         elif self.cfg.backend == "3D-warp":
             material_cfg = Material3DRFTCfg()
@@ -106,6 +108,7 @@ class PhysicsCallbackAction(ActionTerm):
                 contact_threshold=self.cfg.contact_threshold,
                 enable_ema_filter=self.cfg.enable_ema_filter,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
+                history_length=self.cfg.contact_data_history_length,
             )
         else:
             raise ValueError(f"Unsupported RFT backend: {self.cfg.backend}")
@@ -187,27 +190,13 @@ class PhysicsCallbackAction(ActionTerm):
             forces=self.contact_wrench_b[:, :, :3],
             torques=self.contact_wrench_b[:, :, 3:6],
             body_ids=self._body_ids,
-            # is_global=True,
         )
 
-        # with timeblock("solver step"):
-        #     if self.cfg.disable:
-        #         return
-
-        #     body_pos = self.body_pos.clone()
-        #     body_quat = self.body_quat.clone()
-        #     body_lin_vel = self.body_lin_vel.clone()
-        #     body_ang_vel = self.body_ang_vel.clone()
-        #     self.contact_solver.update(body_pos, body_quat, body_lin_vel, body_ang_vel)
-
-        #     # self.contact_wrench = self.contact_solver.contact_wrench # (num_envs, num_bodies, 6)
-        #     self.contact_wrench_b = self.contact_solver.contact_wrench_b # (num_envs, num_bodies, 6)
-        #     self._asset.permanent_wrench_composer.set_forces_and_torques(
-        #         forces = self.contact_wrench_b[:, :, :3],
-        #         torques = self.contact_wrench_b[:, :, 3:6],
-        #         body_ids = self._body_ids,
-        #         # is_global=True,
-        #     )
+        # track if sensor if active or not
+        self.contact_solver.data.is_sensor_active = (
+            torch.max(torch.norm(self.contact_solver.data.net_forces_w_history, dim=-1), dim=1)[0]
+            > self.cfg.contact_threshold
+        )
 
     def _debug_vis_callback(self, event):
         # check if robot is initialized

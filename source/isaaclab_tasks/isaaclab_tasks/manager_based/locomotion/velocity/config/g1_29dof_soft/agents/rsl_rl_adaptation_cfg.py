@@ -60,6 +60,14 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
+class G1AdaptationPPORunnerCfgFinetune(G1AdaptationPPORunnerCfg):
+    max_iterations = 15_000
+    logger = "wandb"
+    wandb_project = "g1_29dof_soft_adaptation_finetune"
+    experiment_name = "g1_29dof_soft_adaptation_finetune"
+
+
+@configclass
 class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
     num_steps_per_env = 120
     max_iterations = 300

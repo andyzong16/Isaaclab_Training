@@ -118,6 +118,19 @@ gym.register(
     },
 )
 
+gym.register(
+    id="Isaac-Velocity-Flat-G1-29dof-Soft-Teacher-Finetune-v1",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_distillation:G1FlatTeacherEnvCfg_FINETUNE",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1FlatPPORunnerCfg",
+        "rsl_rl_adaptation_cfg_entry_point": f"{agents.__name__}.rsl_rl_adaptation_cfg:G1AdaptationPPORunnerCfgFinetune",
+        "holosoma_agent_cfg_entry_point": f"{agents.__name__}.holosoma_agent_fastsac_cfg:G1HolosomaFastSACAgentCfg",
+        # "holosoma_agent_cfg_entry_point": f"{agents.__name__}.holosoma_agent_ppo_cfg:G1HolosomaPPOAgentCfg",
+    },
+)
+
 
 gym.register(
     id="Isaac-Velocity-Flat-G1-29dof-Soft-Teacher-Play-v1",

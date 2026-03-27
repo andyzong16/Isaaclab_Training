@@ -193,7 +193,11 @@ RigidSoftTerrain = TerrainImporterCfg(
                 num_holes=60,
                 holes_depth=-2.0,
                 platform_width=2.0,
-            )
+            ),
+            # "plane": terrain_gen.MeshPlaneTerrainCfg(
+            #     proportion=1.0,
+            #     ground_height_range=(0.0, 0.0),
+            # ),
         },
     ),
     collision_group=-1,

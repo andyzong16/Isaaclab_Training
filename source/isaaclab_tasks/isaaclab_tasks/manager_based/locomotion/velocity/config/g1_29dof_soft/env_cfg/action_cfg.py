@@ -73,7 +73,8 @@ class G1ActionsCfg:
             "right_wrist_pitch_joint",
             "right_wrist_yaw_joint",
         ],
-        scale=0.25,
+        # scale=0.25,
+        scale=0.5,
         use_default_offset=True,
         preserve_order=True,
     )
@@ -90,5 +91,7 @@ class G1ActionsCfg:
         intruder_geometry_cfg=g1_foot_geometry_cfg,
         enable_ema_filter=True,
         contact_threshold=SOFT_CONTACT_THRESHOLD,
-        # debug_vis=True,
+        debug_vis=True,
+        contact_data_history_length=80,  # physics 200Hz, window=0.4s -> int(0.4 * 200) = 80
+        contact_vis_force_threshold=SOFT_CONTACT_THRESHOLD,
     )

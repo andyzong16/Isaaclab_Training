@@ -27,7 +27,7 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
 
         # curriculum settings
         self.curriculum.terrain_levels = None  # type: ignore
-        self.curriculum.command_vel = None  # no running
+        # self.curriculum.command_vel = None  # no running
 
         # no height scan
         self.scene.height_scanner = None  # type: ignore
@@ -62,6 +62,20 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
+        # rendering
+        self.sim.render.enable_dlssg = True
+        self.sim.render.dlss_mode = "performance"  # type: ignore
+        self.viewer = ViewerCfg(
+            eye=(-0.0, -3.5, 0.5),
+            lookat=(0.0, -0.0, 0.2),
+            # eye=(3.5, 0.0, 0.5),
+            # lookat=(0.0, 0.0, 0.2),
+            # resolution=(1920, 1080),
+            resolution=(1080, 720),
+            origin_type="asset_root",
+            asset_name="robot",
+        )
+
 
 class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
     def __post_init__(self) -> None:
@@ -72,7 +86,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.sim.dt = 1/200 # 200Hz
         # self.decimation = 4 # 50Hz
         # self.sim.render_interval = self.decimation
-        self.episode_length_s = 10.0
+        self.episode_length_s = 20.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -92,9 +106,9 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.events.scale_actuator_gains = None  # type: ignore
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (3.0, 3.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
         self.commands.base_velocity.heading_command = False
         self.commands.base_velocity.rel_standing_envs = 0.0

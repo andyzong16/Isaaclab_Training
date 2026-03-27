@@ -51,6 +51,8 @@ class PhysicsCallbackActionCfg(ActionTermCfg):
     """Threshold for contact detection (N)."""
     intruder_geometry_cfg: ColliderCfg = MISSING
     """Configuration for the intruder geometry used in soft contact modeling."""
+    contact_data_history_length: int = 3
+    """Length of the contact data history."""
 
     contact_visualizer_cfg: VisualizationMarkersCfg = CONTACT_MARKER_CFG.replace(
         prim_path="/Visuals/Contact/contact",

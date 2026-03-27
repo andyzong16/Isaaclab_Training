@@ -20,7 +20,8 @@ from isaaclab_rl.rsl_rl import (
 @configclass
 class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 20_000
+    # max_iterations = 20_000
+    max_iterations = 30_000
     save_interval = 500
     obs_groups = {"actor": ["policy"], "critic": ["critic", "privileged"], "privileged": ["privileged"]}
     actor = RslRlMLPEncoderModelCfg(

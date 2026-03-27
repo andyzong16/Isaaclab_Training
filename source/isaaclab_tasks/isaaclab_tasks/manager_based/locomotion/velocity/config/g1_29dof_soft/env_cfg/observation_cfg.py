@@ -307,7 +307,7 @@ class PrivilegedObsCfg(ObsGroup):
         },
     )
 
-    # # # old ones
+    # # old ones
     # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
     # foot_height = ObsTerm(
     #     func=vel_mdp.foot_height,
@@ -420,6 +420,7 @@ class LogPrivilegedObsCfg(ObsGroup):
         params={
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
             "soft_contact_sensor_name": "physics_callback",
+            "soft_force_threshold": SOFT_CONTACT_THRESHOLD,
         },
     )
 
@@ -428,6 +429,7 @@ class LogPrivilegedObsCfg(ObsGroup):
         params={
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
             "soft_contact_sensor_name": "physics_callback",
+            "soft_force_threshold": SOFT_CONTACT_THRESHOLD,
         },
     )
 
@@ -445,9 +447,11 @@ class G1ObservationsCfg:
     # policy: PolicyCfg = PolicyCfg()
     # critic: CriticCfg = CriticCfg()
     # privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+
     policy: PolicyHistoryCfg = PolicyHistoryCfg()
     critic: CriticHistoryCfg = CriticHistoryCfg()
     privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
+
     logging: LoggingObsCfg = LoggingObsCfg()
 
 
@@ -459,10 +463,12 @@ class G1TeacherObservationsCfg:
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
     privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+
     # policy: PolicyHistoryCfg = PolicyHistoryCfg()
     # critic: CriticHistoryCfg = CriticHistoryCfg()
     # privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
-    # logging: LoggingObsCfg = LoggingObsCfg()
+
+    logging: LoggingObsCfg = LoggingObsCfg()
     # log_privileged: LogPrivilegedObsCfg = LogPrivilegedObsCfg()
 
 

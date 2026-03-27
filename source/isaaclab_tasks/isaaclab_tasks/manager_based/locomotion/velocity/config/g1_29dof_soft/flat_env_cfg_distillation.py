@@ -83,18 +83,33 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         )
 
 
+class G1FlatTeacherEnvCfg_FINETUNE(G1FlatTeacherEnvCfg):
+    def __post_init__(self) -> None:
+        # post init of parent
+        super().__post_init__()
+
+        self.curriculum.command_vel.params["velocity_stages"] = [
+            {"step": 0, "lin_vel_x": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
+            {"step": 4000 * 24, "lin_vel_x": (-1.0, 1.7), "ang_vel_z": (-0.7, 0.7)},
+            {"step": 8000 * 24, "lin_vel_x": (-1.0, 2.5), "ang_vel_z": (-1.0, 1.0)},
+        ]
+        self.curriculum.track_lin_vel.params["num_steps"] = 12000 * 24
+        self.curriculum.track_ang_vel.params["num_steps"] = 12000 * 24
+        self.curriculum.track_heading.params["num_steps"] = 12000 * 24
+
+
 class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()
 
         # change timestep
-        # self.sim.dt = 1 / 200  # 200Hz
-        # self.decimation = 4  # 50Hz
-        self.sim.dt = 1 / 400  # 400Hz
-        self.decimation = 8  # 50Hz
-        self.sim.render_interval = self.decimation
-        self.episode_length_s = 20.0
+        self.sim.dt = 1 / 200  # 200Hz
+        self.decimation = 4  # 50Hz
+        # self.sim.dt = 1 / 400  # 400Hz
+        # self.decimation = 8  # 50Hz
+        # self.sim.render_interval = self.decimation
+        # self.episode_length_s = 20.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -103,7 +118,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # terrain with hole
         # self.scene.terrain = vel_mdp.RigidSoftTerrain
         self.scene.terrain = vel_mdp.SoftTerrainVisual
-        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
+        self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
         # make soft terrain
         # self.scene.terrain = vel_mdp.SoftTerrain
@@ -120,8 +135,8 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
 
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.7, 0.7)
-        # self.events.randomize_friction.params["friction_range"] = (0.7, 0.7)
+        # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
+        # self.events.randomize_friction.params["friction_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 

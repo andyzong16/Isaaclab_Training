@@ -92,3 +92,8 @@ class SoftContactData:
     Note:
         If the :attr:`ContactSensorCfg.track_air_time` is False, then this quantity is None.
     """
+    is_sensor_active: torch.Tensor | None = None
+    """Whether the sensor is active.
+
+    Shape is (N, B), where N is the number of sensors and B is the number of bodies in each sensor.
+    """
