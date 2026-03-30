@@ -67,17 +67,40 @@ foot state
 """
 
 
+# def foot_height(
+#     env: ManagerBasedEnv,
+#     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+#     offset: list[float] = [0.0, 0.0, -0.03539],
+# ) -> torch.Tensor:
+#     # extract the used quantities (to enable type-hinting)
+#     asset: Articulation = env.scene[asset_cfg.name]
+
+#     # access the body poses in world frame
+#     pose = asset.data.body_pose_w[:, asset_cfg.body_ids, :7]
+#     pose[..., :3] = pose[..., :3] - env.scene.env_origins.unsqueeze(1)
+#     return pose[..., 2].reshape(env.num_envs, -1)
+
+
 def foot_height(
     env: ManagerBasedEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    offset: list[float] = [0.0, 0.0, -0.03539],
 ) -> torch.Tensor:
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
 
     # access the body poses in world frame
     pose = asset.data.body_pose_w[:, asset_cfg.body_ids, :7]
-    pose[..., :3] = pose[..., :3] - env.scene.env_origins.unsqueeze(1)
-    return pose[..., 2].reshape(env.num_envs, -1)
+    pose[..., :2] = pose[..., :2] - env.scene.env_origins.unsqueeze(1)[:, :, :2]
+    position = pose[..., :3]
+    quat = pose[..., 3:7]
+
+    offset_position = torch.zeros_like(position)
+    offset_position[..., 0] += offset[0]
+    offset_position[..., 1] += offset[1]
+    offset_position[..., 2] += offset[2]
+    body_position = math_utils.quat_apply(quat, offset_position) + position
+    return body_position[..., 2].reshape(env.num_envs, -1)
 
 
 def foot_air_time(

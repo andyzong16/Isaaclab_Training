@@ -179,6 +179,7 @@ def feet_air_time_positive_biped_hybrid(
     threshold: float,
     rigid_contact_sensor_cfg: SceneEntityCfg,
     soft_contact_sensor_name: str = "physics_callback",
+    velocity_threshold: float = 0.05, 
 ) -> torch.Tensor:
     """Hybrid biped air time reward selecting timing from the authoritative contact solver.
 
@@ -207,7 +208,7 @@ def feet_air_time_positive_biped_hybrid(
     linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     angular_norm = torch.abs(env.command_manager.get_command(command_name)[:, 2])
     total_norm = linear_norm + angular_norm
-    reward *= total_norm > 0.05
+    reward *= total_norm > velocity_threshold
 
     return reward
 

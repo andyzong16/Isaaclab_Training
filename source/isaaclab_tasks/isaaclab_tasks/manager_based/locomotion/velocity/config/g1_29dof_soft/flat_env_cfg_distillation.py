@@ -29,9 +29,11 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         # self.scene.rigid_floor = vel_mdp.CurriculumSoftTerrainPlatform
 
         # no height scan
-        self.scene.height_scanner = None  # type: ignore
-        self.observations.policy.height_scan = None  # type: ignore
-        self.observations.critic.height_scan = None  # type: ignore
+        self.scene.height_scanner = None
+        if hasattr(self.observations.policy, "height_scan"):
+            self.observations.policy.height_scan = None
+        if hasattr(self.observations.critic, "height_scan"):
+            self.observations.critic.height_scan = None
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -104,12 +106,12 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         super().__post_init__()
 
         # change timestep
-        self.sim.dt = 1 / 200  # 200Hz
-        self.decimation = 4  # 50Hz
-        # self.sim.dt = 1 / 400  # 400Hz
-        # self.decimation = 8  # 50Hz
+        # self.sim.dt = 1 / 200  # 200Hz
+        # self.decimation = 4  # 50Hz
+        self.sim.dt = 1 / 400  # 400Hz
+        self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
-        # self.episode_length_s = 20.0
+        # self.episode_length_s = 10.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -132,13 +134,15 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.actions.physics_callback.backend = "3D"
         # self.events.randomize_stiffness.params["stiffness_range"] = (0.577, 0.577)
         # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.9, 0.9)
-        self.events.randomize_friction.params["friction_range"] = (0.9, 0.9)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
+        self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
         self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
+        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.9, 0.9)
+        # self.events.randomize_friction.params["friction_range"] = (0.9, 0.9)
+        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # self.actions.physics_callback.backend = "2D"
         # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
@@ -161,9 +165,9 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.events.scale_actuator_gains = None
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.5)
+        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, -0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
         self.commands.base_velocity.heading_command = False
         self.commands.base_velocity.rel_standing_envs = 0.0
@@ -236,9 +240,11 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         # self.scene.rigid_floor = vel_mdp.CurriculumSoftTerrainPlatform
 
         # no height scan
-        self.scene.height_scanner = None  # type: ignore
-        self.observations.policy.height_scan = None  # type: ignore
-        self.observations.critic.height_scan = None  # type: ignore
+        self.scene.height_scanner = None
+        if hasattr(self.observations.policy, "height_scan"):
+            self.observations.policy.height_scan = None
+        if hasattr(self.observations.student_encoder, "height_scan"):
+            self.observations.student_encoder.height_scan = None
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"

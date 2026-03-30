@@ -30,13 +30,11 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         # self.curriculum.command_vel = None  # no running
 
         # no height scan
-        self.scene.height_scanner = None  # type: ignore
+        self.scene.height_scanner = None
         if hasattr(self.observations.policy, "height_scan"):
-            self.observations.policy.height_scan = None  # type: ignore
+            self.observations.policy.height_scan = None
         if hasattr(self.observations.critic, "height_scan"):
-            self.observations.critic.height_scan = None  # type: ignore
-        if hasattr(self.observations.privileged, "height_scan"):
-            self.observations.privileged.height_scan = None  # type: ignore
+            self.observations.critic.height_scan = None
 
         # Randomization
         self.events.reset_base.params = {
@@ -106,7 +104,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.events.scale_actuator_gains = None  # type: ignore
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.5)
+        self.commands.base_velocity.ranges.lin_vel_x = (2.5, 2.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
@@ -167,13 +165,11 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.curriculum.command_vel = None  # no running
 
         # no height scan
-        self.scene.height_scanner = None  # type: ignore
+        self.scene.height_scanner = None
         if hasattr(self.observations.policy, "height_scan"):
-            self.observations.policy.height_scan = None  # type: ignore
-        if hasattr(self.observations.critic, "height_scan"):
-            self.observations.critic.height_scan = None  # type: ignore
-        if hasattr(self.observations.privileged, "height_scan"):
-            self.observations.privileged.height_scan = None  # type: ignore
+            self.observations.policy.height_scan = None
+        if hasattr(self.observations.student_encoder, "height_scan"):
+            self.observations.student_encoder.height_scan = None
 
         # Randomization
         self.events.reset_base.params = {

@@ -69,9 +69,14 @@ class G1AdaptationPPORunnerCfgFinetune(G1AdaptationPPORunnerCfg):
 
 @configclass
 class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
-    num_steps_per_env = 120
-    max_iterations = 300
-    save_interval = 50
+    # num_steps_per_env = 120
+    # max_iterations = 1000
+    # save_interval = 50
+    num_steps_per_env = 24
+    max_iterations = 10_000
+    save_interval = 100
+    logger = "wandb"
+    wandb_project = "g1_29dof_soft_adaptation_distillation"
     experiment_name = "g1_29dof_soft_adaptation_distillation"
     obs_groups = {
         "student": ["policy"],

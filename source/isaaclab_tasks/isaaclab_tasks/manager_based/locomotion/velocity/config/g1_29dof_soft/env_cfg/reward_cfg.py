@@ -14,6 +14,7 @@ import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof_soft.mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 
 SOFT_CONTACT_THRESHOLD = 40.0
+# SOFT_CONTACT_THRESHOLD = 300.0
 
 
 @configclass
@@ -296,7 +297,7 @@ class G1RewardsCfg:
 
     feet_pitch_contact = RewTerm(
         func=g1_mdp.reward_feet_pitch_contact,
-        weight=-1.0,
+        weight=-4.0,
         params={
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "soft_contact_sensor_name": "physics_callback",
@@ -320,19 +321,20 @@ class G1RewardsCfg:
             "threshold": 0.5,
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "soft_contact_sensor_name": "physics_callback",
+            "velocity_threshold": 0.01,
         },
     )
 
     no_fly = RewTerm(
         func=g1_mdp.no_fly_hybrid,
-        weight=0.5,
+        weight=-1.0,
         params={
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "soft_contact_sensor_name": "physics_callback",
             "rigid_contact_threshold": 5.0,
             "soft_contact_threshold": SOFT_CONTACT_THRESHOLD,
             "command_name": "base_velocity",
-            "velocity_threshold": 1.5,
+            "velocity_threshold": 1.0,
         },
     )
 
@@ -396,6 +398,17 @@ class G1RewardsCfg:
         },
     )
 
+    contact_impulse = RewTerm(
+        func=g1_mdp.reward_soft_landing_hybrid,
+        weight=-5e-3,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+            "soft_contact_sensor_name": "physics_callback",
+            "command_name": "base_velocity",
+            "command_threshold": 0.05,
+        },
+    )
+
     # contact_impulse = RewTerm(
     #     func=g1_mdp.penalize_landing_velocity_hybrid,
     #     weight=-5e-3,
@@ -409,17 +422,6 @@ class G1RewardsCfg:
     #         "command_threshold": 0.05,
     #     },
     # )
-
-    contact_impulse = RewTerm(
-        func=g1_mdp.reward_soft_landing_hybrid,
-        weight=-5e-3,
-        params={
-            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-            "soft_contact_sensor_name": "physics_callback",
-            "command_name": "base_velocity",
-            "command_threshold": 0.05,
-        },
-    )
 
     # # old ones
 

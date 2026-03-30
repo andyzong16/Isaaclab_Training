@@ -35,11 +35,16 @@ class G1RewardsCfg:
         weight=4.0,
         params={"asset_cfg": SceneEntityCfg("robot"), "command_name": "base_velocity", "std": math.sqrt(0.5)},
     )
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts,
+        weight=-1.0,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names="(?!.*ankle.*).*"), "threshold": 1.0},
+    )
 
     """
-    style rewards
+    regularization.
     """
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     action_rate_l2_lower_body = RewTerm(
         func=vel_mdp.action_rate_l2,
         weight=-0.01,
@@ -50,23 +55,6 @@ class G1RewardsCfg:
         weight=-0.05,
         params={"joint_idx": list(range(12, 29))},  # mjc order
     )
-
-    # -- base penalties
-    base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.75})
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
-    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
-
-    # -- contact penalties
-    undesired_contacts = RewTerm(
-        func=mdp.undesired_contacts,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names="(?!.*ankle.*).*"), "threshold": 1.0},
-    )
-
-    """
-    joint regularization.
-    """
     energy = RewTerm(func=vel_mdp.energy, weight=-1e-3)
     dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-2e-4)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
@@ -79,7 +67,7 @@ class G1RewardsCfg:
     )
 
     joint_deviation = RewTerm(
-        func=vel_mdp.variable_posture_l1,  # type: ignore
+        func=vel_mdp.variable_posture_l1,
         weight=-1.0,
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
@@ -116,8 +104,8 @@ class G1RewardsCfg:
                 ".*ankle_roll.*": 0.01,
                 # waist
                 ".*waist_yaw.*": 0.15,
-                ".*waist_roll.*": 1.5,
-                ".*waist_pitch.*": 1.0,
+                ".*waist_roll.*": 2.0,
+                ".*waist_pitch.*": 2.0,
                 # arms
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,
@@ -131,10 +119,16 @@ class G1RewardsCfg:
     )
 
     """
-    foot orientation
+    style rewards
     """
 
-    # -- foot orientation penalities
+    # -- base penalties
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.75})
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
+
+    # -- foot orientation
     # feet_yaw_diff = RewTerm(
     #     func=vel_mdp.reward_feet_yaw_diff,
     #     weight=-1.0,
@@ -209,7 +203,7 @@ class G1RewardsCfg:
 
     feet_pitch_contact = RewTerm(
         func=vel_mdp.reward_feet_pitch_contact,
-        weight=-1.0,
+        weight=-4.0,
         params={
             "sensor_cfg": SceneEntityCfg(
                 "contact_forces",
@@ -248,7 +242,7 @@ class G1RewardsCfg:
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "threshold": 5.0,
             "command_name": "base_velocity",
-            "velocity_threshold": 1.5,
+            "velocity_threshold": 1.0,
         },
     )
 

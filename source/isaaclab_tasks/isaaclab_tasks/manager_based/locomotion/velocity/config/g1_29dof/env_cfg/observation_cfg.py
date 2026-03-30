@@ -250,16 +250,16 @@ class PolicyHistoryCfg(PolicyCfg):
 
 
 @configclass
-class CriticHistoryCfg(CriticCfg):
-    def __post_init__(self):
-        self.history_length = 10
-
-
-@configclass
-class HistoryObsCfg(CriticCfg):
+class HistoryObsCfg(PolicyCfg):
     def __post_init__(self):
         self.history_length = 10
         self.flatten_history_dim = False
+
+
+@configclass
+class CriticHistoryCfg(CriticCfg):
+    def __post_init__(self):
+        self.history_length = 10
 
 
 @configclass
@@ -352,8 +352,6 @@ class G1StudentObservationsCfg:
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
-    critic: CriticCfg = CriticCfg()
-    # policy: PolicyHistoryCfg = PolicyHistoryCfg()
-    # critic: CriticHistoryCfg = CriticHistoryCfg()
-    privileged: HistoryObsCfg = HistoryObsCfg()
+    teacher_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    student_encoder: HistoryObsCfg = HistoryObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()
