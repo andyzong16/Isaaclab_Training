@@ -103,8 +103,8 @@ class G1RewardsCfg:
                 ".*waist_yaw.*": 0.15,
                 # ".*waist_roll.*": 0.8,
                 # ".*waist_pitch.*": 0.5,
-                ".*waist_roll.*": 1.5,
-                ".*waist_pitch.*": 1.0,
+                ".*waist_roll.*": 2.0,
+                ".*waist_pitch.*": 2.0,
                 # arms
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,
@@ -126,8 +126,8 @@ class G1RewardsCfg:
                 ".*waist_yaw.*": 0.15,
                 # ".*waist_roll.*": 0.8,
                 # ".*waist_pitch.*": 0.5,
-                ".*waist_roll.*": 1.5,
-                ".*waist_pitch.*": 1.0,
+                ".*waist_roll.*": 2.0,
+                ".*waist_pitch.*": 2.0,
                 # arms
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,
@@ -145,78 +145,42 @@ class G1RewardsCfg:
     #     func=g1_mdp.angular_momentum_l2,
     #     weight=-0.02,
     #     params={
-    #         "asset_cfg": SceneEntityCfg("robot"),
-    #         "physx_joint_names": [
-    #             "left_hip_pitch_joint",
-    #             "right_hip_pitch_joint",
-    #             "waist_yaw_joint",
-    #             "left_hip_roll_joint",
-    #             "right_hip_roll_joint",
-    #             "waist_roll_joint",
-    #             "left_hip_yaw_joint",
-    #             "right_hip_yaw_joint",
-    #             "waist_pitch_joint",
-    #             "left_knee_joint",
-    #             "right_knee_joint",
-    #             "left_shoulder_pitch_joint",
-    #             "right_shoulder_pitch_joint",
-    #             "left_ankle_pitch_joint",
-    #             "right_ankle_pitch_joint",
-    #             "left_shoulder_roll_joint",
-    #             "right_shoulder_roll_joint",
-    #             "left_ankle_roll_joint",
-    #             "right_ankle_roll_joint",
-    #             "left_shoulder_yaw_joint",
-    #             "right_shoulder_yaw_joint",
-    #             "left_elbow_joint",
-    #             "right_elbow_joint",
-    #             "left_wrist_roll_joint",
-    #             "right_wrist_roll_joint",
-    #             "left_wrist_pitch_joint",
-    #             "right_wrist_pitch_joint",
-    #             "left_wrist_yaw_joint",
-    #             "right_wrist_yaw_joint",
-    #         ],
-    #         "mjw_joint_names": [
-    #             "left_hip_pitch_joint",
-    #             "left_hip_roll_joint",
-    #             "left_hip_yaw_joint",
-    #             "left_knee_joint",
-    #             "left_ankle_pitch_joint",
-    #             "left_ankle_roll_joint",
-
-    #             "right_hip_pitch_joint",
-    #             "right_hip_roll_joint",
-    #             "right_hip_yaw_joint",
-    #             "right_knee_joint",
-    #             "right_ankle_pitch_joint",
-    #             "right_ankle_roll_joint",
-
-    #             # waist
-    #             "waist_yaw_joint",
-    #             "waist_roll_joint",
-    #             "waist_pitch_joint",
-
-    #             # arms
-    #             "left_shoulder_pitch_joint",
-    #             "left_shoulder_roll_joint",
-    #             "left_shoulder_yaw_joint",
-    #             "left_elbow_joint",
-
-    #             "left_wrist_roll_joint",
-    #             "left_wrist_pitch_joint",
-    #             "left_wrist_yaw_joint",
-
-    #             "right_shoulder_pitch_joint",
-    #             "right_shoulder_roll_joint",
-    #             "right_shoulder_yaw_joint",
-    #             "right_elbow_joint",
-
-    #             "right_wrist_roll_joint",
-    #             "right_wrist_pitch_joint",
-    #             "right_wrist_yaw_joint",
-    #         ],
-    #     }
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             joint_names=[
+    #                 "left_hip_pitch_joint",
+    #                 "left_hip_roll_joint",
+    #                 "left_hip_yaw_joint",
+    #                 "left_knee_joint",
+    #                 "left_ankle_pitch_joint",
+    #                 "left_ankle_roll_joint",
+    #                 "right_hip_pitch_joint",
+    #                 "right_hip_roll_joint",
+    #                 "right_hip_yaw_joint",
+    #                 "right_knee_joint",
+    #                 "right_ankle_pitch_joint",
+    #                 "right_ankle_roll_joint",
+    #                 "waist_yaw_joint",
+    #                 "waist_roll_joint",
+    #                 "waist_pitch_joint",
+    #                 "left_shoulder_pitch_joint",
+    #                 "left_shoulder_roll_joint",
+    #                 "left_shoulder_yaw_joint",
+    #                 "left_elbow_joint",
+    #                 "left_wrist_roll_joint",
+    #                 "left_wrist_pitch_joint",
+    #                 "left_wrist_yaw_joint",
+    #                 "right_shoulder_pitch_joint",
+    #                 "right_shoulder_roll_joint",
+    #                 "right_shoulder_yaw_joint",
+    #                 "right_elbow_joint",
+    #                 "right_wrist_roll_joint",
+    #                 "right_wrist_pitch_joint",
+    #                 "right_wrist_yaw_joint",
+    #             ],
+    #             preserve_order=True,
+    #         ),
+    #     },
     # )
 
     """
@@ -271,36 +235,10 @@ class G1RewardsCfg:
         },
     )
 
-    # feet_pitch = RewTerm(
-    #     func=vel_mdp.reward_feet_pitch,
-    #     weight=-1.0,
-    #     params={
-    #         "asset_cfg": SceneEntityCfg(
-    #             "robot",
-    #             body_names=[".*ankle_roll.*"],
-    #             preserve_order=True,
-    #         ),
-    #     },
-    # )
-
-    # feet_pitch_diff = RewTerm(
-    #     func=vel_mdp.reward_feet_pitch_diff,
-    #     weight=-1.0,
-    #     params={
-    #         "asset_cfg": SceneEntityCfg(
-    #             "robot",
-    #             body_names=[".*ankle_roll.*"],
-    #             preserve_order=True,
-    #         ),
-    #     },
-    # )
-
-    feet_pitch_contact = RewTerm(
-        func=g1_mdp.reward_feet_pitch_contact,
-        weight=-4.0,
+    feet_pitch = RewTerm(
+        func=vel_mdp.reward_feet_pitch,
+        weight=-1.0,
         params={
-            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-            "soft_contact_sensor_name": "physics_callback",
             "asset_cfg": SceneEntityCfg(
                 "robot",
                 body_names=[".*ankle_roll.*"],
@@ -309,10 +247,52 @@ class G1RewardsCfg:
         },
     )
 
+    feet_pitch_diff = RewTerm(
+        func=vel_mdp.reward_feet_pitch_diff,
+        weight=-1.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=[".*ankle_roll.*"],
+                preserve_order=True,
+            ),
+        },
+    )
+
+    # # only track soft contact
+    # feet_pitch_contact = RewTerm(
+    #     func=g1_mdp.reward_feet_pitch_contact,
+    #     weight=-4.0,
+    #     params={
+    #         "soft_contact_sensor_name": "physics_callback",
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             body_names=[".*ankle_roll.*"],
+    #             preserve_order=True,
+    #         ),
+    #     },
+    # )
+
+    # track both rigid and soft contact
+    # feet_pitch_contact = RewTerm(
+    #     func=g1_mdp.reward_feet_pitch_contact_hybrid,
+    #     weight=-4.0,
+    #     params={
+    #         "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    #         "soft_contact_sensor_name": "physics_callback",
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             body_names=[".*ankle_roll.*"],
+    #             preserve_order=True,
+    #         ),
+    #     },
+    # )
+
     """
     gait
     """
 
+    # track both rigid and soft contact
     feet_air_time = RewTerm(
         func=g1_mdp.feet_air_time_positive_biped_hybrid,
         weight=0.5,
@@ -321,7 +301,7 @@ class G1RewardsCfg:
             "threshold": 0.5,
             "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "soft_contact_sensor_name": "physics_callback",
-            "velocity_threshold": 0.01,
+            "velocity_threshold": 0.05,
         },
     )
 
@@ -338,9 +318,8 @@ class G1RewardsCfg:
         },
     )
 
-    # # old ones
-
-    # feet_air_time = RewTerm(
+    # # reward for rigid and soft contact
+    # feet_air_time_rigid = RewTerm(
     #     func=vel_mdp.feet_air_time_positive_biped,
     #     weight=0.5,
     #     params={
@@ -349,6 +328,17 @@ class G1RewardsCfg:
     #         "threshold": 0.5,
     #     },
     # )
+    # no_fly_rigid = RewTerm(
+    #     func=vel_mdp.fly,
+    #     weight=-1.0,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    #         "threshold": 5.0,
+    #         "command_name": "base_velocity",
+    #         "velocity_threshold": 1.0,
+    #     },
+    # )
+
     # feet_air_time_soft = RewTerm(
     #     func=vel_mdp.feet_air_time_positive_biped_soft,
     #     weight=0.5,
@@ -358,32 +348,36 @@ class G1RewardsCfg:
     #         "threshold": 0.5,
     #     },
     # )
-
-    # # no_fly = RewTerm(
-    # #     func=vel_mdp.fly,
-    # #     weight=-1.0,
-    # #     params={
-    # #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    # #         "threshold": 5.0,
-    # #         "command_name": "base_velocity",
-    # #         "velocity_threshold": 1.5,
-    # #     },
-    # # )
-    # # no_fly_soft = RewTerm(
-    # #     func=vel_mdp.fly_soft,
-    # #     weight=-1.0,
-    # #     params={
-    # #         "action_term_name": "physics_callback",
-    # #         "threshold": SOFT_CONTACT_THRESHOLD,
-    # #         "command_name": "base_velocity",
-    # #         "velocity_threshold": 1.5,
-    # #     },
-    # # )
+    # no_fly_soft = RewTerm(
+    #     func=vel_mdp.fly_soft,
+    #     weight=-1.0,
+    #     params={
+    #         "action_term_name": "physics_callback",
+    #         "threshold": SOFT_CONTACT_THRESHOLD,
+    #         "command_name": "base_velocity",
+    #         "velocity_threshold": 1.0,
+    #     },
+    # )
 
     """
     Stance foot
     """
+    # penalize lateral foot distance
+    foot_distance = RewTerm(
+        # func=vel_mdp.reward_foot_distance,
+        func=vel_mdp.reward_foot_lateral_symmetry,
+        weight=-2.0,
+        params={
+            "ref_dist": 0.2,
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=".*_ankle_roll_link",
+                preserve_order=True,
+            ),
+        },
+    )
 
+    # track both rigid and soft contact
     feet_slide = RewTerm(
         func=g1_mdp.feet_slide_hybrid,
         weight=-0.25,
@@ -409,7 +403,7 @@ class G1RewardsCfg:
         },
     )
 
-    # contact_impulse = RewTerm(
+    # contact_impulse_velocity = RewTerm(
     #     func=g1_mdp.penalize_landing_velocity_hybrid,
     #     weight=-5e-3,
     #     params={
@@ -423,9 +417,8 @@ class G1RewardsCfg:
     #     },
     # )
 
-    # # old ones
-
-    # feet_slide = RewTerm(
+    # # reward both rigid and soft contact
+    # feet_slide_rigid = RewTerm(
     #     func=vel_mdp.feet_slide,
     #     weight=-0.25,
     #     params={
@@ -433,17 +426,7 @@ class G1RewardsCfg:
     #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
     #     },
     # )
-    # feet_slide_soft = RewTerm(
-    #     func=vel_mdp.feet_slide_soft,
-    #     weight=-0.25,
-    #     params={
-    #         "action_term_name": "physics_callback",
-    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
-    #         "contact_threshold": SOFT_CONTACT_THRESHOLD,  # peak GRF is around 600N on soft terrain
-    #     },
-    # )
-
-    # contact_impulse = RewTerm(
+    # contact_impulse_rigid = RewTerm(
     #     func=vel_mdp.reward_soft_landing,
     #     weight=-5e-3,
     #     params={
@@ -452,7 +435,15 @@ class G1RewardsCfg:
     #         "command_threshold": 0.05,
     #     },
     # )
-
+    # feet_slide_soft = RewTerm(
+    #     func=vel_mdp.feet_slide_soft,
+    #     weight=-0.25,
+    #     params={
+    #         "action_term_name": "physics_callback",
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
+    #         "contact_threshold": SOFT_CONTACT_THRESHOLD,
+    #     },
+    # )
     # contact_impulse_soft = RewTerm(
     #     func=vel_mdp.reward_soft_landing_soft,
     #     weight=-5e-3,
@@ -463,49 +454,12 @@ class G1RewardsCfg:
     #     },
     # )
 
-    # # feet_force = RewTerm(
-    # #     func=vel_mdp.foot_force,
-    # #     # weight=-5e-3,
-    # #     weight=-1e-2,
-    # #     params={
-    # #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    # #         "threshold": 300,
-    # #         "max_reward": 300,
-    # #     },
-    # # )
-    # # feet_force_soft = RewTerm(
-    # #     func=vel_mdp.foot_force_soft,
-    # #     # weight=-5e-3,
-    # #     weight=-1e-2,
-    # #     params={
-    # #         "action_term_name": "physics_callback",
-    # #         "threshold": 300,
-    # #         "max_reward": 300,
-    # #     },
-    # # )
-
-    # penalize lateral foot distance
-    foot_distance = RewTerm(
-        # func=vel_mdp.reward_foot_distance,
-        func=vel_mdp.reward_foot_lateral_symmetry,
-        weight=-2.0,
-        params={
-            "ref_dist": 0.2,
-            "asset_cfg": SceneEntityCfg(
-                "robot",
-                body_names=".*_ankle_roll_link",
-                preserve_order=True,
-            ),
-        },
-    )
-
     ###
 
     """
     Swing foot
     """
 
-    # encourage specific foot clearance value
     foot_clearance = RewTerm(
         func=vel_mdp.foot_clearance_reward,
         weight=5.0,

@@ -84,6 +84,23 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         )
 
 
+class G1FlatEnvCfg_FINETUNE(G1FlatEnvCfg):
+    def __post_init__(self) -> None:
+        # post init of parent
+        super().__post_init__()
+
+        self.curriculum.command_vel.params["velocity_stages"] = [
+            {"step": 0, "lin_vel_x": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
+            {"step": 4000 * 24, "lin_vel_x": (-1.0, 1.7), "ang_vel_z": (-0.7, 0.7)},
+            {"step": 8000 * 24, "lin_vel_x": (-1.0, 2.5), "ang_vel_z": (-1.0, 1.0)},
+        ]
+        self.curriculum.track_lin_vel.params["num_steps"] = 12000 * 24
+        self.curriculum.track_ang_vel.params["num_steps"] = 12000 * 24
+        self.curriculum.track_heading.params["num_steps"] = 12000 * 24
+
+        # self.scene.terrain = vel_mdp.SoftTerrainVisual
+
+
 class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
     def __post_init__(self) -> None:
         # post init of parent
@@ -102,8 +119,8 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.RigidSoftTerrain
-        self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
+        self.scene.terrain = vel_mdp.SoftTerrainVisual
+        # self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
 
         # make soft terrain
         # self.scene.terrain = vel_mdp.SoftTerrain

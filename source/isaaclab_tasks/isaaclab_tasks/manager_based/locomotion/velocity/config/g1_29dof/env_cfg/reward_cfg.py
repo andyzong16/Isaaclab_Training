@@ -85,8 +85,8 @@ class G1RewardsCfg:
                 ".*ankle_roll.*": 0.02,
                 # waist
                 ".*waist_yaw.*": 0.15,
-                ".*waist_roll.*": 1.5,
-                ".*waist_pitch.*": 1.0,
+                ".*waist_roll.*": 2.0,
+                ".*waist_pitch.*": 2.0,
                 # # arms
                 ".*shoulder_pitch.*": 0.5,
                 ".*elbow.*": 0.25,

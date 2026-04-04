@@ -53,7 +53,7 @@ CurriculumSoftTerrain = TerrainImporterCfg(
         albedo_brightness=0.2,
     ),
     max_init_terrain_level=0,
-    debug_vis=True,
+    # debug_vis=True,
 )
 
 # CurriculumSoftTerrainPlatform = TerrainImporterCfg(
@@ -131,6 +131,7 @@ SoftTerrain = TerrainImporterCfg(
         texture_scale=(0.25, 0.25),
         albedo_brightness=0.2,
     ),
+    disable_collider=True,
 )
 
 RigidPatch = TerrainImporterCfg(

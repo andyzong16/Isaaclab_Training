@@ -16,7 +16,9 @@ class G1CurriculumCfg:
 
     terrain_levels = CurrTerm(func=vel_mdp.terrain_levels_vel)
 
-    # # walking
+    """
+    walking
+    """
     # command_vel = CurrTerm(
     #     func=vel_mdp.commands_vel,
     #     params={
@@ -45,7 +47,9 @@ class G1CurriculumCfg:
     # #     # params={"term_name": "track_ang_vel_z", "std": 0.25, "num_steps": 7000 * 24}
     # # )
 
-    # running
+    """
+    running
+    """
     command_vel = CurrTerm(
         func=vel_mdp.commands_vel,
         params={
@@ -82,6 +86,9 @@ class G1CurriculumCfg:
         # params={"term_name": "track_heading", "std": 0.25, "num_steps": 50_000}, # fastSAC
     )
 
+    """
+    terrain parameters
+    """
     # terrain_friction_levels = CurrTerm(
     #     func=g1_mdp.terrain_friction_levels,
     #     params={

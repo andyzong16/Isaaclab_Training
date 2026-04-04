@@ -705,6 +705,7 @@ def feet_air_time_positive_biped_soft(
     command_name: str,
     threshold: float,
     action_term_name: str = "physics_callback",
+    command_threshold: float = 0.05,
 ) -> torch.Tensor:
     """Reward long steps taken by the feet for bipeds.
 
@@ -727,7 +728,7 @@ def feet_air_time_positive_biped_soft(
     linear_norm = torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     angular_norm = torch.abs(env.command_manager.get_command(command_name)[:, 2])
     total_norm = linear_norm + angular_norm
-    reward *= total_norm > 0.05
+    reward *= total_norm > command_threshold
     return reward
 
 

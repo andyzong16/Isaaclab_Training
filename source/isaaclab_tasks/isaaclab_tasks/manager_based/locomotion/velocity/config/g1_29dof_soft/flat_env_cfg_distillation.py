@@ -26,7 +26,6 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
 
         # make curriculum soft terrain
         self.scene.terrain = vel_mdp.CurriculumSoftTerrain
-        # self.scene.rigid_floor = vel_mdp.CurriculumSoftTerrainPlatform
 
         # no height scan
         self.scene.height_scanner = None
@@ -37,7 +36,6 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "3D"
         # self.actions.physics_callback.backend = "2D"
         # self.events.randomize_stiffness.params["stiffness_range"] = (0.5, 15.0)
         # self.events.randomize_friction.params["friction_range"] = (0.2, 1.0)
@@ -77,11 +75,11 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         self.sim.render.enable_dlssg = True
         self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(0.0, 20.0, 0.5),
+            eye=(0.0, 20.0, 5.0),
             lookat=(0.0, 0.0, 0.2),
             resolution=(1080, 720),
-            origin_type="asset_root",
-            asset_name="robot",
+            # origin_type="asset_root",
+            # asset_name="robot",
         )
 
 
@@ -106,10 +104,10 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         super().__post_init__()
 
         # change timestep
-        # self.sim.dt = 1 / 200  # 200Hz
-        # self.decimation = 4  # 50Hz
-        self.sim.dt = 1 / 400  # 400Hz
-        self.decimation = 8  # 50Hz
+        self.sim.dt = 1 / 200  # 200Hz
+        self.decimation = 4  # 50Hz
+        # self.sim.dt = 1 / 400  # 400Hz
+        # self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
         # self.episode_length_s = 10.0
 
@@ -236,8 +234,7 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.sim.render_interval = self.decimation
 
         # make curriculum soft terrain
-        self.scene.terrain = vel_mdp.CurriculumSoftTerrain
-        # self.scene.rigid_floor = vel_mdp.CurriculumSoftTerrainPlatform
+        self.scene.terrain = vel_mdp.SoftTerrain
 
         # no height scan
         self.scene.height_scanner = None
@@ -272,14 +269,18 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         }
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
 
-        # disable curriculum for walking only
+        # curriculum settings
         # self.curriculum.command_vel = None
+        self.curriculum.command_vel.params["velocity_stages"] = [
+            {"step": 0, "lin_vel_x": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
+            {"step": 3000 * 24, "lin_vel_x": (-1.0, 1.7), "ang_vel_z": (-0.7, 0.7)},
+            {"step": 6000 * 24, "lin_vel_x": (-1.0, 2.5), "ang_vel_z": (-1.0, 1.0)},
+        ]
 
         # edit command range
         self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        # self.commands.base_velocity.ranges.ang_vel_z = (-0.5, 0.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
@@ -289,12 +290,12 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.sim.render.enable_dlssg = True
         self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(0.0, 5.0, 0.5),
+            eye=(0.0, -15.0, 0.8),
             lookat=(0.0, 0.0, 0.2),
             # resolution=(1920, 1080),
             resolution=(1080, 720),
-            origin_type="asset_root",
-            asset_name="robot",
+            # origin_type="asset_root",
+            # asset_name="robot",
         )
 
 
@@ -304,10 +305,10 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         super().__post_init__()
 
         # change timestep
-        # self.sim.dt = 1 / 200  # 200Hz
-        # self.decimation = 4  # 50Hz
-        self.sim.dt = 1 / 400  # 400Hz
-        self.decimation = 8  # 50Hz
+        self.sim.dt = 1 / 200  # 200Hz
+        self.decimation = 4  # 50Hz
+        # self.sim.dt = 1 / 400  # 400Hz
+        # self.decimation = 8  # 50Hz
         self.sim.render_interval = self.decimation
         self.episode_length_s = 15.0
 
@@ -316,8 +317,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.RigidSoftTerrain
-        self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
+        self.scene.terrain = vel_mdp.SoftTerrain
+        # self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
 
         # make soft terrain
         # self.scene.terrain = vel_mdp.SoftTerrain

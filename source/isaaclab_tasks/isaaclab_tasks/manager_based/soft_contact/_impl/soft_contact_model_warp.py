@@ -44,7 +44,8 @@ class RFT_3D:
         material_cfg: Material3DRFTCfg,
         collider_cfg: ColliderCfg,
         history_length: int = 3,
-        contact_threshold: float = 10,
+        history_logging_decimation: int = 1,
+        contact_threshold: float = 40.0,
         enable_ema_filter: bool = True,
     ) -> None:
         """
@@ -68,6 +69,8 @@ class RFT_3D:
         self.dt = dt
         self.c_r = 100 / (1 / self.dt)  # 100/f (e.g. f=2000hz -> 0.05)
         self.history_length = history_length
+        self.history_logging_decimation = history_logging_decimation
+        self._history_step_counter: int = 0
         self.enable_ema_filter = enable_ema_filter
         self.contact_threshold = contact_threshold
 
@@ -461,13 +464,16 @@ class RFT_3D:
         self._data.net_forces_w[env_ids, :, :] = self.torch_contact_force[env_ids, :, :]  # type: ignore
         self._data.force_matrix_w[env_ids, :, :, :] = self.torch_contact_point_force[env_ids, :, :, :]  # type: ignore
         if self.history_length > 0:
-            self._data.net_forces_w_history[env_ids] = self._data.net_forces_w_history[env_ids].roll(shifts=1, dims=1)  # type: ignore
-            self._data.net_forces_w_history[env_ids, 0] = self._data.net_forces_w[env_ids]  # type: ignore
+            self._history_step_counter += 1
+            if self._history_step_counter >= self.history_logging_decimation:
+                self._history_step_counter = 0
+                self._data.net_forces_w_history[env_ids] = self._data.net_forces_w_history[env_ids].roll(shifts=1, dims=1)  # type: ignore
+                self._data.net_forces_w_history[env_ids, 0] = self._data.net_forces_w[env_ids]  # type: ignore
 
-            self._data.force_matrix_w_history[env_ids] = self._data.force_matrix_w_history[env_ids].roll(
-                shifts=1, dims=1
-            )  # type: ignore
-            self._data.force_matrix_w_history[env_ids, 0] = self._data.force_matrix_w[env_ids]  # type: ignore
+                self._data.force_matrix_w_history[env_ids] = self._data.force_matrix_w_history[env_ids].roll(
+                    shifts=1, dims=1
+                )  # type: ignore
+                self._data.force_matrix_w_history[env_ids, 0] = self._data.force_matrix_w[env_ids]  # type: ignore
 
         # track air time (see contact sensor class)
         elapsed_time = self._timestamp[env_ids] - self._timestamp_last_update[env_ids]

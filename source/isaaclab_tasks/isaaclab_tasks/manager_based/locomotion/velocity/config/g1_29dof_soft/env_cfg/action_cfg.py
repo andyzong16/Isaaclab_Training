@@ -13,21 +13,24 @@ from isaaclab_tasks.manager_based.soft_contact import (
     SphereColliderCfg,  # noqa: F401
 )
 
-# g1_foot_geometry_cfg = PlaneColliderCfg(
+"""
+collider geometry
+"""
+# collider_cfg = PlaneColliderCfg(
 #     contact_edge_x=(-0.065, 0.141),
 #     contact_edge_y=(-0.0368, 0.0368),
 #     contact_edge_z=(-0.03539, 0.0),
 #     resolution=(5, 5),
 # )
 
-g1_foot_geometry_cfg = BoxColliderCfg(
+collider_cfg = BoxColliderCfg(
     contact_edge_x=(-0.065, 0.141),
     contact_edge_y=(-0.0368, 0.0368),
     contact_edge_z=(-0.03539, 0.0),
     resolution=(5, 5),
 )
 
-# g1_foot_geometry_cfg = SphereColliderCfg(
+# collider_cfg = SphereColliderCfg(
 #     radius=0.05,
 #     center=(0.0, 0.0, 0.0),
 #     resolution=(8, 8),
@@ -74,8 +77,8 @@ class G1ActionsCfg:
             "right_wrist_pitch_joint",
             "right_wrist_yaw_joint",
         ],
-        scale=0.25,
-        # scale=0.5,
+        # scale=0.25,
+        scale=0.5,
         use_default_offset=True,
         preserve_order=True,
     )
@@ -89,12 +92,11 @@ class G1ActionsCfg:
         # backend="2D",
         # backend="3D",
         backend="3D-warp",
-        intruder_geometry_cfg=g1_foot_geometry_cfg,
+        intruder_geometry_cfg=collider_cfg,
         enable_ema_filter=True,
         contact_threshold=SOFT_CONTACT_THRESHOLD,
         debug_vis=True,
-        contact_data_history_length=3,  # physics 200Hz, window=0.4s -> int(0.4 * 200) = 80
-        # contact_data_history_length=100,  # physics 200Hz, window=0.4s -> int(0.4 * 200) = 80
-        # contact_data_history_length=200,  # physics 400Hz, window=0.5s -> int(0.5 * 400) = 200
+        contact_data_history_length=10,  # logging interval = 0.005*10 = 0.05s, 10 history -> 0.5s
+        history_logging_decimation=10,
         contact_vis_force_threshold=SOFT_CONTACT_THRESHOLD,
     )

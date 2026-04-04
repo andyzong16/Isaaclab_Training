@@ -281,6 +281,7 @@ class CommandCfg(ObsGroup):
 class PrivilegedObsCfg(ObsGroup):
     """Observations for policy group."""
 
+    # -- track both rigid and soft contact state
     base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
     foot_height = ObsTerm(
         func=vel_mdp.foot_height,
@@ -321,11 +322,27 @@ class PrivilegedObsCfg(ObsGroup):
         },
     )
 
-    # # old ones
+    # # add rigid and soft contact states
     # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
     # foot_height = ObsTerm(
     #     func=vel_mdp.foot_height,
     #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    # )
+    # foot_contact_soft = ObsTerm(
+    #     func=g1_mdp.foot_contact,
+    #     params={"action_term_name": "physics_callback", "threshold": SOFT_CONTACT_THRESHOLD},
+    # )
+    # foot_contact_force_soft = ObsTerm(
+    #     func=g1_mdp.foot_contact_forces,
+    #     params={"action_term_name": "physics_callback", "threshold": SOFT_CONTACT_THRESHOLD},
+    # )
+    # foot_air_time_soft = ObsTerm(
+    #     func=g1_mdp.foot_air_time,
+    #     params={"action_term_name": "physics_callback"},
+    # )
+    # terrain_material_parameters = ObsTerm(
+    #     func=g1_mdp.terrain_material_parameters,
+    #     params={"action_term_name": "physics_callback"},
     # )
 
     # # rigid contact
@@ -342,25 +359,6 @@ class PrivilegedObsCfg(ObsGroup):
     #     params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
     # )
 
-    # # soft contact
-    # foot_contact_soft = ObsTerm(
-    #     func=g1_mdp.foot_contact,
-    #     params={"action_term_name": "physics_callback", "threshold": SOFT_CONTACT_THRESHOLD},
-    # )
-    # foot_contact_force_soft = ObsTerm(
-    #     func=g1_mdp.foot_contact_forces,
-    #     params={"action_term_name": "physics_callback", "threshold": SOFT_CONTACT_THRESHOLD},
-    # )
-    # foot_air_time_soft = ObsTerm(
-    #     func=g1_mdp.foot_air_time,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-
-    # terrain_material_parameters = ObsTerm(
-    #     func=g1_mdp.terrain_material_parameters,
-    #     params={"action_term_name": "physics_callback"},
-    # )
-
     def __post_init__(self):
         self.enable_corruption = True
         self.concatenate_terms = True
@@ -371,6 +369,52 @@ class PrivilegedObsCfg(ObsGroup):
 class PrivilegedHistoryCfg(PrivilegedObsCfg):
     def __post_init__(self):
         self.history_length = 10
+
+
+@configclass
+class LogPrivilegedObsCfg(ObsGroup):
+    """Observations for policy group."""
+
+    # -- track both rigid and soft contact state
+    base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+    foot_height = ObsTerm(
+        func=vel_mdp.foot_height,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    )
+
+    foot_contact = ObsTerm(
+        func=g1_mdp.foot_contact_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_force_threshold": 5.0,
+            "soft_force_threshold": SOFT_CONTACT_THRESHOLD,
+        },
+    )
+    foot_contact_force = ObsTerm(
+        func=g1_mdp.foot_contact_forces_raw_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_force_filter_threshold": 5.0,
+            "soft_force_filter_threshold": SOFT_CONTACT_THRESHOLD,
+        },
+    )
+    foot_air_time = ObsTerm(
+        func=g1_mdp.foot_air_time_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+        },
+    )
+
+    terrain_material_parameters = ObsTerm(
+        func=g1_mdp.terrain_material_parameters_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+        },
+    )
 
 
 """
@@ -413,7 +457,7 @@ class G1ObservationsCfg:
     critic: CriticHistoryCfg = CriticHistoryCfg()
     privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
 
-    logging: LoggingObsCfg = LoggingObsCfg()
+    # logging: LoggingObsCfg = LoggingObsCfg()
 
 
 @configclass
@@ -430,7 +474,7 @@ class G1TeacherObservationsCfg:
     # privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
 
     logging: LoggingObsCfg = LoggingObsCfg()
-    log_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    log_privileged: LogPrivilegedObsCfg = LogPrivilegedObsCfg()
 
 
 @configclass
@@ -441,4 +485,4 @@ class G1StudentObservationsCfg:
     policy: PolicyCfg = PolicyCfg()
     teacher_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
     student_encoder: HistoryObsCfg = HistoryObsCfg()
-    logging: LoggingObsCfg = LoggingObsCfg()
+    # logging: LoggingObsCfg = LoggingObsCfg()

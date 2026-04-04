@@ -64,6 +64,16 @@ class G1FlatPPORunnerCfg(G1RoughPPORunnerCfg):
 
 
 @configclass
+class G1FlatPPORunnerCfgFinetune(G1FlatPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 15_000  # running
+        self.wandb_project = "g1_29dof_soft_flat_finetune"
+        self.experiment_name = "g1_29dof_soft_flat_finetune"
+
+
+@configclass
 class G1FlatPPORunnerRecurrentCfg(G1FlatPPORunnerCfg):
     actor = RslRlRNNModelCfg(
         hidden_dims=[128, 128, 128],

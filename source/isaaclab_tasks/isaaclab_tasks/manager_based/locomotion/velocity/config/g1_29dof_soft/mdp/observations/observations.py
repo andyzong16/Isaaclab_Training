@@ -199,13 +199,15 @@ def terrain_material_parameters(
     action_term = env.action_manager.get_term(action_term_name)
     contact_solver = action_term.contact_solver
     friction_coef = contact_solver.terrain_friction
-    rho_c = contact_solver.terrain_density / 3000.0  # max rho = 3000.0
+    rho_c_max = 3000.0
+    rho_c = contact_solver.terrain_density / rho_c_max
     mu_int = contact_solver.terrain_stiffness
     return torch.stack([friction_coef, rho_c, mu_int], dim=-1)
 
 
 """
 soft contact + rigid contact mixed
+caveat is that we need to keep big history of contact data to infer which solver is active
 """
 
 

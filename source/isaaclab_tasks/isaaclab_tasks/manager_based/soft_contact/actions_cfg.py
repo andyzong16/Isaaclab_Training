@@ -53,6 +53,8 @@ class PhysicsCallbackActionCfg(ActionTermCfg):
     """Configuration for the intruder geometry used in soft contact modeling."""
     contact_data_history_length: int = 3
     """Length of the contact data history."""
+    history_logging_decimation: int = 1
+    """Decimation factor for logging contact data."""
 
     contact_visualizer_cfg: VisualizationMarkersCfg = CONTACT_MARKER_CFG.replace(
         prim_path="/Visuals/Contact/contact",

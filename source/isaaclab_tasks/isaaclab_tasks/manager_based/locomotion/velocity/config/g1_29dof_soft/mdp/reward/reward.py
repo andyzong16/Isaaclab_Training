@@ -27,24 +27,6 @@ if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
 
 
-def find_physx_mjwarp_mapping(mjwarp_joint_names, physx_joint_names):
-    """
-    Finds the mapping between PhysX and MJWarp joint names.
-    Returns a tuple of two lists: (mjc_to_physx, physx_to_mjc).
-    """
-    mjc_to_physx = []
-    physx_to_mjc = []
-    for j in mjwarp_joint_names:
-        if j in physx_joint_names:
-            mjc_to_physx.append(physx_joint_names.index(j))
-
-    for j in physx_joint_names:
-        if j in mjwarp_joint_names:
-            physx_to_mjc.append(mjwarp_joint_names.index(j))
-
-    return mjc_to_physx, physx_to_mjc
-
-
 """
 whole-body centroidal momentum penalties.
 """
@@ -70,32 +52,20 @@ class angular_momentum_l2(ManagerTermBase):
             num_instances=env.num_envs,
         )
 
-        # get joint mapping index
-        assert len(cfg.params["physx_joint_names"]) == len(cfg.params["mjw_joint_names"]), (
-            "PhysX and MJWarp joint name lists must have the same length."
-        )
-        self.mjc_to_physx, self.physx_to_mjc = find_physx_mjwarp_mapping(
-            cfg.params["mjw_joint_names"], cfg.params["physx_joint_names"]
-        )
-
     def __call__(
         self,
         env: ManagerBasedRLEnv,
         asset_cfg: SceneEntityCfg,
-        physx_joint_names: list[str],
-        mjw_joint_names: list[str],
     ) -> torch.Tensor:
 
         asset: Articulation = env.scene[asset_cfg.name]
         base_pos = asset.data.root_pos_w - env.scene.env_origins  # (num_envs, 3)
         base_quat = asset.data.root_quat_w  # (num_envs, 4)
-        # align physx joint order to mjw order
-        joint_pos = asset.data.joint_pos.clone()[:, self.mjc_to_physx]  # (num_envs, num_dofs)
+        joint_pos = asset.data.joint_pos.clone()[:, asset_cfg.joint_ids]  # (num_envs, num_dofs)
 
         base_lin_vel = asset.data.root_lin_vel_w  # (num_envs, 3)
         base_ang_vel = asset.data.root_ang_vel_w  # (num_envs, 3)
-        # align physx joint order to mjw order
-        joint_vel = asset.data.joint_vel.clone()[:, self.mjc_to_physx]  # (num_envs, num_dofs)
+        joint_vel = asset.data.joint_vel.clone()[:, asset_cfg.joint_ids]  # (num_envs, num_dofs)
 
         q_pos = torch.cat([base_pos, base_quat, joint_pos], dim=-1)
         q_vel = torch.cat([base_lin_vel, base_ang_vel, joint_vel], dim=-1)
@@ -144,6 +114,30 @@ def _feet_rpy(
 
 def reward_feet_pitch_contact(
     env: ManagerBasedRLEnv,
+    soft_contact_sensor_name: str = "physics_callback",
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize foot pitch angle only at the moment of first contact.
+
+    During swing the penalty is zero, so knee flexion is not penalized.
+    At touchdown, pitch² is penalized to encourage flat foot landings.
+    """
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+    first_contact = soft_contact_sensor.compute_first_contact(env.step_dt)  # [B, N]
+
+    _, feet_pitch, _ = _feet_rpy(env, asset_cfg=asset_cfg)  # [B, N_feet]
+
+    # penalize pitch only on the landing step
+    return torch.sum(torch.square(feet_pitch) * first_contact.float(), dim=-1)
+
+
+"""
+contact reward
+"""
+
+
+def reward_feet_pitch_contact_hybrid(
+    env: ManagerBasedRLEnv,
     rigid_contact_sensor_cfg: SceneEntityCfg,
     soft_contact_sensor_name: str = "physics_callback",
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
@@ -168,18 +162,13 @@ def reward_feet_pitch_contact(
     return torch.sum(torch.square(feet_pitch) * first_contact.float(), dim=-1)
 
 
-"""
-contact reward
-"""
-
-
 def feet_air_time_positive_biped_hybrid(
     env: ManagerBasedRLEnv,
     command_name: str,
     threshold: float,
     rigid_contact_sensor_cfg: SceneEntityCfg,
     soft_contact_sensor_name: str = "physics_callback",
-    velocity_threshold: float = 0.05, 
+    velocity_threshold: float = 0.05,
 ) -> torch.Tensor:
     """Hybrid biped air time reward selecting timing from the authoritative contact solver.
 

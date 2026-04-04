@@ -81,6 +81,7 @@ class PhysicsCallbackAction(ActionTerm):
                 enable_ema_filter=self.cfg.enable_ema_filter,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
                 history_length=self.cfg.contact_data_history_length,
+                history_logging_decimation=self.cfg.history_logging_decimation,
             )
         elif self.cfg.backend == "3D":
             material_cfg = Material3DRFTCfg()
@@ -95,6 +96,7 @@ class PhysicsCallbackAction(ActionTerm):
                 enable_ema_filter=self.cfg.enable_ema_filter,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
                 history_length=self.cfg.contact_data_history_length,
+                history_logging_decimation=self.cfg.history_logging_decimation,
             )
         elif self.cfg.backend == "3D-warp":
             material_cfg = Material3DRFTCfg()
@@ -109,6 +111,7 @@ class PhysicsCallbackAction(ActionTerm):
                 enable_ema_filter=self.cfg.enable_ema_filter,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
                 history_length=self.cfg.contact_data_history_length,
+                history_logging_decimation=self.cfg.history_logging_decimation,
             )
         else:
             raise ValueError(f"Unsupported RFT backend: {self.cfg.backend}")

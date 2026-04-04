@@ -9,6 +9,10 @@ from isaaclab.utils import configclass
 
 from .rough_env_cfg_distillation import G1RoughStudentEnvCfg, G1RoughTeacherEnvCfg
 
+"""
+teacher
+"""
+
 
 @configclass
 class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
@@ -145,6 +149,11 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         )
 
 
+"""
+student
+"""
+
+
 @configclass
 class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
     def __post_init__(self):
@@ -162,7 +171,16 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
 
         # curriculum settings
         self.curriculum.terrain_levels = None  # type: ignore
-        self.curriculum.command_vel = None  # no running
+        # self.curriculum.command_vel = None  # no running
+        self.curriculum.command_vel.params["velocity_stages"] = [
+            {"step": 0, "lin_vel_x": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
+            {"step": 3000 * 24, "lin_vel_x": (-1.0, 1.7), "ang_vel_z": (-0.7, 0.7)},
+            {"step": 6000 * 24, "lin_vel_x": (-1.0, 2.5), "ang_vel_z": (-1.0, 1.0)},
+        ]
+        # does not have effect for pure DAgger
+        # self.curriculum.track_lin_vel.params["num_steps"] = 12000 * 24
+        # self.curriculum.track_ang_vel.params["num_steps"] = 12000 * 24
+        # self.curriculum.track_heading.params["num_steps"] = 12000 * 24
 
         # no height scan
         self.scene.height_scanner = None
@@ -230,7 +248,7 @@ class G1FlatStudentEnvCfg_PLAY(G1FlatStudentEnvCfg):
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
 
         self.commands.base_velocity.heading_command = False
-        self.commands.base_velocity.rel_standing_envs = 0.0
+        self.commands.base_velocity.rel_standing_envs = 0.2
         self.commands.base_velocity.resampling_time_range = (self.episode_length_s / 4, self.episode_length_s / 4)
         # self.commands.base_velocity.debug_vis = False
 
