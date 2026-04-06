@@ -7,7 +7,7 @@
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Flat-G1-29dof-Soft-v1 --num_envs 4096 --headless --video
 
 # evaluation
-./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task Isaac-Velocity-Flat-G1-29dof-Soft-Play-v1 --num_envs 1 --headless --video
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task Isaac-Velocity-Flat-G1-29dof-Soft-Play-v1 --num_envs 1 --video
 ```
 
 ### Teacher-student distillation 

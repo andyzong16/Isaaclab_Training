@@ -113,18 +113,22 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.SoftTerrainVisual
-        self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
+        # self.scene.terrain = vel_mdp.SoftTerrainVisual
+        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        # self.scene.terrain = vel_mdp.SoftTerrain
-        # self.scene.rigid_floor = vel_mdp.RigidPatch
+        self.scene.terrain = vel_mdp.SoftTerrain
+        self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
-        self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.5, 0.5)
+        # self.events.randomize_friction.params["friction_range"] = (0.5, 0.5)
+        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.7, 0.7)
+        self.events.randomize_friction.params["friction_range"] = (0.7, 0.7)
         self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # disable curriculum
         self.curriculum.terrain_levels = None
@@ -283,18 +287,22 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.SoftTerrainVisual
-        self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
+        # self.scene.terrain = vel_mdp.SoftTerrainVisual
+        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        # self.scene.terrain = vel_mdp.SoftTerrain
-        # self.scene.rigid_floor = vel_mdp.RigidPatch
+        self.scene.terrain = vel_mdp.SoftTerrain
+        self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
-        self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.2, 0.2)
+        self.events.randomize_friction.params["friction_range"] = (0.2, 0.2)
         self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
+        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # disable curriculum
         self.curriculum.terrain_levels = None
@@ -329,8 +337,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
                 "y": (-0.0, 0.0),
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                "yaw": (-math.pi / 6, math.pi / 6),
-                # "yaw": (0, 0),
+                # "yaw": (-math.pi / 6, math.pi / 6),
+                "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
@@ -344,15 +352,15 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         }
 
         # rendering
-        self.sim.render.enable_dlssg = True
-        self.sim.render.dlss_mode = "performance"
+        # self.sim.render.enable_dlssg = True
+        # self.sim.render.dlss_mode = "performance"
         self.viewer = ViewerCfg(
             eye=(-0.0, -3.5, 0.5),
             lookat=(0.0, -0.0, 0.2),
             # eye=(3.5, 0.0, 0.5),
             # lookat=(0.0, 0.0, 0.2),
-            # resolution=(1920, 1080),
-            resolution=(1080, 720),
+            resolution=(1920, 1080),
+            # resolution=(1080, 720),
             origin_type="asset_root",
             asset_name="robot",
         )

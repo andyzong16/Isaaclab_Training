@@ -256,8 +256,11 @@ def foot_contact_forces_hybrid(
     rigid_contact_sensor: ContactSensor = env.scene.sensors[rigid_contact_sensor_cfg.name]
     soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
 
-    rigid_contact_forces = rigid_contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :]
-    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]
+    max_force = 1000.0
+    rigid_contact_forces = rigid_contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :].clamp(
+        -max_force, max_force
+    )
+    soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3].clamp(-max_force, max_force)
 
     is_soft = soft_contact_sensor.data.is_sensor_active  # [B, N_feet]
 
@@ -329,5 +332,9 @@ def terrain_material_parameters_hybrid(
     # friction_coef = soft_contact_sensor.terrain_friction
     # rho_c = soft_contact_sensor.terrain_density / rho_c_max
     # mu_int = soft_contact_sensor.terrain_stiffness
+
+    # friction_coef = friction_rigid * torch.ones_like(on_soft_ground)
+    # rho_c = (rho_c_rigid / rho_c_max) * torch.ones_like(on_soft_ground)
+    # mu_int = mu_rigid * torch.ones_like(on_soft_ground)
 
     return torch.stack([friction_coef, rho_c, mu_int], dim=-1)

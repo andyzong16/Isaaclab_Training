@@ -110,7 +110,7 @@ class G1RoughStudentEnvCfg(LocomotionVelocityRoughEnvCfg):
         # self.sim.render_interval = self.decimation
 
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
-        self.sim.physx.enable_external_forces_every_iteration = True
+        # self.sim.physx.enable_external_forces_every_iteration = True
 
         # Randomization
         self.events.reset_base.params = {

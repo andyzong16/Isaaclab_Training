@@ -392,6 +392,6 @@ class G1StudentObservationsCfg:
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
-    teacher_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
     student_encoder: HistoryObsCfg = HistoryObsCfg()
     logging: LoggingObsCfg = LoggingObsCfg()

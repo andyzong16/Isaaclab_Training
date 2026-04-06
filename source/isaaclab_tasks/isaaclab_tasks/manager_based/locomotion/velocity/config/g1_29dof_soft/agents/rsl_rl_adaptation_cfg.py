@@ -81,7 +81,7 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
     obs_groups = {
         "student": ["policy"],
         "teacher": ["policy"],
-        "teacher_privileged": ["teacher_privileged"],
+        "privileged": ["privileged"],
         "student_encoder": ["student_encoder"],
     }
     teacher = RslRlMLPEncoderModelCfg(
@@ -89,7 +89,7 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-        encoder_obs_set="teacher_privileged",
+        encoder_obs_set="privileged",
         encoder_output_dim=64,
         encoder_hidden_dims=[256, 128],
         encoder_activation="elu",
