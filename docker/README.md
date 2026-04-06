@@ -132,7 +132,7 @@ cd Research/g1_loco_rigid/isaaclab_{timestamp}
 After interactive job is initialized, run the training command 
 ```bash
 ./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-v1 --num_envs 4096 --headless
-./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Teacher-v1 --num_envs 4096 --headless --agent rsl_rl_adaptation_cfg_entry_point
+./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-Teacher-v1 --num_envs 4096 --headless --agent rsl_rl_adaptation_cfg_entry_point
 ./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-v1 --num_envs 4096 --headless --video --enable_cameras
 ```
 

@@ -36,9 +36,6 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "2D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.5, 15.0)
-        # self.events.randomize_friction.params["friction_range"] = (0.2, 1.0)
 
         # edit randomization
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
@@ -75,11 +72,11 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
         self.sim.render.enable_dlssg = True
         self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(0.0, 20.0, 5.0),
+            eye=(0.0, 7.0, 0.5),
             lookat=(0.0, 0.0, 0.2),
             resolution=(1080, 720),
-            # origin_type="asset_root",
-            # asset_name="robot",
+            origin_type="asset_root",
+            asset_name="robot",
         )
 
 
@@ -109,42 +106,25 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.sim.dt = 1 / 400  # 400Hz
         # self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
-        # self.episode_length_s = 10.0
+        self.episode_length_s = 10.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        # self.scene.terrain = vel_mdp.RigidSoftTerrain
         self.scene.terrain = vel_mdp.SoftTerrainVisual
         self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        # make soft terrain
         # self.scene.terrain = vel_mdp.SoftTerrain
         # self.scene.rigid_floor = vel_mdp.RigidPatch
-        # self.scene.terrain.disable_collider = True  # enable soft terrain
-        # self.scene.terrain = vel_mdp.RoughTerrain
-        # self.actions.physics_callback.disable = True # disable soft contact
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "3D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.577, 0.577)
-        # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
-        self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
         self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
         self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.9, 0.9)
-        # self.events.randomize_friction.params["friction_range"] = (0.9, 0.9)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
-
-        # self.actions.physics_callback.backend = "2D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
-        # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
 
         # disable curriculum
         self.curriculum.terrain_levels = None
@@ -179,7 +159,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
                 "y": (-0.0, 0.0),
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                # "yaw": (-math.pi / 6, -math.pi / 6),
+                # "yaw": (-math.pi / 6, math.pi / 6),
                 "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
@@ -194,27 +174,18 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         }
 
         # rendering
-        self.sim.render.enable_dlssg = True
-        self.sim.render.dlss_mode = "performance"  # type: ignore
+        # self.sim.render.enable_dlssg = True
+        # self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
             eye=(-0.0, -3.5, 0.5),
             lookat=(0.0, -0.0, 0.2),
             # eye=(3.5, 0.0, 0.5),
             # lookat=(0.0, 0.0, 0.2),
-            # resolution=(1920, 1080),
-            resolution=(1080, 720),
+            resolution=(1920, 1080),
+            # resolution=(1080, 720),
             origin_type="asset_root",
             asset_name="robot",
         )
-
-        # # rendering
-        # self.viewer = ViewerCfg(
-        #     eye=(-0.0, -15.0, 1.0),
-        #     lookat=(0.0, -0.0, 1.0),
-        #     resolution=(1920, 1080),
-        #     # origin_type="asset_root",
-        #     # asset_name="robot"
-        # )
 
 
 """
@@ -234,7 +205,7 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.sim.render_interval = self.decimation
 
         # make curriculum soft terrain
-        self.scene.terrain = vel_mdp.SoftTerrain
+        self.scene.terrain = vel_mdp.CurriculumSoftTerrain
 
         # no height scan
         self.scene.height_scanner = None
@@ -245,10 +216,6 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "3D"
-        # self.actions.physics_callback.backend = "2D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.5, 15.0)
-        # self.events.randomize_friction.params["friction_range"] = (0.2, 1.0)
 
         # edit randomization
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
@@ -290,12 +257,11 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.sim.render.enable_dlssg = True
         self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(0.0, -15.0, 0.8),
+            eye=(0.0, 7.0, 0.5),
             lookat=(0.0, 0.0, 0.2),
-            # resolution=(1920, 1080),
             resolution=(1080, 720),
-            # origin_type="asset_root",
-            # asset_name="robot",
+            origin_type="asset_root",
+            asset_name="robot",
         )
 
 
@@ -309,52 +275,42 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.decimation = 4  # 50Hz
         # self.sim.dt = 1 / 400  # 400Hz
         # self.decimation = 8  # 50Hz
-        self.sim.render_interval = self.decimation
-        self.episode_length_s = 15.0
+        # self.sim.render_interval = self.decimation
+        self.episode_length_s = 10.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.SoftTerrain
-        # self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
+        self.scene.terrain = vel_mdp.SoftTerrainVisual
+        self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        # make soft terrain
         # self.scene.terrain = vel_mdp.SoftTerrain
         # self.scene.rigid_floor = vel_mdp.RigidPatch
-        # self.scene.terrain.disable_collider = True  # enable soft terrain
-        # self.scene.terrain = vel_mdp.RoughTerrain
-        # self.actions.physics_callback.disable = True # disable soft contact
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "3D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.577, 0.577)
-        # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
-        # self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
-
-        # self.actions.physics_callback.backend = "2D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
-        # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
+        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
 
         # disable curriculum
-        self.curriculum.terrain_levels = None  # type: ignore
-        self.curriculum.command_vel = None  # type: ignore
+        self.curriculum.terrain_levels = None
+        self.curriculum.command_vel = None
+        # self.curriculum.terrain_friction_levels = None
+        # self.curriculum.terrain_stiffness_levels = None
+        # self.curriculum.terrain_density_levels = None
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False
 
         # remove random events
-        self.events.add_base_mass = None  # type: ignore
-        self.events.push_robot = None  # type: ignore
-        self.events.physics_material = None  # type: ignore
-        self.events.scale_actuator_gains = None  # type: ignore
+        self.events.add_base_mass = None
+        self.events.push_robot = None
+        self.events.physics_material = None
+        self.events.scale_actuator_gains = None
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
@@ -371,9 +327,9 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
             "pose_range": {
                 "x": (-0.0, 0.0),
                 "y": (-0.0, 0.0),
-                "yaw": (-math.pi, math.pi),
+                # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                # "yaw": (-math.pi/4, -math.pi/4),
+                "yaw": (-math.pi / 6, math.pi / 6),
                 # "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
@@ -389,23 +345,14 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
 
         # rendering
         self.sim.render.enable_dlssg = True
-        self.sim.render.dlss_mode = "performance"  # type: ignore
+        self.sim.render.dlss_mode = "performance"
         self.viewer = ViewerCfg(
-            # eye=(-0.0, -3.5, 0.5),
-            # lookat=(0.0, -0.0, 0.2),
-            eye=(3.5, 0.0, 0.5),
-            lookat=(0.0, 0.0, 0.2),
+            eye=(-0.0, -3.5, 0.5),
+            lookat=(0.0, -0.0, 0.2),
+            # eye=(3.5, 0.0, 0.5),
+            # lookat=(0.0, 0.0, 0.2),
             # resolution=(1920, 1080),
             resolution=(1080, 720),
             origin_type="asset_root",
             asset_name="robot",
         )
-
-        # # rendering
-        # self.viewer = ViewerCfg(
-        #     eye=(-0.0, -15.0, 1.0),
-        #     lookat=(0.0, -0.0, 1.0),
-        #     resolution=(1920, 1080),
-        #     # origin_type="asset_root",
-        #     # asset_name="robot"
-        # )

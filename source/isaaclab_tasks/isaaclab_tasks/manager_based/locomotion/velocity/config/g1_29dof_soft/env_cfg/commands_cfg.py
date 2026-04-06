@@ -12,6 +12,7 @@ import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 class G1CommandsCfg:
     """Command specifications for the MDP."""
 
+    # lin vel and ang vel tracking
     # base_velocity = vel_mdp.UniformLevelVelocityCommandCfg(
     #     asset_name="robot",
     #     resampling_time_range=(10.0, 10.0),
@@ -25,6 +26,7 @@ class G1CommandsCfg:
     #     ),
     # )
 
+    # lin vel, ang vel, yaw tracking
     base_velocity = vel_mdp.UniformVelocityYawCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
@@ -38,10 +40,4 @@ class G1CommandsCfg:
             lin_vel_y=(-0.5, 0.5),
             ang_vel_z=(-1.0, 1.0),
         ),
-    )
-
-    foot_height = vel_mdp.SwingCommandCfg(
-        # foot_height=(0.08, 0.15),
-        foot_height=(0.12, 0.12),
-        resampling_time_range=(1e10, 1e10),  # resample on command resample
     )

@@ -58,7 +58,6 @@ class G1RoughTeacherEnvCfg(LocomotionVelocityRoughEnvCfg):
                 "yaw": (0.0, 0.0),
             },
         }
-        # self.events.base_com = None
 
 
 @configclass

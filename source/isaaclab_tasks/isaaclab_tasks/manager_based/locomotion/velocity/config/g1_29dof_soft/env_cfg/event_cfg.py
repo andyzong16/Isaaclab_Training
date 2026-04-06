@@ -108,11 +108,12 @@ class G1EventCfg:
         func=g1_mdp.randomize_terrain_stiffness,
         mode="reset",
         params={
-            "stiffness_range": (0.2, 0.9),
+            "stiffness_range": (0.2, 0.9),  # 3D-RFT
+            # "stiffnes_range": (0.5, 15.0), # 2D-RFT
             "contact_solver_name": "physics_callback",
         },
     )
-    # randomize material density
+    # randomize material density (only for 3D-RFT)
     randomize_material_density = EventTerm(
         func=g1_mdp.randomize_material_density,
         mode="reset",

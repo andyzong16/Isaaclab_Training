@@ -14,7 +14,6 @@ import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof_soft.mdp
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 
 SOFT_CONTACT_THRESHOLD = 40.0
-# SOFT_CONTACT_THRESHOLD = 300.0
 
 
 @configclass
@@ -47,12 +46,12 @@ class G1RewardsCfg:
     action_rate_l2_lower_body = RewTerm(
         func=vel_mdp.action_rate_l2,
         weight=-0.01,
-        params={"joint_idx": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]},  # mjc order
+        params={"joint_idx": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]},
     )
     action_rate_l2_upper_body = RewTerm(
         func=vel_mdp.action_rate_l2,
         weight=-0.05,
-        params={"joint_idx": [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]},  # mjc order
+        params={"joint_idx": [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]},
     )
 
     # -- base penalties
@@ -258,22 +257,6 @@ class G1RewardsCfg:
             ),
         },
     )
-
-    # # only track soft contact
-    # feet_pitch_contact = RewTerm(
-    #     func=g1_mdp.reward_feet_pitch_contact,
-    #     weight=-4.0,
-    #     params={
-    #         "soft_contact_sensor_name": "physics_callback",
-    #         "asset_cfg": SceneEntityCfg(
-    #             "robot",
-    #             body_names=[".*ankle_roll.*"],
-    #             preserve_order=True,
-    #         ),
-    #     },
-    # )
-
-    # track both rigid and soft contact
     # feet_pitch_contact = RewTerm(
     #     func=g1_mdp.reward_feet_pitch_contact_hybrid,
     #     weight=-4.0,
@@ -292,7 +275,7 @@ class G1RewardsCfg:
     gait
     """
 
-    # track both rigid and soft contact
+    # physx and soft contact model coupling
     feet_air_time = RewTerm(
         func=g1_mdp.feet_air_time_positive_biped_hybrid,
         weight=0.5,
@@ -318,47 +301,6 @@ class G1RewardsCfg:
         },
     )
 
-    # # reward for rigid and soft contact
-    # feet_air_time_rigid = RewTerm(
-    #     func=vel_mdp.feet_air_time_positive_biped,
-    #     weight=0.5,
-    #     params={
-    #         "command_name": "base_velocity",
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "threshold": 0.5,
-    #     },
-    # )
-    # no_fly_rigid = RewTerm(
-    #     func=vel_mdp.fly,
-    #     weight=-1.0,
-    #     params={
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "threshold": 5.0,
-    #         "command_name": "base_velocity",
-    #         "velocity_threshold": 1.0,
-    #     },
-    # )
-
-    # feet_air_time_soft = RewTerm(
-    #     func=vel_mdp.feet_air_time_positive_biped_soft,
-    #     weight=0.5,
-    #     params={
-    #         "command_name": "base_velocity",
-    #         "action_term_name": "physics_callback",
-    #         "threshold": 0.5,
-    #     },
-    # )
-    # no_fly_soft = RewTerm(
-    #     func=vel_mdp.fly_soft,
-    #     weight=-1.0,
-    #     params={
-    #         "action_term_name": "physics_callback",
-    #         "threshold": SOFT_CONTACT_THRESHOLD,
-    #         "command_name": "base_velocity",
-    #         "velocity_threshold": 1.0,
-    #     },
-    # )
-
     """
     Stance foot
     """
@@ -377,7 +319,7 @@ class G1RewardsCfg:
         },
     )
 
-    # track both rigid and soft contact
+    # physx and soft contact model coupling
     feet_slide = RewTerm(
         func=g1_mdp.feet_slide_hybrid,
         weight=-0.25,
@@ -403,59 +345,6 @@ class G1RewardsCfg:
         },
     )
 
-    # contact_impulse_velocity = RewTerm(
-    #     func=g1_mdp.penalize_landing_velocity_hybrid,
-    #     weight=-5e-3,
-    #     params={
-    #         "rigid_contact_sensor_cfg": SceneEntityCfg(
-    #             "contact_forces", body_names=".*ankle_roll.*", preserve_order=True
-    #         ),
-    #         "soft_contact_sensor_name": "physics_callback",
-    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*ankle_roll.*", preserve_order=True),
-    #         "command_name": "base_velocity",
-    #         "command_threshold": 0.05,
-    #     },
-    # )
-
-    # # reward both rigid and soft contact
-    # feet_slide_rigid = RewTerm(
-    #     func=vel_mdp.feet_slide,
-    #     weight=-0.25,
-    #     params={
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
-    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
-    #     },
-    # )
-    # contact_impulse_rigid = RewTerm(
-    #     func=vel_mdp.reward_soft_landing,
-    #     weight=-5e-3,
-    #     params={
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "command_name": "base_velocity",
-    #         "command_threshold": 0.05,
-    #     },
-    # )
-    # feet_slide_soft = RewTerm(
-    #     func=vel_mdp.feet_slide_soft,
-    #     weight=-0.25,
-    #     params={
-    #         "action_term_name": "physics_callback",
-    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
-    #         "contact_threshold": SOFT_CONTACT_THRESHOLD,
-    #     },
-    # )
-    # contact_impulse_soft = RewTerm(
-    #     func=vel_mdp.reward_soft_landing_soft,
-    #     weight=-5e-3,
-    #     params={
-    #         "action_term_name": "physics_callback",
-    #         "command_name": "base_velocity",
-    #         "command_threshold": 0.05,
-    #     },
-    # )
-
-    ###
-
     """
     Swing foot
     """
@@ -466,8 +355,7 @@ class G1RewardsCfg:
         params={
             "target_height": 0.1,
             "std": 0.05,
-            # "tanh_mult": 2.0,
-            "tanh_mult": 10.0,
+            "tanh_mult": 2.0,
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
             "standing_position_foot_z": 0.03539,
         },

@@ -325,4 +325,9 @@ def terrain_material_parameters_hybrid(
         rho_c_rigid / rho_c_max
     )
     mu_int = soft_contact_sensor.terrain_stiffness * on_soft_ground + (1 - on_soft_ground) * mu_rigid
+
+    # friction_coef = soft_contact_sensor.terrain_friction
+    # rho_c = soft_contact_sensor.terrain_density / rho_c_max
+    # mu_int = soft_contact_sensor.terrain_stiffness
+
     return torch.stack([friction_coef, rho_c, mu_int], dim=-1)

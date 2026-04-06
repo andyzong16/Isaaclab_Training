@@ -37,7 +37,6 @@ collider_cfg = BoxColliderCfg(
 # )
 
 SOFT_CONTACT_THRESHOLD = 40.0
-# SOFT_CONTACT_THRESHOLD = 300.0
 
 
 @configclass
