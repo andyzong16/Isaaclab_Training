@@ -236,7 +236,7 @@ class G1RewardsCfg:
 
     feet_pitch = RewTerm(
         func=vel_mdp.reward_feet_pitch,
-        weight=-1.0,
+        weight=-2.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot",
@@ -248,7 +248,7 @@ class G1RewardsCfg:
 
     feet_pitch_diff = RewTerm(
         func=vel_mdp.reward_feet_pitch_diff,
-        weight=-1.0,
+        weight=-2.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot",

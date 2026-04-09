@@ -99,7 +99,7 @@ gym.register(
 """
 distillation policy
 """
-
+# teacher
 gym.register(
     id="Isaac-Velocity-Flat-G1-29dof-Soft-Teacher-v1",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
@@ -140,7 +140,7 @@ gym.register(
     },
 )
 
-
+# student
 gym.register(
     id="Isaac-Velocity-Flat-G1-29dof-Soft-Student-v1",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",

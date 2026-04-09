@@ -3,11 +3,14 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import Literal
+
 from isaaclab.utils import configclass
 
 from isaaclab_rl.rsl_rl import (
     RslRlDistillationAlgorithmCfg,
     RslRlDistillationRunnerCfg,
+    RslRlMLPEncoderDecoderModelCfg,
     RslRlMLPEncoderModelCfg,
     RslRlMLPModelCfg,
     RslRlOnPolicyRunnerCfg,
@@ -18,13 +21,22 @@ from isaaclab_rl.rsl_rl import (
 
 
 @configclass
+class RslRlPpoEncoderDecoderAlgorithmCfg(RslRlPpoAlgorithmCfg):
+    """Configuration for the PPOEncoderDecoder algorithm."""
+
+    class_name: str = "PPOEncoderDecoder"
+    decoder_loss_coef: float = 1.0
+    loss_type: Literal["mse", "huber"] = "mse"
+
+
+@configclass
 class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    # max_iterations = 20_000
     max_iterations = 30_000
     save_interval = 500
     obs_groups = {"actor": ["policy"], "critic": ["critic", "privileged"], "privileged": ["privileged"]}
-    actor = RslRlMLPEncoderModelCfg(
+    # actor = RslRlMLPEncoderModelCfg(
+    actor = RslRlMLPEncoderDecoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
@@ -40,7 +52,7 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         activation="elu",
         obs_normalization=False,
     )
-    algorithm = RslRlPpoAlgorithmCfg(
+    algorithm = RslRlPpoEncoderDecoderAlgorithmCfg(
         value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
@@ -53,18 +65,20 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         lam=0.95,
         desired_kl=0.01,
         max_grad_norm=1.0,
+        decoder_loss_coef=0.2,
+        loss_type="mse",
     )
     logger = "wandb"
-    wandb_project = "g1_29dof_soft_adaptation"
-    experiment_name = "g1_29dof_soft_adaptation"
+    wandb_project = "g1_29dof_soft_encoder_decoder_teacher"
+    experiment_name = "g1_29dof_soft_encoder_decoder_teacher"
 
 
 @configclass
 class G1AdaptationPPORunnerCfgFinetune(G1AdaptationPPORunnerCfg):
     max_iterations = 15_000
     logger = "wandb"
-    wandb_project = "g1_29dof_soft_adaptation_finetune"
-    experiment_name = "g1_29dof_soft_adaptation_finetune"
+    wandb_project = "g1_29dof_soft_encoder_decoder_teacher_finetune"
+    experiment_name = "g1_29dof_soft_encoder_decoder_teacher_finetune"
 
 
 @configclass
@@ -76,8 +90,8 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
     max_iterations = 10_000
     save_interval = 100
     logger = "wandb"
-    wandb_project = "g1_29dof_soft_adaptation_distillation"
-    experiment_name = "g1_29dof_soft_adaptation_distillation"
+    wandb_project = "g1_29dof_soft_encoder_decoder_student"
+    experiment_name = "g1_29dof_soft_encoder_decoder_student"
     obs_groups = {
         "student": ["policy"],
         "teacher": ["policy"],
