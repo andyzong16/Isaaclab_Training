@@ -35,10 +35,6 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "3D"
-        # self.actions.physics_callback.backend = "2D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.5, 15.0)
-        # self.events.randomize_friction.params["friction_range"] = (0.2, 1.0)
 
         # edit randomization
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
@@ -69,7 +65,7 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # disable for non rough terrain
-        # self.terminations.terrain_out_of_bounds = None
+        self.terminations.terrain_out_of_bounds = None
 
         # rendering
         self.sim.render.enable_dlssg = True
@@ -107,11 +103,8 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         super().__post_init__()
 
         # change timestep
-        # self.sim.dt = 1 / 200  # 200Hz
-        # self.decimation = 4  # 50Hz
-        self.sim.dt = 1 / 400  # 400Hz
-        self.decimation = 8  # 50Hz
-        self.sim.render_interval = self.decimation
+        self.sim.dt = 1 / 200  # 200Hz
+        self.decimation = 4  # 50Hz
         self.episode_length_s = 10.0
 
         # make a smaller scene for play
@@ -119,54 +112,40 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        self.scene.terrain = vel_mdp.SoftTerrainVisual
-        # self.scene.rigid_floor = vel_mdp.SoftTerrainVisual
+        # self.scene.terrain = vel_mdp.SoftTerrainVisual
+        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        # make soft terrain
-        # self.scene.terrain = vel_mdp.SoftTerrain
-        # self.scene.rigid_floor = vel_mdp.RigidPatch
-        # self.scene.terrain.disable_collider = True  # enable soft terrain
-        # self.scene.terrain = vel_mdp.RoughTerrain
-        # self.actions.physics_callback.disable = True # disable soft contact
+        self.scene.terrain = vel_mdp.SoftTerrain
+        self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "3D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.577, 0.577)
-        # self.events.randomize_friction.params["friction_range"] = (0.577, 0.577)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
-        self.events.randomize_friction.params["friction_range"] = (0.4, 0.4)
-        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
-
-        # self.actions.physics_callback.backend = "2D"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (1.0, 1.0)
-        # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
 
         # disable curriculum
-        self.curriculum.terrain_levels = None  # type: ignore
-        self.curriculum.command_vel = None  # type: ignore
+        self.curriculum.terrain_levels = None
+        self.curriculum.command_vel = None
+        # self.curriculum.terrain_friction_levels = None
+        # self.curriculum.terrain_stiffness_levels = None
+        # self.curriculum.terrain_density_levels = None
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False
 
         # remove random events
-        self.events.add_base_mass = None  # type: ignore
-        self.events.push_robot = None  # type: ignore
-        self.events.physics_material = None  # type: ignore
-        self.events.scale_actuator_gains = None  # type: ignore
+        self.events.add_base_mass = None
+        self.events.push_robot = None
+        self.events.physics_material = None
+        self.events.scale_actuator_gains = None
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (1, 1)
+        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
         self.commands.base_velocity.heading_command = False
-        self.commands.base_velocity.rel_standing_envs = 0.2
+        self.commands.base_velocity.rel_standing_envs = 0.0
         self.commands.base_velocity.resampling_time_range = (self.episode_length_s, self.episode_length_s)
-        # self.commands.base_velocity.debug_vis = False
+        self.commands.base_velocity.debug_vis = False
 
         # Randomization
         self.events.reset_base.params = {
@@ -175,7 +154,7 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
                 "y": (-0.0, 0.0),
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                # "yaw": (-math.pi/4, -math.pi/4),
+                # "yaw": (-math.pi / 6, math.pi / 6),
                 "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
@@ -190,27 +169,18 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         }
 
         # rendering
-        self.sim.render.enable_dlssg = True
-        self.sim.render.dlss_mode = "performance"  # type: ignore
+        # self.sim.render.enable_dlssg = True
+        # self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
             eye=(-0.0, -3.5, 0.5),
             lookat=(0.0, -0.0, 0.2),
             # eye=(3.5, 0.0, 0.5),
             # lookat=(0.0, 0.0, 0.2),
-            # resolution=(1920, 1080),
-            resolution=(1080, 720),
+            resolution=(1920, 1080),
+            # resolution=(1080, 720),
             origin_type="asset_root",
             asset_name="robot",
         )
-
-        # # rendering
-        # self.viewer = ViewerCfg(
-        #     eye=(-0.0, -15.0, 1.0),
-        #     lookat=(0.0, -0.0, 1.0),
-        #     resolution=(1920, 1080),
-        #     # origin_type="asset_root",
-        #     # asset_name="robot"
-        # )
 
 
 """
