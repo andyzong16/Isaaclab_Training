@@ -94,7 +94,7 @@ class G1ActionsCfg:
         intruder_geometry_cfg=collider_cfg,
         enable_ema_filter=True,
         contact_threshold=SOFT_CONTACT_THRESHOLD,
-        debug_vis=True,
+        # debug_vis=True,
         contact_data_history_length=10,  # logging interval = 0.005*10 = 0.05s, 10 history -> 0.5s
         history_logging_decimation=10,
         contact_vis_force_threshold=SOFT_CONTACT_THRESHOLD,

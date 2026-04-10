@@ -134,3 +134,17 @@ class G1EventCfg:
         interval_range_s=(10.0, 15.0),
         params={"velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0)}},
     )
+
+    # distance_based_sample_terrain_property = EventTerm(
+    #     func=g1_mdp.sample_terrain_property,
+    #     mode="interval",
+    #     interval_range_s=(0.02, 0.02),
+    #     params={
+    #         "friction_range": (0.1, 1.0),
+    #         "stiffness_range": (0.2, 0.6),
+    #         "packing_ratio_range": (1.0, 1.0),
+    #         "bulk_density_range": (1100.0, 3000.0),
+    #         "bin_size": 1.9,
+    #         "max_bins": 8,
+    #     },
+    # )

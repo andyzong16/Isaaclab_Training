@@ -202,7 +202,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # prepare logging
     if args_cli.log:
         max_episode_length = int(env_cfg.episode_length_s / (env_cfg.decimation * env_cfg.sim.dt))
-        log_item = ["obs", "privileged", "latent", "action"]
+        log_item = ["obs", "privileged", "latent", "action", "decoder_output"]
         logger = DictBenchmarkLogger(
             log_dir=log_dir,
             tag=args_cli.tag,
@@ -222,6 +222,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     with torch.inference_mode():
         action = policy(obs)
         latent = policy.get_encoder_state()
+        decoder_output = policy.get_decoder_inference(latent)
 
     # simulate environment
     while simulation_app.is_running():
@@ -234,6 +235,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 "privileged": privileged_obs.cpu().numpy(),
                 "latent": latent.cpu().numpy(),
                 "action": action.cpu().numpy(),
+                "decoder_output": decoder_output.cpu().numpy(),
             }
             logger.log(item_dict)
 
@@ -243,6 +245,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # agent stepping
             actions = policy(obs)
             latent = policy.get_encoder_state()
+            decoder_output = policy.get_decoder_inference(latent)
             # env stepping
             obs, _, dones, _ = env.step(actions)
 

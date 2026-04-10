@@ -134,11 +134,52 @@ SoftTerrain = TerrainImporterCfg(
     disable_collider=True,
 )
 
+MultiSoftTerrain = TerrainImporterCfg(
+    prim_path="/World/ground",
+    terrain_type="generator",
+    terrain_generator=terrain_gen.TerrainGeneratorCfg(
+        size=(4.0, 8.0),  # size of sub-terrain
+        border_width=0.0,
+        num_rows=6,
+        num_cols=1,
+        horizontal_scale=0.1,
+        vertical_scale=0.005,
+        slope_threshold=0.75,
+        use_cache=False,
+        curriculum=True,
+        sub_terrains={
+            "soft_ground": terrain_gen.MeshPlaneTerrainCfg(
+                proportion=0.5,
+                ground_height_range=(0.0, 0.0),
+            ),
+        },
+    ),
+    collision_group=-1,
+    # this wont be used in soft terrain
+    physics_material=sim_utils.RigidBodyMaterialCfg(
+        friction_combine_mode="average",
+        restitution_combine_mode="average",
+        static_friction=0.5,
+        dynamic_friction=0.5,
+    ),
+    visual_material=sim_utils.MdlFileCfg(
+        # mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+        # mdl_path=f"{ISAACLAB_ASSETS_DATA_DIR}/texture/Ground_039/Ground039_4K.mdl", # black sand
+        mdl_path=f"{ISAACLAB_ASSETS_DATA_DIR}/texture/Ground_080/Ground080_4K.mdl",  # beach
+        project_uvw=True,
+        texture_scale=(0.25, 0.25),
+        albedo_brightness=0.2,
+    ),
+    max_init_terrain_level=3,
+    debug_vis=True,
+    disable_collider=True,
+)
+
 RigidPatch = TerrainImporterCfg(
     prim_path="/World/rigid_patch",
     terrain_type="generator",
     terrain_generator=terrain_gen.TerrainGeneratorCfg(
-        size=(8, 8),  # size of sub-terrain
+        size=(4, 4),  # size of sub-terrain
         border_width=0.0,
         num_rows=1,
         num_cols=1,

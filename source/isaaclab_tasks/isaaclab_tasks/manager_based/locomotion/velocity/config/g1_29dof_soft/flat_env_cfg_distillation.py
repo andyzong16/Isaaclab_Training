@@ -121,14 +121,6 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.5, 0.5)
-        # self.events.randomize_friction.params["friction_range"] = (0.5, 0.5)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.7, 0.7)
-        self.events.randomize_friction.params["friction_range"] = (0.7, 0.7)
-        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # disable curriculum
         self.curriculum.terrain_levels = None

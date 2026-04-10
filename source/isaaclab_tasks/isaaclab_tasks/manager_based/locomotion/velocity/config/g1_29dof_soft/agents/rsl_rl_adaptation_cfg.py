@@ -52,6 +52,7 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         activation="elu",
         obs_normalization=False,
     )
+    # algorithm = RslRlPpoAlgorithmCfg(
     algorithm = RslRlPpoEncoderDecoderAlgorithmCfg(
         value_loss_coef=1.0,
         use_clipped_value_loss=True,
@@ -71,6 +72,8 @@ class G1AdaptationPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     logger = "wandb"
     wandb_project = "g1_29dof_soft_encoder_decoder_teacher"
     experiment_name = "g1_29dof_soft_encoder_decoder_teacher"
+    # wandb_project = "g1_29dof_soft_encoder_teacher"
+    # experiment_name = "g1_29dof_soft_encoder_teacher"
 
 
 @configclass
@@ -98,7 +101,8 @@ class G1AdaptationDistillationRunnerCfg(RslRlDistillationRunnerCfg):
         "privileged": ["privileged"],
         "student_encoder": ["student_encoder"],
     }
-    teacher = RslRlMLPEncoderModelCfg(
+    # teacher = RslRlMLPEncoderModelCfg(
+    teacher = RslRlMLPEncoderDecoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,

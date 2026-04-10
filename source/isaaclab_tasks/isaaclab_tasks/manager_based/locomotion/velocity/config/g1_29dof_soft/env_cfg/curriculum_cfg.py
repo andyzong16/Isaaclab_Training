@@ -86,9 +86,9 @@ class G1CurriculumCfg:
         # params={"term_name": "track_heading", "std": 0.25, "num_steps": 50_000}, # fastSAC
     )
 
-    """
-    terrain parameters
-    """
+    # """
+    # terrain parameters
+    # """
     # terrain_friction_levels = CurrTerm(
     #     func=g1_mdp.terrain_friction_levels,
     #     params={
@@ -107,6 +107,6 @@ class G1CurriculumCfg:
     #     func=g1_mdp.terrain_density_levels,
     #     params={
     #         "density_range": (1000.0, 3000.0),
-    #         "packing_ratio_range": (0.5, 1.0),
+    #         "packing_ratio_range": (1.0, 1.0),
     #     },
     # )
