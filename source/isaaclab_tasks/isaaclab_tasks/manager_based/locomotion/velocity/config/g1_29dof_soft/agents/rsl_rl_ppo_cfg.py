@@ -59,8 +59,8 @@ class G1FlatPPORunnerCfg(G1RoughPPORunnerCfg):
 
         # self.max_iterations = 20_000 # walking
         self.max_iterations = 30_000  # running
-        self.wandb_project = "g1_29dof_soft_flat"
-        self.experiment_name = "g1_29dof_soft_flat"
+        self.wandb_project = "g1_29dof_soft_vanilla_ppo"
+        self.experiment_name = "g1_29dof_soft_vanilla_ppo"
 
 
 @configclass
@@ -69,8 +69,8 @@ class G1FlatPPORunnerCfgFinetune(G1FlatPPORunnerCfg):
         super().__post_init__()
 
         self.max_iterations = 15_000  # running
-        self.wandb_project = "g1_29dof_soft_flat_finetune"
-        self.experiment_name = "g1_29dof_soft_flat_finetune"
+        self.wandb_project = "g1_29dof_soft_vanilla_ppo_finetune"
+        self.experiment_name = "g1_29dof_soft_vanilla_ppo_finetune"
 
 
 @configclass

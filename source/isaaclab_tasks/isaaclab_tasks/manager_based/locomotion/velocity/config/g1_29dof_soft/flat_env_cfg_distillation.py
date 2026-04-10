@@ -146,7 +146,7 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.commands.base_velocity.heading_command = False
         self.commands.base_velocity.rel_standing_envs = 0.0
         self.commands.base_velocity.resampling_time_range = (self.episode_length_s, self.episode_length_s)
-        # self.commands.base_velocity.debug_vis = False
+        self.commands.base_velocity.debug_vis = False
 
         # Randomization
         self.events.reset_base.params = {
@@ -287,14 +287,6 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.2, 0.2)
-        self.events.randomize_friction.params["friction_range"] = (0.2, 0.2)
-        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
-        # self.events.randomize_friction.params["friction_range"] = (0.3, 0.3)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (3000.0, 3000.0)
 
         # disable curriculum
         self.curriculum.terrain_levels = None
@@ -345,7 +337,7 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
 
         # rendering
         # self.sim.render.enable_dlssg = True
-        # self.sim.render.dlss_mode = "performance"
+        # self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
             eye=(-0.0, -3.5, 0.5),
             lookat=(0.0, -0.0, 0.2),
