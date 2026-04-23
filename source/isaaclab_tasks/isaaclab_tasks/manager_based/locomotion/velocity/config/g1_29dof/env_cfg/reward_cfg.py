@@ -78,7 +78,8 @@ class G1RewardsCfg:
             "weight_walking": {
                 # leg
                 ".*hip_pitch.*": 0.02,
-                ".*hip_roll.*": 0.15,
+                # ".*hip_roll.*": 0.15,
+                ".*hip_roll.*": 0.3,
                 ".*hip_yaw.*": 0.15,
                 ".*knee.*": 0.02,
                 ".*ankle_pitch.*": 0.02,
@@ -97,7 +98,8 @@ class G1RewardsCfg:
             "weight_running": {
                 # leg
                 ".*hip_pitch.*": 0.005,
-                ".*hip_roll.*": 0.15,
+                # ".*hip_roll.*": 0.15,
+                ".*hip_roll.*": 0.3,
                 ".*hip_yaw.*": 0.15,
                 ".*knee.*": 0.005,
                 ".*ankle_pitch.*": 0.01,
@@ -114,7 +116,7 @@ class G1RewardsCfg:
                 ".*wrist.*": 0.5,
             },
             "walking_threshold": 0.05,
-            "running_threshold": 1.5,
+            "running_threshold": 2.0,
         },
     )
 
@@ -124,7 +126,7 @@ class G1RewardsCfg:
 
     # -- base penalties
     base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.75})
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-10.0)
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
 
@@ -177,29 +179,29 @@ class G1RewardsCfg:
         },
     )
 
-    # feet_pitch = RewTerm(
-    #     func=vel_mdp.reward_feet_pitch,
-    #     weight=-1.0,
-    #     params={
-    #         "asset_cfg": SceneEntityCfg(
-    #             "robot",
-    #             body_names=[".*ankle_roll.*"],
-    #             preserve_order=True,
-    #         ),
-    #     },
-    # )
+    feet_pitch = RewTerm(
+        func=vel_mdp.reward_feet_pitch,
+        weight=-1.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=[".*ankle_roll.*"],
+                preserve_order=True,
+            ),
+        },
+    )
 
-    # feet_pitch_diff = RewTerm(
-    #     func=vel_mdp.reward_feet_pitch_diff,
-    #     weight=-1.0,
-    #     params={
-    #         "asset_cfg": SceneEntityCfg(
-    #             "robot",
-    #             body_names=[".*ankle_roll.*"],
-    #             preserve_order=True,
-    #         ),
-    #     },
-    # )
+    feet_pitch_diff = RewTerm(
+        func=vel_mdp.reward_feet_pitch_diff,
+        weight=-1.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=[".*ankle_roll.*"],
+                preserve_order=True,
+            ),
+        },
+    )
 
     feet_pitch_contact = RewTerm(
         func=vel_mdp.reward_feet_pitch_contact,
@@ -231,20 +233,20 @@ class G1RewardsCfg:
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
             "threshold": 0.5,
-            "velocity_threshold": 0.01,
+            "velocity_threshold": 0.05,
         },
     )
 
-    no_fly = RewTerm(
-        func=vel_mdp.fly,
-        weight=-1.0,
-        params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-            "threshold": 5.0,
-            "command_name": "base_velocity",
-            "velocity_threshold": 1.0,
-        },
-    )
+    # no_fly = RewTerm(
+    #     func=vel_mdp.fly,
+    #     weight=-1.0,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+    #         "threshold": 5.0,
+    #         "command_name": "base_velocity",
+    #         "velocity_threshold": 1.0,
+    #     },
+    # )
 
     """
     stance foot
@@ -307,8 +309,7 @@ class G1RewardsCfg:
         params={
             "target_height": 0.1,
             "std": 0.05,
-            # "tanh_mult": 2.0,
-            "tanh_mult": 10.0,
+            "tanh_mult": 2.0,
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
             "standing_position_foot_z": 0.03539,
         },

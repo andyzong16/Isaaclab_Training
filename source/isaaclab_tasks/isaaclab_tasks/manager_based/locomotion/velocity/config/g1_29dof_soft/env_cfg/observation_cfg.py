@@ -332,6 +332,66 @@ class PrivilegedHistoryCfg(PrivilegedObsCfg):
         self.history_length = 10
 
 
+@configclass
+class DynamicsPrivilegedObsCfg(ObsGroup):
+    """Observations for policy group."""
+
+    base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+    foot_height = ObsTerm(
+        func=vel_mdp.foot_height,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+    )
+
+    foot_contact = ObsTerm(
+        func=g1_mdp.foot_contact_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_force_threshold": 5.0,
+            "soft_force_threshold": SOFT_CONTACT_THRESHOLD,
+        },
+    )
+    foot_contact_force = ObsTerm(
+        func=g1_mdp.foot_contact_forces_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_force_filter_threshold": 5.0,
+            "soft_force_filter_threshold": SOFT_CONTACT_THRESHOLD,
+        },
+    )
+    foot_air_time = ObsTerm(
+        func=g1_mdp.foot_air_time_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+        },
+    )
+
+    def __post_init__(self):
+        self.enable_corruption = True
+        self.concatenate_terms = True
+        self.history_length = 1
+
+
+@configclass
+class TerrainPrivilegedObsCfg(ObsGroup):
+    """Observations for policy group."""
+
+    terrain_material_parameters = ObsTerm(
+        func=g1_mdp.terrain_material_parameters_hybrid,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+        },
+    )
+
+    def __post_init__(self):
+        self.enable_corruption = True
+        self.concatenate_terms = True
+        self.history_length = 1
+
+
 """
 obs for logging
 """
@@ -375,6 +435,32 @@ class G1ObservationsCfg:
     logging: LoggingObsCfg = LoggingObsCfg()
 
 
+# @configclass
+# class G1TeacherObservationsCfg:
+#     """Observation specifications for the MDP."""
+
+#     # observation groups
+#     policy: PolicyCfg = PolicyCfg()
+#     critic: CriticCfg = CriticCfg()
+#     privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+#     proprioceptive_history: PolicyHistoryCfg = PolicyHistoryCfg()
+
+#     logging: LoggingObsCfg = LoggingObsCfg()
+
+
+# @configclass
+# class G1StudentObservationsCfg:
+#     """Observation specifications for the MDP."""
+
+#     # observation groups
+#     policy: PolicyCfg = PolicyCfg()
+#     privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+#     # proprioceptive_history: HistoryObsCfg = HistoryObsCfg() # TCN
+#     proprioceptive_history: PolicyHistoryCfg = PolicyHistoryCfg()  # RNN
+
+#     logging: LoggingObsCfg = LoggingObsCfg()
+
+
 @configclass
 class G1TeacherObservationsCfg:
     """Observation specifications for the MDP."""
@@ -382,8 +468,13 @@ class G1TeacherObservationsCfg:
     # observation groups
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
-    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+
+    dynamics_privileged: DynamicsPrivilegedObsCfg = DynamicsPrivilegedObsCfg()
+    terrain_privileged: TerrainPrivilegedObsCfg = TerrainPrivilegedObsCfg()
+    proprioceptive_history: PolicyHistoryCfg = PolicyHistoryCfg()
+
     logging: LoggingObsCfg = LoggingObsCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
 
 
 @configclass
@@ -392,6 +483,12 @@ class G1StudentObservationsCfg:
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
-    privileged: PrivilegedObsCfg = PrivilegedObsCfg()
-    student_encoder: HistoryObsCfg = HistoryObsCfg()
+    dynamics_privileged: DynamicsPrivilegedObsCfg = DynamicsPrivilegedObsCfg()
+    terrain_privileged: TerrainPrivilegedObsCfg = TerrainPrivilegedObsCfg()
+
+    policy_history: PolicyHistoryCfg = PolicyHistoryCfg()
+    proprioceptive_history: HistoryObsCfg = HistoryObsCfg()  # TCN
+    # proprioceptive_history: PolicyHistoryCfg = PolicyHistoryCfg()  # RNN
+
     logging: LoggingObsCfg = LoggingObsCfg()
+    privileged: PrivilegedObsCfg = PrivilegedObsCfg()

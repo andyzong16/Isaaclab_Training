@@ -139,3 +139,53 @@ def sample_terrain_property(
             log["Events/packing_ratio"] = packing_ratio.mean()
         if "Events/bulk_density" in log:
             log["Events/bulk_density"] = bulk_density.mean()
+
+
+def sample_terrain_property_linear(
+    env: ManagerBasedEnv,
+    env_ids: torch.Tensor,
+    friction_range: tuple[float, float],
+    stiffness_range: tuple[float, float],
+    packing_ratio_range: tuple[float, float],
+    bulk_density_range: tuple[float, float],
+    contact_solver_name: str = "physics_callback",
+) -> None:
+    """Set terrain properties (friction, stiffness, material density) based on robot x position.
+
+    The terrain is divided into bins of ``bin_size`` metres along the x axis. The bin index is used
+    to compute a ratio ``bin / max_bins`` which linearly interpolates each parameter from its upper
+    bound (near x=0) down to its lower bound (at ``max_bins * bin_size`` metres away).
+
+    The interpolation formula is:
+        parameter = parameter_ub + (parameter_lb - parameter_ub) * ratio
+    """
+    ratio = env.episode_length_buf / env.max_episode_length
+
+    # -- interpolate parameters: ub at ratio=0, lb at ratio=1
+    friction_lb, friction_ub = friction_range
+    stiffness_lb, stiffness_ub = stiffness_range
+    packing_lb, packing_ub = packing_ratio_range
+    density_lb, density_ub = bulk_density_range
+
+    friction = friction_ub + (friction_lb - friction_ub) * ratio
+    stiffness = stiffness_ub + (stiffness_lb - stiffness_ub) * ratio
+    packing_ratio = packing_ub + (packing_lb - packing_ub) * ratio
+    bulk_density = density_ub + (density_lb - density_ub) * ratio
+
+    # -- apply to contact solver
+    contact_solver = env.action_manager.get_term(contact_solver_name).contact_solver
+    contact_solver.update_friction_params(env_ids, friction, friction)
+    contact_solver.randomize_ground_stiffness(env_ids, stiffness)
+    contact_solver.update_material_density(env_ids, packing_ratio, bulk_density)
+
+    # -- logging
+    if "log" in env.extras:
+        log = env.extras["log"]
+        if "Events/terrain_friction" in log:
+            log["Events/terrain_friction"] = friction.mean()
+        if "Events/terrain_stiffness" in log:
+            log["Events/terrain_stiffness"] = stiffness.mean()
+        if "Events/packing_ratio" in log:
+            log["Events/packing_ratio"] = packing_ratio.mean()
+        if "Events/bulk_density" in log:
+            log["Events/bulk_density"] = bulk_density.mean()

@@ -124,9 +124,6 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         # disable curriculum
         self.curriculum.terrain_levels = None
         self.curriculum.command_vel = None
-        # self.curriculum.terrain_friction_levels = None
-        # self.curriculum.terrain_stiffness_levels = None
-        # self.curriculum.terrain_density_levels = None
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False

@@ -33,6 +33,8 @@ class G1FlatTeacherEnvCfg(G1RoughTeacherEnvCfg):
             self.observations.policy.height_scan = None
         if hasattr(self.observations.critic, "height_scan"):
             self.observations.critic.height_scan = None
+        if hasattr(self.observations.proprioceptive_history, "height_scan"):
+            self.observations.proprioceptive_history.height_scan = None
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -106,18 +108,18 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.sim.dt = 1 / 400  # 400Hz
         # self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
-        self.episode_length_s = 10.0
+        self.episode_length_s = 12.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
         # terrain with hole
-        # self.scene.terrain = vel_mdp.SoftTerrainVisual
-        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
+        self.scene.terrain = vel_mdp.SoftTerrainVisual
+        self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        self.scene.terrain = vel_mdp.SoftTerrain
-        self.scene.rigid_floor = vel_mdp.RigidPatch
+        # self.scene.terrain = vel_mdp.SoftTerrain
+        # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -137,9 +139,17 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.events.push_robot = None
         self.events.physics_material = None
         self.events.scale_actuator_gains = None
+        self.events.distance_based_sample_terrain_property.mode = "interval"
+        self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
+
+        # material
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        # self.commands.base_velocity.ranges.lin_vel_x = (2.5, 2.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
@@ -156,7 +166,8 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
                 # "yaw": (-math.pi / 6, math.pi / 6),
-                "yaw": (0, 0),
+                # "yaw": (0, 0),
+                "yaw": (math.pi / 8, math.pi / 8),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
@@ -207,8 +218,10 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.scene.height_scanner = None
         if hasattr(self.observations.policy, "height_scan"):
             self.observations.policy.height_scan = None
-        if hasattr(self.observations.student_encoder, "height_scan"):
-            self.observations.student_encoder.height_scan = None
+        if hasattr(self.observations.proprioceptive_history, "height_scan"):
+            self.observations.proprioceptive_history.height_scan = None
+        if hasattr(self.observations.policy_history, "height_scan"):
+            self.observations.policy_history.height_scan = None
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -232,13 +245,13 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         }
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
 
-        # curriculum settings
-        # self.curriculum.command_vel = None
-        self.curriculum.command_vel.params["velocity_stages"] = [
-            {"step": 0, "lin_vel_x": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
-            {"step": 3000 * 24, "lin_vel_x": (-1.0, 1.7), "ang_vel_z": (-0.7, 0.7)},
-            {"step": 6000 * 24, "lin_vel_x": (-1.0, 2.5), "ang_vel_z": (-1.0, 1.0)},
-        ]
+        # # curriculum settings
+        # # self.curriculum.command_vel = None
+        # self.curriculum.command_vel.params["velocity_stages"] = [
+        #     {"step": 0, "lin_vel_x": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
+        #     {"step": 3000 * 24, "lin_vel_x": (-1.0, 1.7), "ang_vel_z": (-0.7, 0.7)},
+        #     {"step": 6000 * 24, "lin_vel_x": (-1.0, 2.5), "ang_vel_z": (-1.0, 1.0)},
+        # ]
 
         # edit command range
         self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
@@ -272,18 +285,18 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # self.sim.dt = 1 / 400  # 400Hz
         # self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
-        self.episode_length_s = 10.0
+        self.episode_length_s = 12.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
-        # terrain with hole
+        # # terrain with hole
         # self.scene.terrain = vel_mdp.SoftTerrainVisual
         # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
         self.scene.terrain = vel_mdp.SoftTerrain
-        self.scene.rigid_floor = vel_mdp.RigidPatch
+        # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -303,6 +316,13 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.events.push_robot = None
         self.events.physics_material = None
         self.events.scale_actuator_gains = None
+        self.events.distance_based_sample_terrain_property.mode = "interval"
+        self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
+
+        # material
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
@@ -321,8 +341,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
                 "y": (-0.0, 0.0),
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                # "yaw": (-math.pi / 6, math.pi / 6),
-                "yaw": (0, 0),
+                "yaw": (math.pi / 8, math.pi / 8),
+                # "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {

@@ -42,6 +42,7 @@ docker/.container.cfg
 **/.neptune/*
 docker/artifacts/
 *.tmp
+wandb
 
 # Doc Outputs
 **/docs/_build/*

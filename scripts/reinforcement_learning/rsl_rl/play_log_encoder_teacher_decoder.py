@@ -170,6 +170,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     # obtain the trained policy for inference
     policy = runner.get_inference_policy(device=env.unwrapped.device)
+    teacher = runner.get_inference_teacher(device=env.unwrapped.device)
 
     # export the trained policy to JIT and ONNX formats
     export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
@@ -223,7 +224,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     with torch.inference_mode():
         action = policy(obs)
         latent = policy.get_encoder_state()
-        decoder_output = policy.get_decoder_inference(latent)
+        decoder_output = teacher.get_decoder_inference(latent)
+        # decoder_output = policy.get_decoder_inference(latent)
 
     # simulate environment
     while simulation_app.is_running():
@@ -246,7 +248,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # agent stepping
             actions = policy(obs)
             latent = policy.get_encoder_state()
-            decoder_output = policy.get_decoder_inference(latent)
+            decoder_output = teacher.get_decoder_inference(latent)
+            # decoder_output = policy.get_decoder_inference(latent)
             # env stepping
             obs, _, dones, _ = env.step(actions)
 

@@ -24,14 +24,9 @@ class PolicyCfg(ObsGroup):
         noise=Unoise(n_min=-0.2, n_max=0.2),
         scale=0.25,
     )
-    # projected_gravity = ObsTerm(
-    #     func=mdp.projected_gravity,
-    #     noise=Unoise(n_min=-0.05, n_max=0.05),
-    # )
-    base_quat = ObsTerm(
-        func=mdp.root_quat_w,
-        noise=Unoise(n_min=-0.01, n_max=0.01),
-        params={"make_quat_unique": True},
+    projected_gravity = ObsTerm(
+        func=mdp.projected_gravity,
+        noise=Unoise(n_min=-0.05, n_max=0.05),
     )
     velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
     joint_pos = ObsTerm(
@@ -285,7 +280,7 @@ class PrivilegedObsCfg(ObsGroup):
         func=vel_mdp.foot_air_time,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link")},
     )
-    terrain_material_parameters = ObsTerm(func=g1_mdp.terrain_material_parameters)
+    # terrain_material_parameters = ObsTerm(func=g1_mdp.terrain_material_parameters)
 
     def __post_init__(self):
         self.enable_corruption = False

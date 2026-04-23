@@ -41,10 +41,12 @@ CurriculumSoftTerrain = TerrainImporterCfg(
     collision_group=-1,
     # this wont be used in soft terrain
     physics_material=sim_utils.RigidBodyMaterialCfg(
-        friction_combine_mode="average",
-        restitution_combine_mode="average",
-        static_friction=0.5,
-        dynamic_friction=0.5,
+        # friction_combine_mode="average",
+        # restitution_combine_mode="average",
+        friction_combine_mode="multiply",
+        restitution_combine_mode="multiply",
+        static_friction=1.0,
+        dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
         mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
@@ -118,10 +120,12 @@ SoftTerrain = TerrainImporterCfg(
     ),
     collision_group=-1,
     physics_material=sim_utils.RigidBodyMaterialCfg(
-        friction_combine_mode="average",
-        restitution_combine_mode="average",
-        static_friction=0.5,
-        dynamic_friction=0.5,
+        # friction_combine_mode="average",
+        # restitution_combine_mode="average",
+        friction_combine_mode="multiply",
+        restitution_combine_mode="multiply",
+        static_friction=1.0,
+        dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
         # mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
@@ -157,10 +161,12 @@ MultiSoftTerrain = TerrainImporterCfg(
     collision_group=-1,
     # this wont be used in soft terrain
     physics_material=sim_utils.RigidBodyMaterialCfg(
-        friction_combine_mode="average",
-        restitution_combine_mode="average",
-        static_friction=0.5,
-        dynamic_friction=0.5,
+        # friction_combine_mode="average",
+        # restitution_combine_mode="average",
+        friction_combine_mode="multiply",
+        restitution_combine_mode="multiply",
+        static_friction=1.0,
+        dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
         # mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
@@ -197,10 +203,12 @@ RigidPatch = TerrainImporterCfg(
     ),
     collision_group=-1,
     physics_material=sim_utils.RigidBodyMaterialCfg(
-        friction_combine_mode="average",
-        restitution_combine_mode="average",
-        static_friction=0.5,
-        dynamic_friction=0.5,
+        # friction_combine_mode="average",
+        # restitution_combine_mode="average",
+        friction_combine_mode="multiply",
+        restitution_combine_mode="multiply",
+        static_friction=1.0,
+        dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
         mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
@@ -231,8 +239,8 @@ RigidSoftTerrain = TerrainImporterCfg(
         sub_terrains={
             "flat_holes": terrain_gen.HfFlatHolesTerrainCfg(
                 proportion=1.0,
-                hole_width_range=(1.0, 3.0),
-                num_holes=60,
+                hole_width_range=(1.0, 2.0),
+                num_holes=100,
                 holes_depth=-2.0,
                 platform_width=2.0,
             ),
@@ -244,10 +252,12 @@ RigidSoftTerrain = TerrainImporterCfg(
     ),
     collision_group=-1,
     physics_material=sim_utils.RigidBodyMaterialCfg(
-        friction_combine_mode="average",
-        restitution_combine_mode="average",
-        static_friction=0.5,
-        dynamic_friction=0.5,
+        # friction_combine_mode="average",
+        # restitution_combine_mode="average",
+        friction_combine_mode="multiply",
+        restitution_combine_mode="multiply",
+        static_friction=1.0,
+        dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
         mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
@@ -282,10 +292,12 @@ SoftTerrainVisual = TerrainImporterCfg(
     ),
     collision_group=-1,
     physics_material=sim_utils.RigidBodyMaterialCfg(
-        friction_combine_mode="average",
-        restitution_combine_mode="average",
-        static_friction=0.5,
-        dynamic_friction=0.5,
+        # friction_combine_mode="average",
+        # restitution_combine_mode="average",
+        friction_combine_mode="multiply",
+        restitution_combine_mode="multiply",
+        static_friction=1.0,
+        dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
         # mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",

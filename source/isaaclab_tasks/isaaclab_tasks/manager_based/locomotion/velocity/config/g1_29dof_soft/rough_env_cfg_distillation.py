@@ -33,6 +33,7 @@ class G1RoughTeacherEnvCfg(LocomotionVelocityRoughEnvCfg):
     curriculum: G1CurriculumCfg = G1CurriculumCfg()
     events: G1EventCfg = G1EventCfg()
     commands: G1CommandsCfg = G1CommandsCfg()
+    seed: int = 42
 
     def __post_init__(self):
         # post init of parent
@@ -99,6 +100,7 @@ class G1RoughStudentEnvCfg(LocomotionVelocityRoughEnvCfg):
     curriculum: G1CurriculumCfg = G1CurriculumCfg()
     events: G1EventCfg = G1EventCfg()
     commands: G1CommandsCfg = G1CommandsCfg()
+    seed: int = 42
 
     def __post_init__(self):
         # post init of parent
