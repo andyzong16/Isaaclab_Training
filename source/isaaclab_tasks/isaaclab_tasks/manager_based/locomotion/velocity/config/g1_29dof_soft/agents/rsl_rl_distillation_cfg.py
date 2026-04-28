@@ -20,6 +20,10 @@ from isaaclab_rl.rsl_rl import (
     RslRlTCNModelCfg,
 )
 
+"""
+config override
+"""
+
 
 @configclass
 class RslRlPpoAEAlgorithmCfg(RslRlPpoAlgorithmCfg):
@@ -56,7 +60,9 @@ class RslRlPpoDistillationAlgorithmCfg(RslRlPpoAlgorithmCfg):
 @configclass
 class G1PPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 30_000
+    # max_iterations = 30_000
+    max_iterations = 28_000
+    # max_iterations = 25_000
     save_interval = 500
     obs_groups = {
         "actor": ["policy"],
@@ -120,13 +126,13 @@ class G1PPORunnerCfgFinetune(G1PPORunnerCfg):
 @configclass
 class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 30_000
+    # max_iterations = 30_000
+    max_iterations = 25_000
     save_interval = 500
     obs_groups = {
         "student": ["policy"],
         "teacher": ["policy"],
-        # "encoder": ["proprioceptive_history", "dynamics_privileged", "terrain_privileged"],  # RNN
-        "encoder": ["policy_history", "dynamics_privileged", "terrain_privileged"],  # TCN
+        "encoder": ["policy_history", "dynamics_privileged", "terrain_privileged"],
         "decoder": ["terrain_privileged"],
         "proprioceptive_history": ["proprioceptive_history"],
     }
@@ -197,7 +203,7 @@ class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
         encoder_loss_coef=1.0,
         decoder_loss_coef=1.0,
         loss_type="mse",
-        ppo_learning_start=1000,
+        ppo_learning_start=1500,
     )
 
     logger = "wandb"

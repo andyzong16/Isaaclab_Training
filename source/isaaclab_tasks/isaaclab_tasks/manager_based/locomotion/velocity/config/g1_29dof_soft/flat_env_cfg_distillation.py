@@ -108,17 +108,17 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.sim.dt = 1 / 400  # 400Hz
         # self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
-        self.episode_length_s = 12.0
+        self.episode_length_s = 10.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
-        # terrain with hole
-        self.scene.terrain = vel_mdp.SoftTerrainVisual
-        self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
+        # # terrain with hole
+        # self.scene.terrain = vel_mdp.SoftTerrainVisual
+        # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
-        # self.scene.terrain = vel_mdp.SoftTerrain
+        self.scene.terrain = vel_mdp.SoftTerrain
         # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
@@ -142,14 +142,13 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         self.events.distance_based_sample_terrain_property.mode = "interval"
         self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
 
-        # material
-        self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
-        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        # # material
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
-        # self.commands.base_velocity.ranges.lin_vel_x = (2.5, 2.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
@@ -166,8 +165,8 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
                 # "yaw": (-math.pi / 6, math.pi / 6),
-                # "yaw": (0, 0),
-                "yaw": (math.pi / 8, math.pi / 8),
+                "yaw": (0, 0),
+                # "yaw": (math.pi / 8, math.pi / 8),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
@@ -184,10 +183,8 @@ class G1FlatTeacherEnvCfg_PLAY(G1FlatTeacherEnvCfg):
         # self.sim.render.enable_dlssg = True
         # self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(-0.0, -3.5, 0.5),
-            lookat=(0.0, -0.0, 0.2),
-            # eye=(3.5, 0.0, 0.5),
-            # lookat=(0.0, 0.0, 0.2),
+            eye=(-0.0, -2.5, -0.1),
+            lookat=(0.0, -0.0, -0.1),
             resolution=(1920, 1080),
             # resolution=(1080, 720),
             origin_type="asset_root",
@@ -285,7 +282,7 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # self.sim.dt = 1 / 400  # 400Hz
         # self.decimation = 8  # 50Hz
         # self.sim.render_interval = self.decimation
-        self.episode_length_s = 12.0
+        self.episode_length_s = 10.0
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -294,12 +291,15 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # # terrain with hole
         # self.scene.terrain = vel_mdp.SoftTerrainVisual
         # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
+        # self.scene.terrain.terrain_type = "plane"
+        # self.scene.terrain.terrain_generator = None
 
         self.scene.terrain = vel_mdp.SoftTerrain
         # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
+        # self.actions.physics_callback.disable = True
 
         # disable curriculum
         self.curriculum.terrain_levels = None
@@ -319,8 +319,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.events.distance_based_sample_terrain_property.mode = "interval"
         self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
 
-        # material
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.3, 0.3)
+        # # material
+        # self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
         # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
         # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
 
@@ -341,8 +341,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
                 "y": (-0.0, 0.0),
                 # "yaw": (-math.pi, math.pi),
                 # "yaw": (-math.pi / 2, -math.pi / 2),
-                "yaw": (math.pi / 8, math.pi / 8),
-                # "yaw": (0, 0),
+                # "yaw": (math.pi / 8, math.pi / 8),
+                "yaw": (0, 0),
                 # "yaw": (math.pi / 2, math.pi / 2),
             },
             "velocity_range": {
@@ -359,10 +359,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # self.sim.render.enable_dlssg = True
         # self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(-0.0, -3.5, 0.5),
-            lookat=(0.0, -0.0, 0.2),
-            # eye=(3.5, 0.0, 0.5),
-            # lookat=(0.0, 0.0, 0.2),
+            eye=(-0.0, -2.5, -0.1),
+            lookat=(0.0, -0.0, -0.1),
             resolution=(1920, 1080),
             # resolution=(1080, 720),
             origin_type="asset_root",

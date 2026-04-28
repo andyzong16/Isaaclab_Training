@@ -338,6 +338,5 @@ def terrain_material_parameters_hybrid(
     stiffness = xi / xi_max  # normalize
 
     # return torch.stack([friction_coef, rho_c / rho_c_max, mu_int], dim=-1)
-
     return torch.stack([friction_coef, stiffness], dim=-1)
     # return stiffness.view(-1, 1)

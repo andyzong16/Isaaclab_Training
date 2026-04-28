@@ -111,12 +111,12 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.scene.num_envs = 50
         self.scene.env_spacing = 0.0
 
-        # terrain with hole
+        # # terrain with hole
         # self.scene.terrain = vel_mdp.SoftTerrainVisual
         # self.scene.rigid_floor = vel_mdp.RigidSoftTerrain
 
         self.scene.terrain = vel_mdp.SoftTerrain
-        self.scene.rigid_floor = vel_mdp.RigidPatch
+        # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -169,8 +169,8 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         # self.sim.render.enable_dlssg = True
         # self.sim.render.dlss_mode = "performance"  # type: ignore
         self.viewer = ViewerCfg(
-            eye=(-0.0, -3.5, 0.5),
-            lookat=(0.0, -0.0, 0.2),
+            eye=(-0.0, -2.5, -0.1),
+            lookat=(0.0, -0.0, -0.1),
             # eye=(3.5, 0.0, 0.5),
             # lookat=(0.0, 0.0, 0.2),
             resolution=(1920, 1080),

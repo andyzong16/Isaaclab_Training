@@ -690,10 +690,11 @@ def compute_resistive_force(
     tau_r[env_id, body_id] = tau_r_update
 
     alpha_unfiltered[env_id, body_id] = alpha
-    alpha_filtered[env_id, body_id] = alpha
+    # # filter all axis
     # alpha_filtered[env_id, body_id] = (
     #     (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id] + coef * tau_r_update * alpha_filtered[env_id, body_id]
     # )
+    alpha_filtered[env_id, body_id] = alpha
     alpha_filtered[env_id, body_id][2] = (
         (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id][2] + coef * tau_r_update * alpha_filtered[env_id, body_id][2]
     ) # filter z only

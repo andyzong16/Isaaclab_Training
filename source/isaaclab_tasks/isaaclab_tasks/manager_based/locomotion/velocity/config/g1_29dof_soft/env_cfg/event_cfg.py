@@ -31,6 +31,17 @@ class G1EventCfg:
             "num_buckets": 64,
         },
     )
+    # physics_material = EventTerm(
+    #     func=mdp.randomize_rigid_body_material,  # type: ignore
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "static_friction_range": (0.6, 1.0),
+    #         "dynamic_friction_range": (0.4, 0.6),
+    #         "restitution_range": (0.0, 0.0),
+    #         "num_buckets": 64,
+    #     },
+    # )
 
     add_base_mass = EventTerm(
         func=mdp.randomize_rigid_body_mass,  # type: ignore
@@ -155,10 +166,10 @@ class G1EventCfg:
     #         # "stiffness_range": (0.6, 0.6),
     #         # "bulk_density_range": (1000.0, 3000.0),
     #         "packing_ratio_range": (1.0, 1.0),
-    #         "bin_size": 2.0,
-    #         "max_bins": 8,
-    #         # "bin_size": 2.5,
-    #         # "max_bins": 6,
+    #         # "bin_size": 2.0,
+    #         # "max_bins": 8,
+    #         "bin_size": 2.5,
+    #         "max_bins": 6,
     #         # "bin_size": 3.5,
     #         # "max_bins": 4,
     #     },
