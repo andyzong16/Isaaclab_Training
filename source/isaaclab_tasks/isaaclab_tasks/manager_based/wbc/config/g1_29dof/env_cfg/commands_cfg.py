@@ -51,5 +51,5 @@ class G1CommandsCfg:
             "right_elbow_link",
             "right_wrist_yaw_link",
         ],
-        motion_file=f"{MOTION_TRACKING_DATA_DIR}/motions/npz/g1_spinkick.npz", # <- change this for other motions
+        motion_file=f"{MOTION_TRACKING_DATA_DIR}/motions/npz/g1_jump_forward_traj.npz", # <- change this for other motions
     )

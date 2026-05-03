@@ -9,7 +9,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 
 @configclass
 class BasePPORunnerCfg(RslRlOnPolicyRunnerCfg):
-    num_steps_per_env = 24
+    num_steps_per_env = 24     # changed this parameter
     max_iterations = 30_000
     save_interval = 500
     policy = RslRlPpoActorCriticCfg(

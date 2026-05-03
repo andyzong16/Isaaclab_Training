@@ -13,6 +13,7 @@ from isaaclab.utils import configclass
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab.envs import ManagerBasedRLEnvCfg
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import CurriculumCfg
+from isaaclab.envs.common import ViewerCfg
 
 ##
 # Pre-defined configs
@@ -31,7 +32,7 @@ from .env_cfg import (
 
 
 @configclass
-class G1WBCEnvCfg(ManagerBasedRLEnvCfg):
+class G1WBCEnvCfg_PLAY(ManagerBasedRLEnvCfg):
     """Configuration for the motion tracking environment."""
 
     # Scene settings
@@ -48,16 +49,23 @@ class G1WBCEnvCfg(ManagerBasedRLEnvCfg):
 
     def __post_init__(self):
         """Post initialization."""
-        # general settings
+        super().__post_init__()
+        self.episode_length_s = 20.0
         self.decimation = 4
-        self.episode_length_s = 10.0
-        # simulation settings
-        self.sim.dt = 0.005
-        self.sim.render_interval = self.decimation
-        self.sim.physics_material = self.scene.terrain.physics_material
-        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
-        # viewer settings
-        self.viewer.eye = (3.0, 3.0, 3.0)
+
+        self.terminations.anchor_pos = None # type: ignore
+        self.terminations.anchor_ori = None # type: ignore
+        self.terminations.ee_body_pos = None # type: ignore
+        self.terminations.base_ang_vel_exceed = None # type: ignore
+
+        self.viewer = ViewerCfg(
+            eye=(-0.0, -3.5, 0.2), 
+            lookat=(0.0, -0.0, 0.0),
+            resolution=(1920, 1080), 
+            origin_type="asset_root", 
+            asset_name="robot"
+        )
+    
 
         # disable debug vis
         # self.commands.motion.debug_vis = False
@@ -69,3 +77,4 @@ class G1WBCEnvCfg(ManagerBasedRLEnvCfg):
         # livestream_gui = carb_settings_iface.get("/app/livestream/enabled")
         # if not local_gui and not livestream_gui:
         #     self.scene.dummy_robot = None
+G1WBCEnvCfg = G1WBCEnvCfg_PLAY

@@ -43,7 +43,7 @@ class G1TerminationsCfg:
     )
 
     # -- safety terms
-    base_ang_vel_exceed = DoneTerm(
-        func=wbc_mdp.base_ang_vel_exceed,
-        params={"threshold": 500 * math.pi / 180.0},
-    )
+    # base_ang_vel_exceed = DoneTerm(
+    #    func=wbc_mdp.base_ang_vel_exceed,
+    #    params={"threshold": 500 * math.pi / 180.0},
+    # )

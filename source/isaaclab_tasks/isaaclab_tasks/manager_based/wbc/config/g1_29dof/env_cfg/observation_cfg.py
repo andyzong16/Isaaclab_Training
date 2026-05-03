@@ -22,6 +22,8 @@ class G1ObservationsCfg:
 
         # observation terms (order preserved)
         command = ObsTerm(func=mdp.generated_commands, params={"command_name": "motion"})
+
+        # What is this? Not too sure if this needs to be changed to the Unitree offical code.
         motion_anchor_pos_b = ObsTerm(
             func=wbc_mdp.motion_anchor_pos_b, params={"command_name": "motion"}, noise=Unoise(n_min=-0.25, n_max=0.25)
         )

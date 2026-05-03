@@ -23,10 +23,11 @@ class G1EventCfg:
         func=mdp.randomize_rigid_body_material, # type: ignore
         mode="startup",
         params={
+            # Made some changes here
             "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
-            "static_friction_range": (1.0, 1.0),
-            "dynamic_friction_range": (1.0, 1.0),
-            "restitution_range": (0.0, 0.0),
+            "static_friction_range": (0.3, 1.6),    # (1.0, 1.0)
+            "dynamic_friction_range": (0.3, 1.2),   # (1.0, 1.0)
+            "restitution_range": (0.0, 0.5),        # (0.0, 0.0)
             "num_buckets": 64,
         },
     )

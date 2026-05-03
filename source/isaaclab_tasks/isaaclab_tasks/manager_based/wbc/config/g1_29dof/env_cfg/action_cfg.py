@@ -51,5 +51,5 @@ class G1ActionsCfg:
         ],
         scale=UNITREE_G1_29DOF_MIMIC_ACTION_SCALE, 
         use_default_offset=True, 
-        preserve_order=True,
+        preserve_order=True, # Maybe not neccesary as it is not on the Unitree Code
         )
