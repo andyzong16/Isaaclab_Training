@@ -215,6 +215,8 @@ class G1FlatStudentEnvCfg(G1RoughStudentEnvCfg):
         self.scene.height_scanner = None
         if hasattr(self.observations.policy, "height_scan"):
             self.observations.policy.height_scan = None
+        if hasattr(self.observations.critic, "height_scan"):
+            self.observations.critic.height_scan = None
         if hasattr(self.observations.proprioceptive_history, "height_scan"):
             self.observations.proprioceptive_history.height_scan = None
         if hasattr(self.observations.policy_history, "height_scan"):
@@ -279,9 +281,6 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # change timestep
         self.sim.dt = 1 / 200  # 200Hz
         self.decimation = 4  # 50Hz
-        # self.sim.dt = 1 / 400  # 400Hz
-        # self.decimation = 8  # 50Hz
-        # self.sim.render_interval = self.decimation
         self.episode_length_s = 10.0
 
         # make a smaller scene for play
@@ -295,7 +294,7 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # self.scene.terrain.terrain_generator = None
 
         self.scene.terrain = vel_mdp.SoftTerrain
-        # self.scene.rigid_floor = vel_mdp.RigidPatch
+        self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         self.actions.physics_callback.backend = "3D-warp"
@@ -309,7 +308,7 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # self.curriculum.terrain_density_levels = None
 
         # disable randomization for play
-        self.observations.policy.enable_corruption = False
+        # self.observations.policy.enable_corruption = False
 
         # remove random events
         self.events.add_base_mass = None

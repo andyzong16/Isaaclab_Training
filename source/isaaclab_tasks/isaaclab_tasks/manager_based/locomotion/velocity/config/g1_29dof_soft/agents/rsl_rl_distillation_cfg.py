@@ -54,7 +54,8 @@ class RslRlPpoDistillationAlgorithmCfg(RslRlPpoAlgorithmCfg):
     encoder_loss_coef: float = 1.0
     decoder_loss_coef: float = 1.0
     loss_type: Literal["mse", "huber"] = "mse"
-    ppo_learning_start: int = 0
+    total_iteration: int = 0
+    loss_schedule: Literal["fixed", "curriculum"] = "fixed"
 
 
 @configclass
@@ -130,10 +131,10 @@ class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
     max_iterations = 25_000
     save_interval = 500
     obs_groups = {
-        "student": ["policy"],
         "teacher": ["policy"],
-        "encoder": ["policy_history", "dynamics_privileged", "terrain_privileged"],
-        "decoder": ["terrain_privileged"],
+        "teacher_encoder": ["policy_history", "dynamics_privileged", "terrain_privileged"],
+        "teacher_decoder": ["terrain_privileged"],
+        "student": ["policy"],
         "proprioceptive_history": ["proprioceptive_history"],
     }
     teacher = RslRlMLPVAEModelCfg(
@@ -141,12 +142,76 @@ class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
-        encoder_obs_set="encoder",
+        encoder_obs_set="teacher_encoder",
         encoder_output_dim=64,
         encoder_hidden_dims=[256, 128],
         encoder_activation="elu",
         encoder_obs_normalization=False,
-        decoder_obs_set="decoder",
+        decoder_obs_set="teacher_decoder",
+    )
+    # TCN student
+    student = RslRlTCNModelCfg(
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=False,
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
+        encoder_obs_set="proprioceptive_history",
+        encoder_output_dim=64,
+        encoder_hidden_dims=[256, 128],
+        encoder_activation="elu",
+    )
+    # GRU student
+    # student = RslRlRNNEncoderModelCfg(
+    #     hidden_dims=[512, 256, 128],
+    #     activation="elu",
+    #     obs_normalization=False,
+    #     distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
+    #     encoder_obs_set="proprioceptive_history",
+    #     encoder_obs_normalization=False,
+    #     rnn_type="gru",
+    #     rnn_hidden_dim=64,
+    #     rnn_num_layers=2,
+    # )
+
+    algorithm = RslRlDistillationAlgorithmCfg(
+        num_learning_epochs=2,
+        learning_rate=1.0e-3,
+        gradient_length=15,
+    )
+
+    logger = "wandb"
+    wandb_project = "g1_29dof_soft_vae_student_tcn"
+    experiment_name = "g1_29dof_soft_vae_student_tcn"
+
+    # wandb_project = "g1_29dof_soft_vae_student_gru"
+    # experiment_name = "g1_29dof_soft_vae_student_gru"
+
+
+@configclass
+class G1PPODistillationRunnerCfg(RslRlDistillationRunnerCfg):
+    num_steps_per_env = 24
+    # max_iterations = 30_000
+    max_iterations = 25_000
+    save_interval = 500
+    obs_groups = {
+        "teacher": ["policy"],
+        "teacher_encoder": ["policy_history", "dynamics_privileged", "terrain_privileged"],
+        "teacher_decoder": ["terrain_privileged"],
+        "student": ["policy"],
+        "critic": ["critic", "dynamics_privileged", "terrain_privileged"],
+        "proprioceptive_history": ["proprioceptive_history"],
+    }
+    teacher = RslRlMLPVAEModelCfg(
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=False,
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.1),
+        encoder_obs_set="teacher_encoder",
+        encoder_output_dim=64,
+        encoder_hidden_dims=[256, 128],
+        encoder_activation="elu",
+        encoder_obs_normalization=False,
+        decoder_obs_set="teacher_decoder",
     )
     # TCN student
     student = RslRlTCNModelCfg(
@@ -178,20 +243,13 @@ class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
         obs_normalization=False,
     )
 
-    # pure distillation
-    # algorithm = RslRlDistillationAlgorithmCfg(
-    #     num_learning_epochs=2,
-    #     learning_rate=1.0e-3,
-    #     gradient_length=15,
-    # )
-
-    # distillation with PPO loss
     algorithm = RslRlPpoDistillationAlgorithmCfg(
         value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
         entropy_coef=0.005,
         num_learning_epochs=5,
+        # num_learning_epochs=2,
         num_mini_batches=4,
         learning_rate=1.0e-3,
         schedule="adaptive",
@@ -203,8 +261,10 @@ class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
         encoder_loss_coef=1.0,
         decoder_loss_coef=1.0,
         loss_type="mse",
-        ppo_learning_start=1500,
-    )
+        total_iteration=25_000,
+        loss_schedule="curriculum",
+        # loss_schedule="fixed",
+    ) # type: ignore
 
     logger = "wandb"
     wandb_project = "g1_29dof_soft_vae_student_tcn"

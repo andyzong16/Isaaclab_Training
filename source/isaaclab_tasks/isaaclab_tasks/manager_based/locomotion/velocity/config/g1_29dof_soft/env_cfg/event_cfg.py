@@ -148,6 +148,7 @@ class G1EventCfg:
         params={"velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0)}},
     )
 
+    # # only inference
     # distance_based_sample_terrain_property = EventTerm(
     #     func=g1_mdp.sample_terrain_property,
     #     # func=g1_mdp.sample_terrain_property_linear,
@@ -157,7 +158,7 @@ class G1EventCfg:
     #     params={
     #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
     #         "friction_range": (0.5, 0.5),
-    #         "stiffness_range": (0.2, 0.6),
+    #         "stiffness_range": (0.1, 0.9),
     #         "bulk_density_range": (3000.0, 3000.0),
     #         # "friction_range": (1.0, 1.0),
     #         # "stiffness_range": (0.2, 0.8),

@@ -140,6 +140,7 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.flat_env_cfg_distillation:G1FlatStudentEnvCfg",
         "rsl_rl_distillation_cfg_entry_point": f"{agents.__name__}.rsl_rl_distillation_cfg:G1DistillationRunnerCfg",
+        "rsl_rl_ppo_distillation_cfg_entry_point": f"{agents.__name__}.rsl_rl_distillation_cfg:G1PPODistillationRunnerCfg",
     },
 )
 
@@ -151,5 +152,6 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.flat_env_cfg_distillation:G1FlatEnvStudentCfg_PLAY",
         "rsl_rl_distillation_cfg_entry_point": f"{agents.__name__}.rsl_rl_distillation_cfg:G1DistillationRunnerCfg",
+        "rsl_rl_ppo_distillation_cfg_entry_point": f"{agents.__name__}.rsl_rl_distillation_cfg:G1PPODistillationRunnerCfg",
     },
 )

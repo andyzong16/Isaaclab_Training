@@ -307,6 +307,37 @@ def foot_contact_forces_raw_hybrid(
 
     return forces
 
+def terrain_material_parameters_all_hybrid(
+    env: ManagerBasedRLEnv,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    rigid_contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+    soft_contact_sensor_name: str = "physics_callback",
+) -> torch.Tensor:
+    """Hybrid terrain material parameters observation selecting from the authoritative solver."""
+    asset = env.scene[asset_cfg.name]
+    soft_contact_sensor = env.action_manager.get_term(soft_contact_sensor_name).contact_solver
+
+    on_soft_ground = soft_contact_sensor.data.is_sensor_active.any(dim=-1).float()
+
+    mu_rigid = 0.9
+    friction_rigid = (
+        asset.root_physx_view.get_material_properties()[:, 13 : 13 + 12, 1].mean(dim=-1).to(env.device)
+    )  # dynamic friction of ankle
+    rho_c_rigid = 3000.0
+    rho_c_max = 3000.0
+
+    friction_coef = soft_contact_sensor.terrain_friction * on_soft_ground + (1 - on_soft_ground) * friction_rigid
+    rho_c = soft_contact_sensor.terrain_density * on_soft_ground + (1 - on_soft_ground) * rho_c_rigid
+    mu_int = soft_contact_sensor.terrain_stiffness * on_soft_ground + (1 - on_soft_ground) * mu_rigid
+
+    # NOTE: since both rho_c and mu_int affect stiffness, we use media dependent scaling factor as observation
+    g = 9.81
+    xi = rho_c * g * (894.0 * (mu_int**3.0) - 386.0 * (mu_int**2.0) + 89.0 * mu_int)
+    xi_max = rho_c_max * g * (894.0 * (mu_rigid**3.0) - 386.0 * (mu_rigid**2.0) + 89.0 * mu_rigid)
+    stiffness = xi / xi_max  # normalize
+
+    return torch.stack([friction_coef, rho_c / rho_c_max, mu_int], dim=-1)
+
 
 def terrain_material_parameters_hybrid(
     env: ManagerBasedRLEnv,
@@ -338,5 +369,5 @@ def terrain_material_parameters_hybrid(
     stiffness = xi / xi_max  # normalize
 
     # return torch.stack([friction_coef, rho_c / rho_c_max, mu_int], dim=-1)
-    return torch.stack([friction_coef, stiffness], dim=-1)
-    # return stiffness.view(-1, 1)
+    # return torch.stack([friction_coef, stiffness], dim=-1)
+    return stiffness.view(-1, 1)

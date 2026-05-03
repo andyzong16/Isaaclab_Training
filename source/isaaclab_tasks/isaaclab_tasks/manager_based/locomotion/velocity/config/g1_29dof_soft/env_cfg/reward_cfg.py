@@ -291,18 +291,18 @@ class G1RewardsCfg:
         },
     )
 
-    # no_fly = RewTerm(
-    #     func=g1_mdp.no_fly_hybrid,
-    #     weight=-1.0,
-    #     params={
-    #         "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
-    #         "soft_contact_sensor_name": "physics_callback",
-    #         "rigid_contact_threshold": 5.0,
-    #         "soft_contact_threshold": SOFT_CONTACT_THRESHOLD,
-    #         "command_name": "base_velocity",
-    #         "velocity_threshold": 1.0,
-    #     },
-    # )
+    no_fly = RewTerm(
+        func=g1_mdp.no_fly_hybrid,
+        weight=-1.0,
+        params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle_roll.*"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_contact_threshold": 5.0,
+            "soft_contact_threshold": SOFT_CONTACT_THRESHOLD,
+            "command_name": "base_velocity",
+            "velocity_threshold": 1.0,
+        },
+    )
 
     """
     Stance foot

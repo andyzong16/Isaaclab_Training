@@ -133,6 +133,8 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.events.push_robot = None
         self.events.physics_material = None
         self.events.scale_actuator_gains = None
+        self.events.distance_based_sample_terrain_property.mode = "interval"
+        self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)

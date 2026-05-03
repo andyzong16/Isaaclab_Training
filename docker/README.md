@@ -131,9 +131,22 @@ cd Research/g1_loco_rigid/isaaclab_{timestamp}
 
 After interactive job is initialized, run the training command 
 ```bash
+# vanilla PPO on rigid terrain
 ./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-v1 --num_envs 4096 --headless
-./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-Teacher-v1 --num_envs 4096 --headless --agent rsl_rl_adaptation_cfg_entry_point
+# vanilla PPO on soft terrain
 ./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-v1 --num_envs 4096 --headless --video --enable_cameras
+
+# teacher policy on soft terrain
+./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-Teacher-v1 --num_envs 4096 --headless --agent rsl_rl_distillation_cfg_entry_point
+# student BC distillation on soft terrain
+./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-Student-v1 --num_envs 4096 --headless --agent rsl_rl_distillation_cfg_entry_point \
+--checkpoint /workspace/isaaclab/logs/rsl_rl/g1_29dof_soft_vae_teacher/2026-05-02_11-26-49/model_24000.pt
+# student BC distillation + PPO on soft terrain
+./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Isaac-Velocity-Flat-G1-29dof-Soft-Student-v1 --num_envs 4096 --headless --agent rsl_rl_ppo_distillation_cfg_entry_point \
+--checkpoint /workspace/isaaclab/logs/rsl_rl/g1_29dof_soft_vae_teacher/2026-05-02_11-26-49/model_24000.pt
+
+# WBC training
+./docker/cluster/run_singularity.sh $PWD isaac-lab-base --task Motion-Tracking-G1-v0 --num_envs 4096 --headless
 ```
 
 
