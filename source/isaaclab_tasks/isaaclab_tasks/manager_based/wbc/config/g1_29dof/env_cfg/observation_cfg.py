@@ -21,14 +21,15 @@ class G1ObservationsCfg:
         """Observations for policy group."""
 
         # observation terms (order preserved)
-        command = ObsTerm(func=mdp.generated_commands, params={"command_name": "motion"})
-        motion_anchor_pos_b = ObsTerm(
-            func=wbc_mdp.motion_anchor_pos_b, params={"command_name": "motion"}, noise=Unoise(n_min=-0.25, n_max=0.25)
-        )
+        command = ObsTerm(func=mdp.generated_commands, params={"command_name": "motion"}) # ref joint pos/vel
+        # motion_anchor_pos_b = ObsTerm(
+        #     func=wbc_mdp.motion_anchor_pos_b, params={"command_name": "motion"}, noise=Unoise(n_min=-0.25, n_max=0.25)
+        # ) # exclude
         motion_anchor_ori_b = ObsTerm(
             func=wbc_mdp.motion_anchor_ori_b, params={"command_name": "motion"}, noise=Unoise(n_min=-0.05, n_max=0.05)
         )
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.5, n_max=0.5))
+
+        # base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.5, n_max=0.5)) # exclude
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
         joint_pos = ObsTerm(
             func=mdp.joint_pos_rel, 
@@ -131,7 +132,13 @@ class G1ObservationsCfg:
         command = ObsTerm(func=mdp.generated_commands, params={"command_name": "motion"})
         motion_anchor_pos_b = ObsTerm(func=wbc_mdp.motion_anchor_pos_b, params={"command_name": "motion"})
         motion_anchor_ori_b = ObsTerm(func=wbc_mdp.motion_anchor_ori_b, params={"command_name": "motion"})
+
+        # privileged observations (for critic only)
+        body_pos = ObsTerm(func=wbc_mdp.robot_body_pos_b, params={"command_name": "motion"})
+        body_ori = ObsTerm(func=wbc_mdp.robot_body_ori_b, params={"command_name": "motion"})
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+        ##
+
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
         joint_pos = ObsTerm(
             func=mdp.joint_pos_rel, 
@@ -223,10 +230,6 @@ class G1ObservationsCfg:
             scale=0.05, 
             )
         actions = ObsTerm(func=mdp.last_action)
-
-        # privileged observations (for critic only)
-        body_pos = ObsTerm(func=wbc_mdp.robot_body_pos_b, params={"command_name": "motion"})
-        body_ori = ObsTerm(func=wbc_mdp.robot_body_ori_b, params={"command_name": "motion"})
 
     # observation groups
     policy: PolicyCfg = PolicyCfg(enable_corruption=True, concatenate_terms=True)

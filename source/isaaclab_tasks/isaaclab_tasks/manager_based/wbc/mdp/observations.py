@@ -69,6 +69,9 @@ def robot_body_ori_b(env: ManagerBasedEnv, command_name: str) -> torch.Tensor:
 
 
 def motion_anchor_pos_b(env: ManagerBasedEnv, command_name: str) -> torch.Tensor:
+    """
+    reference anchor pos wrt robot's current anchor frame.
+    """
     command: MotionCommand = env.command_manager.get_term(command_name) # type: ignore
 
     pos, _ = subtract_frame_transforms(
@@ -82,6 +85,9 @@ def motion_anchor_pos_b(env: ManagerBasedEnv, command_name: str) -> torch.Tensor
 
 
 def motion_anchor_ori_b(env: ManagerBasedEnv, command_name: str) -> torch.Tensor:
+    """
+    reference anchor ori wrt robot's current anchor frame.
+    """
     command: MotionCommand = env.command_manager.get_term(command_name) # type: ignore
 
     _, ori = subtract_frame_transforms(

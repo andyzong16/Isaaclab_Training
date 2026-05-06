@@ -51,17 +51,21 @@ class G1WBCEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 4
-        self.episode_length_s = 20.0
+        self.episode_length_s = 30.0
+
         # simulation settings
         self.sim.dt = 0.005
         self.sim.render_interval = self.decimation
         self.sim.physics_material = self.scene.terrain.physics_material
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
-        # # viewer settings
-        # self.viewer.eye = (3.0, 3.0, 3.0)
 
-        # disable debug vis
-        # self.commands.motion.debug_vis = False
+        self.viewer = ViewerCfg(
+            eye=(-1.0, -10.5, 0.2), 
+            lookat=(-1.0, -0.0, 0.0),
+            resolution=(1920, 1080), 
+            origin_type="asset_root", 
+            asset_name="robot"
+        )
 
 @configclass
 class G1WBCEnvCfg_PLAY(G1WBCEnvCfg):
@@ -71,16 +75,19 @@ class G1WBCEnvCfg_PLAY(G1WBCEnvCfg):
         """Post initialization."""
         super().__post_init__()
         
-        self.episode_length_s = 10.0
+        self.episode_length_s = 1.0
 
         self.terminations.anchor_pos = None # type: ignore
         self.terminations.anchor_ori = None # type: ignore
         self.terminations.ee_body_pos = None # type: ignore
         self.terminations.base_ang_vel_exceed = None # type: ignore
+
+        self.commands.motion.start_from_beginning = True
+        self.commands.motion.joint_position_range = (0.0, 0.0)
         
         self.viewer = ViewerCfg(
-            eye=(-0.0, -3.5, 0.2), 
-            lookat=(0.0, -0.0, 0.0),
+            eye=(-1.0, -3.5, 0.2), 
+            lookat=(-1.0, -0.0, 0.0),
             resolution=(1920, 1080), 
             origin_type="asset_root", 
             asset_name="robot"

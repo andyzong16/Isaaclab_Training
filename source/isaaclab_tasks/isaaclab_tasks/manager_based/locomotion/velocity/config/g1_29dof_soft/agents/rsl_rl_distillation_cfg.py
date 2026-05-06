@@ -191,7 +191,7 @@ class G1DistillationRunnerCfg(RslRlDistillationRunnerCfg):
 class G1PPODistillationRunnerCfg(RslRlDistillationRunnerCfg):
     num_steps_per_env = 24
     # max_iterations = 30_000
-    max_iterations = 25_000
+    max_iterations = 20_000
     save_interval = 500
     obs_groups = {
         "teacher": ["policy"],
@@ -261,7 +261,7 @@ class G1PPODistillationRunnerCfg(RslRlDistillationRunnerCfg):
         encoder_loss_coef=1.0,
         decoder_loss_coef=1.0,
         loss_type="mse",
-        total_iteration=25_000,
+        total_iteration=max_iterations,
         loss_schedule="curriculum",
         # loss_schedule="fixed",
     ) # type: ignore

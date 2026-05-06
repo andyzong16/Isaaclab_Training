@@ -18,12 +18,14 @@ class G1RewardsCfg:
     # -- task terms for tracking the motion
     motion_global_anchor_pos = RewTerm(
         func=wbc_mdp.motion_global_anchor_position_error_exp,
-        weight=0.5,
+        # weight=0.5,
+        weight=2.0,
         params={"command_name": "motion", "std": 0.3},
     )
     motion_global_anchor_ori = RewTerm(
         func=wbc_mdp.motion_global_anchor_orientation_error_exp,
-        weight=0.5,
+        # weight=0.5,
+        weight=2.0,
         params={"command_name": "motion", "std": 0.4},
     )
     motion_body_pos = RewTerm(
@@ -48,7 +50,10 @@ class G1RewardsCfg:
     )
 
     # -- penalties
-    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-1e-1)
+    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
+    joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-1e-5)
+    # action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.1) # beyond mimic
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
     joint_limit = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-10.0,

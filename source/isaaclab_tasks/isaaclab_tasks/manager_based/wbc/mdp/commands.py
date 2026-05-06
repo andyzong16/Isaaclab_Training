@@ -232,11 +232,14 @@ class MotionCommand(CommandTerm):
 
         sampled_bins = torch.multinomial(sampling_probabilities, len(env_ids), replacement=True)
 
-        self.time_steps[env_ids] = (
-            (sampled_bins + sample_uniform(0.0, 1.0, (len(env_ids),), device=self.device))
-            / self.bin_count
-            * (self.motion.time_step_total - 1)
-        ).long()
+        if self.cfg.start_from_beginning:
+            self.time_steps[env_ids] = 0
+        else:
+            self.time_steps[env_ids] = (
+                (sampled_bins + sample_uniform(0.0, 1.0, (len(env_ids),), device=self.device))
+                / self.bin_count
+                * (self.motion.time_step_total - 1)
+            ).long()
 
         # Metrics
         H = -(sampling_probabilities * (sampling_probabilities + 1e-12).log()).sum()
@@ -276,6 +279,10 @@ class MotionCommand(CommandTerm):
         joint_pos[env_ids] = torch.clip(
             joint_pos[env_ids], soft_joint_pos_limits[:, :, 0], soft_joint_pos_limits[:, :, 1]
         )
+
+        """
+        hard-reset joint state
+        """
         self.robot.write_joint_state_to_sim(joint_pos[env_ids], joint_vel[env_ids], env_ids=env_ids)
         self.robot.write_root_state_to_sim(
             torch.cat([root_pos[env_ids], root_ori[env_ids], root_lin_vel[env_ids], root_ang_vel[env_ids]], dim=-1),
@@ -375,6 +382,7 @@ class MotionCommandCfg(CommandTermCfg):
     adaptive_lambda: float = 0.8
     adaptive_uniform_ratio: float = 0.1
     adaptive_alpha: float = 0.001
+    start_from_beginning: bool = False
 
     anchor_visualizer_cfg: VisualizationMarkersCfg = FRAME_MARKER_CFG.replace(prim_path="/Visuals/Command/pose") # type: ignore
     anchor_visualizer_cfg.markers["frame"].scale = (0.2, 0.2, 0.2) # type: ignore

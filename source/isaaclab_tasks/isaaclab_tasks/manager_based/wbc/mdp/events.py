@@ -33,6 +33,7 @@ def randomize_joint_default_pos(
     pos_distribution_params: tuple[float, float] | None = None,
     operation: Literal["add", "scale", "abs"] = "abs",
     distribution: Literal["uniform", "log_uniform", "gaussian"] = "uniform",
+    joint_action_name: str = "JointPositionAction",
 ):
     """
     Randomize the joint default positions which may be different from URDF due to calibration errors.
@@ -63,7 +64,7 @@ def randomize_joint_default_pos(
             env_ids = env_ids[:, None]
         asset.data.default_joint_pos[env_ids, joint_ids] = pos
         # update the offset in action since it is not updated automatically
-        env.action_manager.get_term("JointPositionAction")._offset[env_ids, joint_ids] = pos
+        env.action_manager.get_term(joint_action_name)._offset[env_ids, joint_ids] = pos
 
 
 def randomize_rigid_body_com(

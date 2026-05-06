@@ -14,37 +14,46 @@ from isaaclab.utils import configclass
 import isaaclab.envs.mdp as mdp
 import isaaclab_tasks.manager_based.wbc.mdp as wbc_mdp
 
+VELOCITY_RANGE = {
+    "x": (-0.5, 0.5),
+    "y": (-0.5, 0.5),
+    "z": (-0.2, 0.2),
+    "roll": (-0.52, 0.52),
+    "pitch": (-0.52, 0.52),
+    "yaw": (-0.78, 0.78),
+}
+
 @configclass
 class G1EventCfg:
     """Configuration for events."""
 
     # startup
     physics_material = EventTerm(
-        func=mdp.randomize_rigid_body_material, # type: ignore
+        func=wbc_mdp.randomize_rigid_body_material, # type: ignore
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
-            "static_friction_range": (1.0, 1.0),
-            "dynamic_friction_range": (1.0, 1.0),
-            "restitution_range": (0.0, 0.0),
+            "static_friction_range": (0.3, 1.6),
+            "dynamic_friction_range": (0.3, 1.2),
+            "restitution_range": (0.0, 0.5),
             "num_buckets": 64,
         },
     )
 
-    # TODO: Uncomment this to enable domain randomization for joint miscalibrations
+    # # check this
     # add_joint_default_pos = EventTerm(
-    #     func=mdp.randomize_default_joint_pos,
+    #     func=wbc_mdp.randomize_joint_default_pos,
     #     mode="startup",
     #     params={
     #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*"]),
-    #         "distribution_params": (-0.01, 0.01),
+    #         "pos_distribution_params": (-0.01, 0.01),
     #         "operation": "add",
+    #         "joint_action_name": "joint_pos",
     #     },
     # )
 
-    # TODO: Uncomment this to enable domain randomization for rigid body COM
     # base_com = EventTerm(
-    #     func=mdp.randomize_rigid_body_com,
+    #     func=wbc_mdp.randomize_rigid_body_com,
     #     mode="startup",
     #     params={
     #         "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
@@ -52,20 +61,10 @@ class G1EventCfg:
     #     },
     # )
 
-    # TODO: Uncomment this to enable domain randomization for pushing the robot
-    # interval
+    # # interval
     # push_robot = EventTerm(
     #     func=mdp.push_by_setting_velocity,
     #     mode="interval",
     #     interval_range_s=(1.0, 3.0),
-    #     params={
-    #         "velocity_range": {
-    #             "x": (-0.5, 0.5),
-    #             "y": (-0.5, 0.5),
-    #             "z": (-0.2, 0.2),
-    #             "roll": (-0.52, 0.52),
-    #             "pitch": (-0.52, 0.52),
-    #             "yaw": (-0.78, 0.78),
-    #         },
-    #     },
+    #     params={"velocity_range": VELOCITY_RANGE},
     # )

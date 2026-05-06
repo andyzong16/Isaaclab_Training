@@ -109,7 +109,8 @@ def sample_terrain_property(
 
     # -- compute bin index and ratio, clamped to [0, max_bins]
     bin_idx = torch.floor(x_pos.abs() / bin_size).clamp(min=0, max=max_bins)
-    ratio = 1 - (bin_idx / max_bins * 2 - 1).abs()
+    # ratio = 1 - (bin_idx / max_bins * 2 - 1).abs()
+    ratio = bin_idx / max_bins  # linearly decrease from 1 to 0 as bin_idx goes from 0 to max_bins
 
     # -- interpolate parameters: ub at ratio=0, lb at ratio=1
     friction_lb, friction_ub = friction_range
