@@ -143,7 +143,8 @@ class RFT_2D:
         self.tau_r = torch.zeros((self.num_envs, self.num_bodies * self.num_contact_points), device=self.device)
 
         # material parameters
-        self.stiffness = torch.ones(self.num_envs, device=self.device)
+        self.rho_c = self.cfg.rho_c * torch.ones(self.num_envs, device=self.device)
+        self.mu_int = self.cfg.mu_int * torch.ones(self.num_envs, device=self.device)
         self.static_friction_coef = self.cfg.static_friction_coef * torch.ones(self.num_envs, device=self.device)
         self.dynamic_friction_coef = self.cfg.dynamic_friction_coef * torch.ones(self.num_envs, device=self.device)
         self.lam = self.cfg.lam * torch.ones(self.num_envs, device=self.device)
@@ -214,11 +215,11 @@ class RFT_2D:
 
     @property
     def terrain_density(self) -> torch.Tensor:
-        return self.rho
+        return self.rho_c
 
     @property
     def terrain_stiffness(self) -> torch.Tensor:
-        return self.lam
+        return self.mu_int
 
     """
     operations.
@@ -254,17 +255,16 @@ class RFT_2D:
         self._update_data(torch.arange(self.num_envs, device=self.device))
         self._timestamp_last_update[:] = self._timestamp[:]
 
-    def randomize_ground_stiffness(self, env_ids: torch.Tensor, stiffness: torch.Tensor) -> None:
+    def randomize_ground_stiffness(self, env_ids: torch.Tensor, mu_int: torch.Tensor) -> None:
         """
-        Update ground stiffness (N/m) for each env.
-        Implementation is similar to terrain curriculum used in terrain importer class.
+        Update ground internal friction (mu_int) for each env.
         This can be triggered by curriculum manager.
 
         Args:
             env_ids: tensor of env ids to update
-            stiffness: tensor of stiffness values (len(env_ids),)
+            mu_int: tensor of mu_int values (len(env_ids),)
         """
-        self.stiffness[env_ids] = stiffness  # can be 0.25 - 10.0 ?
+        self.mu_int[env_ids] = mu_int
 
     def update_material_density(self, env_ids: torch.Tensor, packing_density: torch.Tensor, bulk_density: torch.Tensor) -> None:
         """
@@ -276,8 +276,7 @@ class RFT_2D:
             packing_density: tensor of packing densities (len(env_ids), )
             bulk_density: tensor of bulk densities (len(env_ids), )
         """
-        rho_c = bulk_density * packing_density
-        self.rho_c[env_ids] = rho_c
+        self.rho_c[env_ids] = bulk_density * packing_density
 
     def update_friction_params(
         self, env_ids: torch.Tensor, static_friction_coef: torch.Tensor, dynamic_friction_coef: torch.Tensor
@@ -463,9 +462,9 @@ class RFT_2D:
         vdotr = (v * r).sum(dim=-1)
         vdotz = (v * z).sum(dim=-1)
         self.contact_point_intrusion_angle = torch.acos(vdotr) * ((vdotz < 0).float() - (vdotz >= 0).float())
-        self.contact_point_intrusion_angle = torch.nan_to_num(
-            self.contact_point_intrusion_angle, nan=0.0, posinf=0.0, neginf=0.0
-        )
+        # self.contact_point_intrusion_angle = torch.nan_to_num(
+        #     self.contact_point_intrusion_angle, nan=0.0, posinf=0.0, neginf=0.0
+        # )
 
         # compute contact point tilt angle (beta)
         # see S7 eq.5 from https://www.pnas.org/doi/10.1073/pnas.2214017120
@@ -476,7 +475,7 @@ class RFT_2D:
         reflection_matrix = (1 - 2 * (ndotr < 0).float()).unsqueeze(-1)
         n_rtz = n_rtz * reflection_matrix
         self.contact_point_tilt_angle = -torch.acos(n_rtz[:, :, :, 2]) + torch.pi * (n_rtz[:, :, :, 2] < 0).float()
-        self.contact_point_tilt_angle = torch.nan_to_num(self.contact_point_tilt_angle, nan=0.0, posinf=0.0, neginf=0.0)
+        # self.contact_point_tilt_angle = torch.nan_to_num(self.contact_point_tilt_angle, nan=0.0, posinf=0.0, neginf=0.0)
 
         # step4: compute resistive force per contact points
         f_normal = self._get_normal_force(
@@ -532,9 +531,9 @@ class RFT_2D:
         is_contact = depth > 0  # apply resistive force only when foot is penetrating
 
         alpha_x, alpha_z = self._compute_elementary_force(beta, gamma)  # get RFT force
-        self.force_gm = (
-            self.stiffness[:, None] * alpha_z * depth * dA[None, :] * is_contact * (1e6)
-        )  # m^3 to cm^3 since alpha is N/cm^3
+        g = 9.81
+        xi = self.rho_c * g * (894.0 * self.mu_int**3 - 386.0 * self.mu_int**2 + 89.0 * self.mu_int)
+        self.force_gm = xi[:, None] * alpha_z * depth * dA[None, :] * is_contact
 
         if self.enable_ema_filter:
             self._ema_filtering(foot_velocity, foot_velocity_prev, depth)

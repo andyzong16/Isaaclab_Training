@@ -629,7 +629,7 @@ class G1ObservationsCfg:
     privileged: PrivilegedHistoryCfg = PrivilegedHistoryCfg()
 
     logging: LoggingObsCfg = LoggingObsCfg()
-    log_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
+    # log_privileged: PrivilegedObsCfg = PrivilegedObsCfg()
 
 
 # @configclass

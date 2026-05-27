@@ -202,7 +202,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # prepare logging
     if args_cli.log:
         max_episode_length = int(env_cfg.episode_length_s / (env_cfg.decimation * env_cfg.sim.dt))
-        log_item = ["obs", "privileged", "log_privileged"]
+        # log_item = ["obs", "privileged", "log_privileged"]
+        log_item = ["obs"]
         logger = DictBenchmarkLogger(
             log_dir=log_dir,
             tag=args_cli.tag,
@@ -225,12 +226,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         # process data to log
         if args_cli.log:
             log_obs = obs["logging"]  # only log necessary data
-            privileged_obs = obs["privileged"]  # only log necessary data
-            log_privileged_obs = obs["log_privileged"]  # only log necessary data
+            # privileged_obs = obs["privileged"]  # only log necessary data
             item_dict = {
                 "obs": log_obs.cpu().numpy(),
-                "privileged": privileged_obs.cpu().numpy(),
-                "log_privileged": log_privileged_obs.cpu().numpy(),
+                # "logging": privileged_obs.cpu().numpy(),
             }
             logger.log(item_dict)
 

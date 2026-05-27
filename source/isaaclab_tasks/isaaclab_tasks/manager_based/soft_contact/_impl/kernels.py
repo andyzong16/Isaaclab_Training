@@ -630,6 +630,7 @@ def compute_resistive_force(
     # emf filter cache
     tau_r: wp.array2d(dtype=wp.float32),  # (N, M)
     c_r: wp.float32,
+    enable_ema: wp.int32, # 1 = use EMA output, 0 = use raw force_gm
     # intruder parameters
     dA: wp.array1d(dtype=wp.float32),  # (C,) per-contact-point area element
     num_cp: wp.int32,  # number of contact points per body (C)
@@ -690,22 +691,25 @@ def compute_resistive_force(
     tau_r[env_id, body_id] = tau_r_update
 
     alpha_unfiltered[env_id, body_id] = alpha
-    # # filter all axis
-    # alpha_filtered[env_id, body_id] = (
-    #     (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id] + coef * tau_r_update * alpha_filtered[env_id, body_id]
+    # filter all axis
+    alpha_filtered[env_id, body_id] = (
+        (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id] + coef * tau_r_update * alpha_filtered[env_id, body_id]
+    )
+    # # filter z only
+    # alpha_filtered[env_id, body_id] = alpha
+    # alpha_filtered[env_id, body_id][2] = (
+    #     (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id][2] + coef * tau_r_update * alpha_filtered[env_id, body_id][2]
     # )
-    alpha_filtered[env_id, body_id] = alpha
-    alpha_filtered[env_id, body_id][2] = (
-        (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id][2] + coef * tau_r_update * alpha_filtered[env_id, body_id][2]
-    ) # filter z only
 
-    # compute force by mulitplying depth, area, stiffness
-    alpha_filtered[env_id, body_id] = alpha_filtered[env_id, body_id] * depth_mask
+    if enable_ema == 0:
+        alpha_out = alpha_unfiltered[env_id, body_id] * depth_mask
+    else:
+        alpha_out = alpha_filtered[env_id, body_id] * depth_mask
 
     # NOTE: orthogonal base is {x, y, z} here.
     cp_id = body_id % num_cp  # contact point index within body
     dA_element = dA[cp_id]
-    force_vec = alpha_filtered[env_id, body_id] * depth * dA_element * is_contact
+    force_vec = alpha_out * depth * dA_element * is_contact
     sign_fy = 1.0 - 2.0 * wp.float32(n_rtz_direction_w[env_id, body_id][1] < 0.0)
     resistive_force[env_id, body_id] = (
         force_vec[0] * r_element + sign_fy * force_vec[1] * t_element + force_vec[2] * z_element
@@ -780,3 +784,211 @@ def zero_wrench(
     env_id, body_id = wp.tid()
     contact_force[env_id, body_id] = wp.vec3f(0.0)
     contact_torque[env_id, body_id] = wp.vec3f(0.0)
+
+
+"""
+2D RFT force kernels
+"""
+
+
+@wp.func
+def _compute_elementary_force_2d(
+    beta: wp.float32,
+    gamma: wp.float32,
+    A00: wp.float32,
+    A10: wp.float32,
+    B11: wp.float32,
+    B01: wp.float32,
+    B_11: wp.float32,
+    C11: wp.float32,
+    C01: wp.float32,
+    C_11: wp.float32,
+    D10: wp.float32,
+) -> wp.vec2f:
+    """
+    Fourier series expansion for 2D RFT force coefficients.
+    Returns (alpha_x, alpha_z) where:
+      alpha_z is the normal (vertical) component
+      alpha_x is the horizontal component (not used in current force pipeline)
+    See https://www.science.org/doi/10.1126/science.1229163
+    """
+    alpha_z = wp.float32(0)
+    alpha_x = wp.float32(0)
+
+    alpha_z += A00 * wp.cos(2.0 * wp.PI * (0.0 * beta / wp.PI))
+    alpha_z += A10 * wp.cos(2.0 * wp.PI * (1.0 * beta / wp.PI))
+    alpha_z += B01 * wp.sin(2.0 * wp.PI * (1.0 * gamma / (2.0 * wp.PI)))
+    alpha_z += B11 * wp.sin(2.0 * wp.PI * (1.0 * beta / wp.PI + 1.0 * gamma / (2.0 * wp.PI)))
+    alpha_z += B_11 * wp.sin(2.0 * wp.PI * (-1.0 * beta / wp.PI + 1.0 * gamma / (2.0 * wp.PI)))
+
+    alpha_x += C01 * wp.sin(2.0 * wp.PI * (1.0 * gamma / (2.0 * wp.PI)))
+    alpha_x += C11 * wp.sin(2.0 * wp.PI * (1.0 * beta / wp.PI + 1.0 * gamma / (2.0 * wp.PI)))
+    alpha_x += C_11 * wp.sin(2.0 * wp.PI * (-1.0 * beta / wp.PI + 1.0 * gamma / (2.0 * wp.PI)))
+    alpha_x += D10 * wp.cos(2.0 * wp.PI * (1.0 * beta / wp.PI))
+
+    return wp.vec2f(alpha_x, alpha_z)
+
+
+@wp.kernel
+def compute_resistive_force_2d(
+    foot_pos_w: wp.array2d(dtype=wp.vec3f),           # (N, M)
+    foot_velocity_w: wp.array2d(dtype=wp.vec3f),       # (N, M)
+    foot_velocity_prev_w: wp.array2d(dtype=wp.vec3f),  # (N, M)
+    beta: wp.array2d(dtype=wp.float32),                # (N, M) tilt angle
+    gamma: wp.array2d(dtype=wp.float32),               # (N, M) intrusion angle
+    z_direction_w: wp.array2d(dtype=wp.vec3f),         # (N, M)
+    # per-env material params
+    rho: wp.array1d(dtype=wp.float32),                 # (N,) DRFT density
+    lam: wp.array1d(dtype=wp.float32),                 # (N,) DRFT coefficient
+    dynamic_friction_coef: wp.array1d(dtype=wp.float32),  # (N,)
+    kf: wp.array1d(dtype=wp.float32),                  # (N,)
+    rho_c: wp.array1d(dtype=wp.float32),               # (N,) critical media density (kg/m^3)
+    mu_int: wp.array1d(dtype=wp.float32),              # (N,) internal friction coefficient
+    # Fourier coefficients (fixed scalar constants, dimensionless)
+    A00: wp.float32,
+    A10: wp.float32,
+    B11: wp.float32,
+    B01: wp.float32,
+    B_11: wp.float32,
+    C11: wp.float32,
+    C01: wp.float32,
+    C_11: wp.float32,
+    D10: wp.float32,
+    # EMA filter state
+    force_gm: wp.array2d(dtype=wp.float32),            # (N, M)
+    force_ema: wp.array2d(dtype=wp.float32),           # (N, M)
+    tau_r: wp.array2d(dtype=wp.float32),               # (N, M)
+    c_r: wp.float32,
+    enable_ema: wp.int32,                              # 1 = use EMA output, 0 = use raw force_gm
+    # per-contact-point area
+    dA: wp.array1d(dtype=wp.float32),                  # (C,)
+    num_cp: wp.int32,
+    # output
+    resistive_force: wp.array2d(dtype=wp.vec3f),       # (N, M)
+):
+    env_id, body_id = wp.tid()
+
+    foot_velocity = foot_velocity_w[env_id, body_id]
+    foot_velocity_prev = foot_velocity_prev_w[env_id, body_id]
+
+    depth = -foot_pos_w[env_id, body_id][2]
+    is_contact = wp.float32(depth > 0.0)
+    depth_mask = wp.float32(depth > 0.0)
+
+    beta_val = beta[env_id, body_id]
+    gamma_val = gamma[env_id, body_id]
+    z_dir = z_direction_w[env_id, body_id]
+
+    alpha_xz = _compute_elementary_force_2d(beta_val, gamma_val, A00, A10, B11, B01, B_11, C11, C01, C_11, D10)
+    alpha_z = alpha_xz[1]
+
+    rho_val = rho[env_id]    # DRFT density
+    lam_val = lam[env_id]    # DRFT coefficient
+    dynamic_friction = dynamic_friction_coef[env_id]
+    kf_val = kf[env_id]
+
+    # Quasistatic stiffness xi: same formula as 3D RFT.
+    # alpha_z is dimensionless (Li et al. 2013); xi [N/m^3] provides the force scale.
+    g_val = wp.float32(9.81)
+    mu_val = mu_int[env_id]
+    xi = rho_c[env_id] * g_val * (894.0 * mu_val * mu_val * mu_val - 386.0 * mu_val * mu_val + 89.0 * mu_val)
+
+    cp_id = body_id % num_cp
+    dA_val = dA[cp_id]
+
+    force_gm_val = xi * alpha_z * depth * dA_val * is_contact
+
+    # EMA filter on z-force (always computed so the state stays valid for reset)
+    coef = 0.8
+    increment_mask = wp.float32(foot_velocity[2] * foot_velocity_prev[2] < 0.0)
+    tau_r_val = tau_r[env_id, body_id]
+    tau_r_boundary = wp.float32(tau_r_val < 1.0)
+    mask = increment_mask * tau_r_boundary
+    tau_r_val = tau_r_val + c_r * mask
+    tau_r_val = depth_mask * tau_r_val
+    tau_r[env_id, body_id] = tau_r_val
+
+    force_gm[env_id, body_id] = force_gm_val
+    force_ema_prev = force_ema[env_id, body_id]
+    force_ema_val = (1.0 - coef * tau_r_val) * force_gm_val + coef * tau_r_val * force_ema_prev
+    force_ema_val = depth_mask * force_ema_val
+    force_ema[env_id, body_id] = force_ema_val
+
+    # Select filtered or unfiltered quasistatic force (matches torch enable_ema_filter flag)
+    fz_qs = force_gm_val
+    if enable_ema:
+        fz_qs = force_ema_val
+
+    # DRFT inertial term: lam * rho * vn^2 (dynamic RFT)
+    vn = foot_velocity[2]
+    fz = fz_qs # only quasistatic term
+    # fz += is_contact * lam_val * rho_val * vn * vn # DRFT term
+
+    # Coulomb tangential friction in x-y plane.
+    # Uses fz directly (not abs), matching the torch implementation exactly.
+    vt_x = foot_velocity[0]
+    vt_y = foot_velocity[1]
+    vt_norm = wp.sqrt(vt_x * vt_x + vt_y * vt_y)
+    ft = wp.min(dynamic_friction * fz, kf_val * vt_norm)
+    vt_dir = wp.vec3f(vt_x / (vt_norm + 1.0e-6), vt_y / (vt_norm + 1.0e-6), wp.float32(0))
+
+    resistive_force[env_id, body_id] = fz * z_dir - ft * vt_dir
+
+
+@wp.kernel
+def reset_2d(
+    env_ids: wp.array(dtype=wp.int64),                      # (n,)
+    force_gm: wp.array2d(dtype=wp.float32),                 # (N, M)
+    force_ema: wp.array2d(dtype=wp.float32),                # (N, M)
+    tau_r: wp.array2d(dtype=wp.float32),                    # (N, M)
+    contact_point_lin_vel_prev_w: wp.array2d(dtype=wp.vec3f),  # (N, M)
+):
+    i, j = wp.tid()
+    env_id = env_ids[i]
+    force_gm[env_id, j] = 0.0
+    force_ema[env_id, j] = 0.0
+    tau_r[env_id, j] = 0.0
+    contact_point_lin_vel_prev_w[env_id, j] = wp.vec3f(0.0)
+
+
+"""
+Spring-damper force kernel
+"""
+
+
+@wp.kernel
+def compute_spring_damper_force(
+    foot_pos_w: wp.array2d(dtype=wp.vec3f),             # (N, M)
+    foot_velocity_w: wp.array2d(dtype=wp.vec3f),         # (N, M)
+    # per-env material params
+    k: wp.array1d(dtype=wp.float32),                     # (N,) spring stiffness density (N/m^3)
+    b: wp.array1d(dtype=wp.float32),                     # (N,) damping density (N*s/m^3)
+    dynamic_friction_coef: wp.array1d(dtype=wp.float32), # (N,)
+    kf: wp.array1d(dtype=wp.float32),                    # (N,)
+    # per-contact-point area
+    dA: wp.array1d(dtype=wp.float32),                    # (C,)
+    num_cp: wp.int32,
+    # output
+    resistive_force: wp.array2d(dtype=wp.vec3f),         # (N, M)
+):
+    env_id, body_id = wp.tid()
+
+    vel = foot_velocity_w[env_id, body_id]
+    depth = -foot_pos_w[env_id, body_id][2]
+    is_contact = wp.float32(depth > 0.0)
+
+    cp_id = body_id % num_cp
+    dA_val = dA[cp_id]
+
+    # Spring-damper normal force (no tensile: clamped to >= 0)
+    vn = vel[2]
+    fz = wp.max((k[env_id] * depth - b[env_id] * vn) * dA_val * is_contact, wp.float32(0.0))
+
+    # Coulomb tangential friction — same model as 2D RFT
+    vt_x = vel[0]
+    vt_y = vel[1]
+    vt_norm = wp.sqrt(vt_x * vt_x + vt_y * vt_y)
+    ft = wp.min(dynamic_friction_coef[env_id] * fz, kf[env_id] * vt_norm)
+    vt_dir = wp.vec3f(vt_x / (vt_norm + 1.0e-6), vt_y / (vt_norm + 1.0e-6), wp.float32(0))
+
+    resistive_force[env_id, body_id] = fz * wp.vec3f(0.0, 0.0, 1.0) - ft * vt_dir

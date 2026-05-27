@@ -300,15 +300,18 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
-        self.actions.physics_callback.backend = "3D-warp"
         # self.actions.physics_callback.disable = True
+        # # 3D RFT
+        # self.actions.physics_callback.backend = "3D"
+        self.actions.physics_callback.backend = "3D-warp"
+        # self.actions.physics_callback.backend = "2D-warp"
+        self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
+        self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
+        self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
 
         # disable curriculum
         self.curriculum.terrain_levels = None
         self.curriculum.command_vel = None
-        # self.curriculum.terrain_friction_levels = None
-        # self.curriculum.terrain_stiffness_levels = None
-        # self.curriculum.terrain_density_levels = None
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False
@@ -318,13 +321,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.events.push_robot = None
         self.events.physics_material = None
         self.events.scale_actuator_gains = None
-        self.events.distance_based_sample_terrain_property.mode = "interval"
-        self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
-
-        # # material
-        # self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
-        # self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
-        # self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
+        # self.events.distance_based_sample_terrain_property.mode = "interval"
+        # self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
@@ -363,7 +361,8 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.viewer = ViewerCfg(
             eye=(-0.0, -2.5, -0.1),
             lookat=(0.0, -0.0, -0.1),
-            resolution=(1920, 1080),
+            # resolution=(1920, 1080),
+            resolution=(3840, 2160),
             # resolution=(1080, 720),
             origin_type="asset_root",
             asset_name="robot",

@@ -51,13 +51,22 @@ class SceneCfg(InteractiveSceneCfg):
     robot: RigidObjectCfg = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/cube",
         spawn=sim_utils.CuboidCfg(
+            activate_contact_sensors=True,
             size=(0.2, 0.1, 0.08),
             rigid_props=sim_utils.RigidBodyPropertiesCfg(max_depenetration_velocity=1.0, disable_gravity=False),
-            mass_props=sim_utils.MassPropertiesCfg(mass=10.0),
+            mass_props=sim_utils.MassPropertiesCfg(mass=35.0),
             physics_material=sim_utils.RigidBodyMaterialCfg(),
             visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.1, 0.1, 0.1), opacity=1.0),
+            collision_props=sim_utils.CollisionPropertiesCfg(),
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.1)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
+    )
+
+    # multi-body contact reporting
+    contact_forces = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/cube",
+        history_length=3,
+        track_air_time=True,
     )
 
     # lights

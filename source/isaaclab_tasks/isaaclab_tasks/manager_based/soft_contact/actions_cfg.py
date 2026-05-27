@@ -41,8 +41,8 @@ class PhysicsCallbackActionCfg(ActionTermCfg):
     class_type: type[ActionTerm] = physics_callback_actions.PhysicsCallbackAction
     body_names: list[str] = MISSING
     """List of joint names or regex expressions that the action will be mapped to."""
-    backend: Literal["2D", "3D", "3D-warp"] = "3D-warp"
-    """The RFT backend to use. Options are '2D' or '3D' or '3D-warp'."""
+    backend: Literal["2D", "3D", "2D-warp", "3D-warp", "spring-damper"] = "3D-warp"
+    """The RFT backend to use. Options are '2D' or '3D' or '3D-warp' or 'spring-damper'."""
     disable: bool = False
     """Whether to disable this action term."""
     enable_ema_filter: bool = True

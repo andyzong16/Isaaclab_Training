@@ -34,7 +34,8 @@ class G1FlatEnvCfg(G1RoughEnvCfg):
         self.observations.critic.height_scan = None  # type: ignore
 
         # select contact solver backend
-        self.actions.physics_callback.backend = "3D-warp"
+        self.actions.physics_callback.backend = "2D-warp"
+        # self.actions.physics_callback.backend = "3D-warp"
 
         # edit randomization
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
@@ -119,7 +120,7 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
-        self.actions.physics_callback.backend = "3D-warp"
+        # self.actions.physics_callback.backend = "3D-warp"
 
         # disable curriculum
         self.curriculum.terrain_levels = None
@@ -133,8 +134,8 @@ class G1FlatEnvCfg_PLAY(G1FlatEnvCfg):
         self.events.push_robot = None
         self.events.physics_material = None
         self.events.scale_actuator_gains = None
-        self.events.distance_based_sample_terrain_property.mode = "interval"
-        self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
+        # self.events.distance_based_sample_terrain_property.mode = "interval"
+        # self.events.distance_based_sample_terrain_property.interval_range_s = (0.02, 0.02)
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)

@@ -10,6 +10,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
 import isaaclab.envs.mdp as mdp
+import isaaclab_tasks.manager_based.soft_contact.mdp as contact_mdp
 
 @configclass
 class ObservationsCfg:
@@ -20,8 +21,9 @@ class ObservationsCfg:
         """Observations for policy group."""
 
         # observation terms (order preserved)
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.5, n_max=0.5))
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
+        root_pos = ObsTerm(func=mdp.root_pos_w)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
 
     @configclass
     class CriticCfg(ObsGroup):
@@ -29,6 +31,31 @@ class ObservationsCfg:
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
 
+    @configclass
+    class LoggingCfg(ObsGroup):
+        """Observations for logging group."""
+
+        # observation terms (order preserved)
+        root_pos = ObsTerm(func=mdp.root_pos_w)
+        root_quat = ObsTerm(func=mdp.root_quat_w)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
+        # contact_forces = ObsTerm(func=contact_mdp.foot_contact_forces_raw,
+        #                          params={
+        #                              "action_term_name": "physics_callback",
+        #                              "threshold": 40.0,
+        #                          })
+        contact_forces = ObsTerm(
+            func=contact_mdp.foot_contact_forces_raw_hybrid,
+            params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_force_filter_threshold": 5.0,
+            "soft_force_filter_threshold": 40.0,
+            },
+        )
+
     # observation groups
     policy: PolicyCfg = PolicyCfg(enable_corruption=True, concatenate_terms=True)
     critic: CriticCfg = CriticCfg(enable_corruption=False, concatenate_terms=True)
+    logging: LoggingCfg = LoggingCfg(enable_corruption=True, concatenate_terms=True)

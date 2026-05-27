@@ -16,6 +16,8 @@ from isaaclab.markers import VisualizationMarkers
 from ._impl.material import (
     Material3DRFTCfg,
     PoppySeedCPCfg,
+    GenericMaterialCfg,
+    DefaultSpringDamperCfg,
     # PoppySeedLPCfg,
 )
 from ._impl.soft_contact_model_torch import (
@@ -23,6 +25,8 @@ from ._impl.soft_contact_model_torch import (
     RFT_3D,
 )
 from ._impl.soft_contact_model_warp import RFT_3D as RFT_3D_WARP
+from ._impl.soft_contact_model_warp import RFT_2D as RFT_2D_WARP
+from ._impl.soft_contact_model_warp import SpringDamper as SpringDamper_WARP
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
@@ -69,7 +73,7 @@ class PhysicsCallbackAction(ActionTerm):
 
         # get physics backend
         if self.cfg.backend == "2D":
-            material_cfg = PoppySeedCPCfg()
+            material_cfg = GenericMaterialCfg()
             num_bodies = len(body_ids)
             self.contact_solver = RFT_2D(
                 material_cfg=material_cfg,
@@ -109,6 +113,35 @@ class PhysicsCallbackAction(ActionTerm):
                 dt=env.physics_dt,
                 contact_threshold=self.cfg.contact_threshold,
                 enable_ema_filter=self.cfg.enable_ema_filter,
+                collider_cfg=self.cfg.intruder_geometry_cfg,
+                history_length=self.cfg.contact_data_history_length,
+                history_logging_decimation=self.cfg.history_logging_decimation,
+            )
+        elif self.cfg.backend == "2D-warp":
+            material_cfg = GenericMaterialCfg()
+            num_bodies = len(body_ids)
+            self.contact_solver = RFT_2D_WARP(
+                material_cfg=material_cfg,
+                num_envs=self.num_envs,
+                num_bodies=num_bodies,
+                device=self.device,
+                dt=env.physics_dt,
+                contact_threshold=self.cfg.contact_threshold,
+                enable_ema_filter=self.cfg.enable_ema_filter,
+                collider_cfg=self.cfg.intruder_geometry_cfg,
+                history_length=self.cfg.contact_data_history_length,
+                history_logging_decimation=self.cfg.history_logging_decimation,
+            )
+        elif self.cfg.backend == "spring-damper":
+            material_cfg = DefaultSpringDamperCfg()
+            num_bodies = len(body_ids)
+            self.contact_solver = SpringDamper_WARP(
+                material_cfg=material_cfg,
+                num_envs=self.num_envs,
+                num_bodies=num_bodies,
+                device=self.device,
+                dt=env.physics_dt,
+                contact_threshold=self.cfg.contact_threshold,
                 collider_cfg=self.cfg.intruder_geometry_cfg,
                 history_length=self.cfg.contact_data_history_length,
                 history_logging_decimation=self.cfg.history_logging_decimation,
@@ -208,9 +241,9 @@ class PhysicsCallbackAction(ActionTerm):
             return
 
         # handle contact point visualization
-        if self.cfg.backend == "3D-warp":
+        if self.cfg.backend in ("3D-warp", "2D-warp", "spring-damper"):
             contact_pos = self.contact_solver.torch_contact_point_pos.reshape(-1, 3)
-        elif self.cfg.backend == "3D" or self.cfg.backend == "2D":
+        elif self.cfg.backend in ("3D", "2D"):
             contact_pos = self.contact_solver.contact_point_pos.reshape(-1, 3)
         scale = (
             torch.tensor(

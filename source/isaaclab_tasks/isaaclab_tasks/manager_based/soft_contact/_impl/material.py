@@ -20,14 +20,16 @@ class MaterialCfg:
     """
     Material configuration for soft contact model.
 
-    A00 - D10: quasistatic RFT Fourier coefficients.
-    lam, rho: dynamic RFT parameters.
+    A00 - D10: quasistatic RFT Fourier coefficients (dimensionless, from Li et al. 2013).
+    rho_c, mu_int: quasistatic stiffness parameters (same as 3D RFT).
+      Effective stiffness xi = rho_c * g * (894*mu_int^3 - 386*mu_int^2 + 89*mu_int).
+    lam, rho: dynamic RFT (DRFT) inertial parameters.
     static_friction_coef, dynamic_friction_coef: friction coefficients.
     kf: tangential force model parameter.
     kh, beta_d, bh: horizontal stroke resistive force model parameters.
     """
 
-    # quasistatic RFT fourier coefficients
+    # quasistatic RFT fourier coefficients (dimensionless)
     A00: float = MISSING  # type: ignore
     A10: float = MISSING  # type: ignore
     B11: float = MISSING  # type: ignore
@@ -37,6 +39,10 @@ class MaterialCfg:
     C01: float = MISSING  # type: ignore
     C_11: float = MISSING  # type: ignore
     D10: float = MISSING  # type: ignore
+
+    # quasistatic stiffness parameters (same parameterisation as 3D RFT)
+    rho_c: float = MISSING  # type: ignore  # critical media density (kg/m^3)
+    mu_int: float = MISSING  # type: ignore  # media internal friction coefficient
 
     # dynamic RFT parameters
     lam: float = MISSING  # type: ignore
@@ -67,6 +73,10 @@ class PoppySeedLPCfg(MaterialCfg):
     C_11: float = 0.0
     D10: float = 0.025
 
+    # quasistatic stiffness (same parameterisation as 3D RFT)
+    rho_c: float = 638.0  # bulk density of poppy seeds (kg/m^3)
+    mu_int: float = 0.3  # internal friction coefficient
+
     # dynamic RFT parameters
     lam: float = 1.0
     rho: float = 638.0 * (1e-6)  # kg/mm^3 to kg/cm^3
@@ -96,6 +106,10 @@ class PoppySeedCPCfg(MaterialCfg):
     C_11: float = 0.018
     D10: float = 0.046
 
+    # quasistatic stiffness (same parameterisation as 3D RFT)
+    rho_c: float = 638.0  # bulk density of poppy seeds (kg/m^3)
+    mu_int: float = 0.3  # internal friction coefficient
+
     lam: float = 1.0
     rho: float = 638.0 * (1e-6)  # kg/mm^3 to kg/cm^3
 
@@ -108,6 +122,71 @@ class PoppySeedCPCfg(MaterialCfg):
     kh: float = 50.0
     beta_d: float = 0.5
     bh: float = 1.0
+
+@configclass
+class GenericMaterialCfg(MaterialCfg):
+    A00: float = 0.206
+    A10: float = 0.169
+    B11: float = 0.212
+    B01: float = 0.358
+    B_11: float = 0.055
+    C11: float = -0.124
+    C01: float = 0.253
+    C_11: float = 0.007
+    D10: float = 0.088
+
+    # quasistatic stiffness (same parameterisation as 3D RFT)
+    rho_c: float = 638.0  # bulk density of poppy seeds (kg/m^3)
+    mu_int: float = 0.3  # internal friction coefficient
+
+    # dynamic inertial correction parameters
+    lam: float = 1.0
+    rho: float = 638.0 * (1e-6)  # kg/mm^3 to kg/cm^3
+
+    static_friction_coef: float = 1.0  # TODO remove
+    dynamic_friction_coef: float = 0.5
+
+    kf: float = 10.0
+
+    # horizontal stroke resistive force model parameters
+    kh: float = 50.0
+    beta_d: float = 0.5
+    bh: float = 1.0
+
+
+"""
+Spring-damper contact model parameters.
+"""
+
+
+@configclass
+class SpringDamperCfg:
+    """
+    Material configuration for spring-damper contact model.
+
+    Normal force per contact point: fz = max((k * depth - b * vn) * dA, 0)
+    Tangential force: ft = min(mu * fz, kf * vt)
+
+    k: spring stiffness density (N/m^3) — scales with contact area element dA.
+    b: damping density (N*s/m^3) — scales with contact area element dA.
+    dynamic_friction_coef: Coulomb friction coefficient.
+    kf: tangential viscous cap coefficient (N*s/m).
+    """
+
+    k: float = MISSING  # type: ignore  # spring stiffness density (N/m^3)
+    b: float = MISSING  # type: ignore  # damping density (N*s/m^3)
+    static_friction_coef: float = MISSING  # type: ignore
+    dynamic_friction_coef: float = MISSING  # type: ignore
+    kf: float = MISSING  # type: ignore  # tangential viscous cap (N*s/m)
+
+
+@configclass
+class DefaultSpringDamperCfg(SpringDamperCfg):
+    k: float = 1.0e5   # N/m^3  (soft ground, similar order to granular media)
+    b: float = 1.0e3   # N*s/m^3
+    static_friction_coef: float = 1.0
+    dynamic_friction_coef: float = 0.5
+    kf: float = 10.0   # N*s/m
 
 
 """

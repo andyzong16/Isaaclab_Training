@@ -121,8 +121,7 @@ class G1EventCfg:
         func=g1_mdp.randomize_terrain_stiffness,
         mode="reset",
         params={
-            "stiffness_range": (0.2, 0.9),  # 3D-RFT
-            # "stiffnes_range": (0.5, 15.0), # 2D-RFT
+            "stiffness_range": (0.2, 0.9),
             "contact_solver_name": "physics_callback",
         },
     )
@@ -148,32 +147,32 @@ class G1EventCfg:
         params={"velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0)}},
     )
 
-    # only inference
-    distance_based_sample_terrain_property = EventTerm(
-        func=g1_mdp.sample_terrain_property,
-        # func=g1_mdp.sample_terrain_property_linear,
-        mode="startup",
-        # mode="interval",
-        # interval_range_s=(0.02, 0.02),
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
-            "friction_range": (0.5, 0.5),
-            "stiffness_range": (0.1, 0.9),
-            "bulk_density_range": (3000.0, 3000.0),
-            # "friction_range": (1.0, 1.0),
-            # "stiffness_range": (0.2, 0.8),
-            # "bulk_density_range": (3000.0, 3000.0),
-            # "friction_range": (1.0, 1.0),
-            # "stiffness_range": (0.6, 0.6),
-            # "bulk_density_range": (1000.0, 3000.0),
-            "packing_ratio_range": (1.0, 1.0),
-            # "bin_size": 2.0,
-            # "max_bins": 8,
-            # "bin_size": 2.5,
-            # "max_bins": 6,
-            # "bin_size": 3.5,
-            # "max_bins": 4,
-            "max_bins": 3, 
-            "bin_size": 2.5,
-        },
-    )
+    # # only inference
+    # distance_based_sample_terrain_property = EventTerm(
+    #     func=g1_mdp.sample_terrain_property,
+    #     # func=g1_mdp.sample_terrain_property_linear,
+    #     mode="startup",
+    #     # mode="interval",
+    #     # interval_range_s=(0.02, 0.02),
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "friction_range": (0.5, 0.5),
+    #         "stiffness_range": (0.1, 0.9),
+    #         "bulk_density_range": (3000.0, 3000.0),
+    #         # "friction_range": (1.0, 1.0),
+    #         # "stiffness_range": (0.2, 0.8),
+    #         # "bulk_density_range": (3000.0, 3000.0),
+    #         # "friction_range": (1.0, 1.0),
+    #         # "stiffness_range": (0.6, 0.6),
+    #         # "bulk_density_range": (1000.0, 3000.0),
+    #         "packing_ratio_range": (1.0, 1.0),
+    #         # "bin_size": 2.0,
+    #         # "max_bins": 8,
+    #         # "bin_size": 2.5,
+    #         # "max_bins": 6,
+    #         # "bin_size": 3.5,
+    #         # "max_bins": 4,
+    #         "max_bins": 3, 
+    #         "bin_size": 2.5,
+    #     },
+    # )

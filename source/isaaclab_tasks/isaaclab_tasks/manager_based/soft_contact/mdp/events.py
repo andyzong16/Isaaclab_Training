@@ -38,36 +38,60 @@ from isaaclab.utils.version import compare_versions
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
 
-
 def randomize_terrain_friction(
     env: ManagerBasedEnv,
     env_ids: torch.Tensor,
     friction_range: tuple[float, float],
-    contact_solver_name:str="physics_callback",
-)->None:
+    contact_solver_name: str = "physics_callback",
+) -> None:
     contact_solver = env.action_manager.get_term(contact_solver_name).contact_solver # type: ignore
     friction_samples = math_utils.sample_uniform(
         friction_range[0], friction_range[1], (len(env_ids),), device=env.device
     )
     contact_solver.update_friction_params(env_ids, friction_samples, friction_samples)
     if "log" in env.extras.keys():
-        env.extras["log"]["Events/terrain_friction"] = friction_samples.mean()
+        if "Events/terrain_friction" in env.extras["log"].keys():
+            env.extras["log"]["Events/terrain_friction"] = friction_samples.mean()
+
 
 def randomize_terrain_stiffness(
-    env: ManagerBasedEnv, 
-    env_ids: Sequence[int], 
+    env: ManagerBasedEnv,
+    env_ids: Sequence[int],
     stiffness_range: tuple[float, float],
-    contact_solver_name:str="physics_callback",
-)->None:
+    contact_solver_name: str = "physics_callback",
+) -> None:
     # extract the used quantities (to enable type-hinting)
     contact_solver = env.action_manager.get_term(contact_solver_name).contact_solver # type: ignore
-    # stiffness_samples = math_utils.sample_uniform(
-    #     stiffness_range[0], stiffness_range[1], (len(env_ids),), device=env.device
-    # )
-    stiffness_samples = torch.linspace(stiffness_range[0], stiffness_range[1], steps=len(env_ids), device=env.device)
+    stiffness_samples = math_utils.sample_uniform(
+        stiffness_range[0], stiffness_range[1], (len(env_ids),), device=env.device
+    )
     contact_solver.randomize_ground_stiffness(env_ids, stiffness_samples)
     if "log" in env.extras.keys():
-        env.extras["log"]["Events/terrain_stiffness"] = stiffness_samples.mean()
+        if "Events/terrain_stiffness" in env.extras["log"].keys():
+            env.extras["log"]["Events/terrain_stiffness"] = stiffness_samples.mean()
+
+
+def randomize_material_density(
+    env: ManagerBasedEnv,
+    env_ids: Sequence[int],
+    packing_ratio_range: tuple[float, float],
+    bulk_density_range: tuple[float, float],
+    contact_solver_name: str = "physics_callback",
+) -> None:
+    # extract the used quantities (to enable type-hinting)
+    contact_solver = env.action_manager.get_term(contact_solver_name).contact_solver # type: ignore
+    packing_ratio = math_utils.sample_uniform(
+        packing_ratio_range[0], packing_ratio_range[1], (len(env_ids),), device=env.device
+    )
+    bulk_density = math_utils.sample_uniform(
+        bulk_density_range[0], bulk_density_range[1], (len(env_ids),), device=env.device
+    )
+    contact_solver.update_material_density(env_ids, packing_ratio, bulk_density)
+    if "log" in env.extras.keys():
+        if "Events/packing_ratio" in env.extras["log"].keys():
+            env.extras["log"]["Events/packing_ratio"] = packing_ratio.mean()
+        if "Events/bulk_density" in env.extras["log"].keys():
+            env.extras["log"]["Events/bulk_density"] = bulk_density.mean()
 
 
 def reset_root_state_uniform(
