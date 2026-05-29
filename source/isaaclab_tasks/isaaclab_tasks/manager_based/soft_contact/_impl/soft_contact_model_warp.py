@@ -10,7 +10,7 @@ import warp as wp
 from .soft_contact_model_data import SoftContactData
 from .material import Material3DRFTCfg, MaterialCfg, PoppySeedCPCfg, SpringDamperCfg
 from .collider import Collider, ColliderCfg, PlaneColliderCfg
-from .kernels import (
+from .kernels_fix import (
     compute_contact_point_lin_vel_w,
     compute_contact_point_pos_w,
     compute_contact_wrench,
@@ -31,10 +31,6 @@ from .kernels import (
     update_array_with_index,
     zero_wrench,
 )
-
-
-# Backward compatibility alias
-IntruderGeometryCfg = PlaneColliderCfg
 
 
 class RFT_3D:
@@ -568,7 +564,7 @@ class RFT_3D:
         wp.launch(
             kernel=compute_r_direction_w,
             dim=(self.num_envs, self.num_bodies, self.num_contact_points),
-            inputs=[self.n_dir, self.z_dir, self.v_dir, self.r_dir, 1e-10],
+            inputs=[self.n_dir, self.z_dir, self.v_dir, self.r_dir, 0.01],
             device=self.device,
         )
         wp.launch(
@@ -1150,7 +1146,7 @@ class RFT_2D:
         wp.launch(
             kernel=compute_r_direction_w,
             dim=(self.num_envs, self.num_bodies, self.num_contact_points),
-            inputs=[self.n_dir, self.z_dir, self.v_dir, self.r_dir, 1e-10],
+            inputs=[self.n_dir, self.z_dir, self.v_dir, self.r_dir, 0.01],
             device=self.device,
         )
         wp.launch(

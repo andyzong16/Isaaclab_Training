@@ -27,7 +27,7 @@ collider_cfg = BoxColliderCfg(
     contact_edge_x=(-0.1, 0.1),
     contact_edge_y=(-0.05, 0.05),
     contact_edge_z=(-0.04, 0.04),
-    resolution=(10, 10),
+    resolution=(2, 2),
 )
 
 

@@ -45,7 +45,7 @@ class SoftcontactEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 10
-        self.episode_length_s = 3.0
+        self.episode_length_s = 4.0
         # simulation settings
         self.sim.dt = 1/500
         self.sim.render_interval = self.decimation
@@ -74,6 +74,6 @@ class SoftcontactEnvCfg(ManagerBasedRLEnvCfg):
             eye=(1.5, 0.0, 0.1),
             lookat=(0.0, 0.0, 0.0),
             resolution=(1920, 1080),
-            origin_type="asset_root",
-            asset_name="robot",
+            # origin_type="asset_root",
+            # asset_name="robot",
         )
