@@ -609,10 +609,15 @@ class LoggingObsCfg(ObsGroup):
         func=mdp.generated_commands,
         params={"command_name": "base_velocity"},
     )
-    foot_contact_force = ObsTerm(
-        func=g1_mdp.foot_contact_forces_raw,
-        params={"action_term_name": "physics_callback"},
-    )
+    contact_forces = ObsTerm(
+            func=g1_mdp.foot_contact_forces_raw_hybrid,
+            params={
+            "rigid_contact_sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "soft_contact_sensor_name": "physics_callback",
+            "rigid_force_filter_threshold": 5.0,
+            "soft_force_filter_threshold": 40.0,
+            },
+        )
 
     def __post_init__(self):
         self.enable_corruption = False

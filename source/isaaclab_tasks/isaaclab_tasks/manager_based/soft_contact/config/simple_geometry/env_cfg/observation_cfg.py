@@ -54,8 +54,47 @@ class ObservationsCfg:
             "soft_force_filter_threshold": 40.0,
             },
         )
+        
+    @configclass
+    class ContactAnglesCfg(ObsGroup):
+        """Observations for logging group."""
 
+        # observation terms (order preserved)
+        contact_angle = ObsTerm(
+            func=contact_mdp.contact_angle,
+            params={
+                "action_term_name": "physics_callback",
+            },
+        )
+        
+    @configclass
+    class ContactVectorsCfg(ObsGroup):
+        """Observations for logging group."""
+
+        # observation terms (order preserved)
+        contact_angle = ObsTerm(
+            func=contact_mdp.contact_coordinate_dir,
+            params={
+                "action_term_name": "physics_callback",
+            },
+        )
+        
+    @configclass
+    class ContactPointPosCfg(ObsGroup):
+        """Observations for logging group."""
+
+        # observation terms (order preserved)
+        contact_angle = ObsTerm(
+            func=contact_mdp.contact_point_pos,
+            params={
+                "action_term_name": "physics_callback",
+            },
+        )
+        
     # observation groups
     policy: PolicyCfg = PolicyCfg(enable_corruption=True, concatenate_terms=True)
     critic: CriticCfg = CriticCfg(enable_corruption=False, concatenate_terms=True)
     logging: LoggingCfg = LoggingCfg(enable_corruption=True, concatenate_terms=True)
+    contact_angles: ContactAnglesCfg = ContactAnglesCfg(enable_corruption=False, concatenate_terms=True)
+    contact_vectors: ContactVectorsCfg = ContactVectorsCfg(enable_corruption=False, concatenate_terms=True)
+    contact_point_pos: ContactPointPosCfg = ContactPointPosCfg(enable_corruption=False, concatenate_terms=True)

@@ -39,6 +39,7 @@ class EventCfg:
             "pose_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "z": (0.1, 0.1), "yaw": (0.0, 0.0)},
             "velocity_range": {
                 # "x": (1.0, 1.0),
+                "x": (0.0, 0.0),
                 "y": (1.0, 1.0),
                 # "y": (0.0, 0.0),
                 "z": (-0.0, 0.0),
@@ -81,14 +82,14 @@ class EventCfg:
             # "packing_ratio_range": (0.5, 1.0),
             # "bulk_density_range": (1000.0, 3000.0),
 
-            # "packing_ratio_range": (1.0, 1.0),
-            # "bulk_density_range": (2700.0, 2700.0),
+            "packing_ratio_range": (1.0, 1.0),
+            "bulk_density_range": (2700.0, 2700.0),
 
             # "packing_ratio_range": (0.6, 0.6),
             # "bulk_density_range": (1500.0, 1500.0),
 
-            "packing_ratio_range": (0.6, 0.6),
-            "bulk_density_range": (1100.0, 1100.0),
+            # "packing_ratio_range": (0.6, 0.6),
+            # "bulk_density_range": (1100.0, 1100.0),
 
             "contact_solver_name": "physics_callback",
         },

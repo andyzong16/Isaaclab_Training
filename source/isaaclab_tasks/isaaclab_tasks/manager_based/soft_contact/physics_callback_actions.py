@@ -227,6 +227,12 @@ class PhysicsCallbackAction(ActionTerm):
             torques=self.contact_wrench_b[:, :, 3:6],
             body_ids=self._body_ids,
         )
+        # self._asset.permanent_wrench_composer.set_forces_and_torques(
+        #     forces=self.contact_wrench[:, :, :3],
+        #     torques=self.contact_wrench[:, :, 3:6],
+        #     body_ids=self._body_ids,
+        #     is_global=True,
+        # )
 
         # track if sensor if active or not
         self.contact_solver.data.is_sensor_active = (

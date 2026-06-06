@@ -837,24 +837,42 @@ def test_force_calculation():
     num_body = 1
     nx, ny = 2, 2
 
+    # """
+    # predefine plane collider
+    # """
+    # contact_edge_x=(-0.1, 0.1)
+    # contact_edge_y=(-0.05, 0.05)
+    # z_offset = -0.04 # contact point is 4cm below com 
+    # num_contact_points = nx * ny
+
+    # contact_points = wp.zeros(nx*ny, dtype=wp.vec3)
+    # contact_normals = wp.zeros(nx*ny, dtype=wp.vec3)
+    # wp.launch(
+    #     kernel=plane_contact_points,
+    #     dim=[nx, ny],
+    #     inputs=[contact_edge_x, contact_edge_y, z_offset, nx, ny],
+    #     outputs=[contact_points, contact_normals],
+    # )
+
     """
     predefine plane collider
     """
     contact_edge_x=(-0.1, 0.1)
     contact_edge_y=(-0.05, 0.05)
-    z_offset = -0.04 # contact point is 4cm below com 
+    contact_edge_z=(-0.04, 0.04)
+    num_contact_points = nx * ny * 6
 
-    contact_points = wp.zeros(nx*ny, dtype=wp.vec3)
-    contact_normals = wp.zeros(nx*ny, dtype=wp.vec3)
+    contact_points = wp.zeros(nx*ny*6, dtype=wp.vec3)
+    contact_normals = wp.zeros(nx*ny*6, dtype=wp.vec3)
     wp.launch(
-        kernel=plane_contact_points,
-        dim=[nx, ny],
-        inputs=[contact_edge_x, contact_edge_y, z_offset, nx, ny],
+        kernel=box_contact_points,
+        dim=[6, nx, ny],
+        inputs=[contact_edge_x, contact_edge_y, contact_edge_z, nx, ny],
         outputs=[contact_points, contact_normals],
     )
 
-    contact_points = contact_points.reshape((num_env, num_body, nx*ny))
-    contact_normals = contact_normals.reshape((num_env, num_body, nx*ny))
+    contact_points = contact_points.reshape((num_env, num_body, num_contact_points))
+    contact_normals = contact_normals.reshape((num_env, num_body, num_contact_points))
 
     """
     calculate global contact point position, linear velocity
@@ -865,11 +883,11 @@ def test_force_calculation():
     # # identity quat
     # body_quat_w[:, :, 3] = 1.0 # warp uses (x, y, z, w) convention for quaternion
 
-    # roll -5deg
-    body_quat_w[:, :, 0] = -0.0436194
-    body_quat_w[:, :, 1] = 0
-    body_quat_w[:, :, 2] = 0
-    body_quat_w[:, :, 3] = 0.9990482
+    # # roll -5deg
+    # body_quat_w[:, :, 0] = -0.0436194
+    # body_quat_w[:, :, 1] = 0
+    # body_quat_w[:, :, 2] = 0
+    # body_quat_w[:, :, 3] = 0.9990482
 
     # yaw 90deg 
     # 0, 0, 0.7071068, 0.7071068
@@ -878,11 +896,11 @@ def test_force_calculation():
     # body_quat_w[:, :, 2] = 0.7071068
     # body_quat_w[:, :, 3] = 0.7071068
 
-    # # pitch -30deg
-    # body_quat_w[:, :, 0] = 0
-    # body_quat_w[:, :, 1] = -0.258819
-    # body_quat_w[:, :, 2] = 0
-    # body_quat_w[:, :, 3] = 0.9659258
+    # pitch -30deg
+    body_quat_w[:, :, 0] = 0
+    body_quat_w[:, :, 1] = -0.258819
+    body_quat_w[:, :, 2] = 0
+    body_quat_w[:, :, 3] = 0.9659258
 
     # # roll 15deg, pitch -30deg 
     # body_quat_w[:, :, 0] = 0.1260786
@@ -907,14 +925,14 @@ def test_force_calculation():
 
     wp.launch(
         kernel=compute_contact_point_pos_w,
-        dim=[num_env, num_body, nx*ny],
+        dim=[num_env, num_body, num_contact_points],
         inputs=[body_pos_w_wp, body_quat_w_wp, contact_points],
         outputs=[contact_point_pos_w],
     )
 
     wp.launch(
         kernel=compute_contact_point_lin_vel_w,
-        dim=[num_env, num_body, nx*ny],
+        dim=[num_env, num_body, num_contact_points],
         inputs=[body_pos_w_wp, body_lin_vel_w_wp, body_ang_vel_w_wp, contact_point_pos_w],
         outputs=[contact_point_lin_vel_w],
     )
@@ -923,7 +941,6 @@ def test_force_calculation():
     calculate coordinate vectors
     """
 
-    num_contact_points = nx * ny
     normal_direction_w = wp.zeros((num_env, num_body, num_contact_points), dtype=wp.vec3)
     v_direction_w = wp.zeros((num_env, num_body, num_contact_points), dtype=wp.vec3)
     r_direction_w = wp.zeros((num_env, num_body, num_contact_points), dtype=wp.vec3)
@@ -1111,9 +1128,9 @@ def test_force_calculation():
         length=0.1, normalize=True, color='b',
     )
 
-    # draw collider surface
-    surf = contact_point_pos_w_np.reshape(nx, ny, 3)
-    ax.plot_surface(surf[:, :, 0], surf[:, :, 1], surf[:, :, 2], alpha=0.3, color='gray')
+    # # draw collider surface
+    # surf = contact_point_pos_w_np.reshape(nx, ny, 3)
+    # ax.plot_surface(surf[:, :, 0], surf[:, :, 1], surf[:, :, 2], alpha=0.3, color='gray')
 
     lim = max(contact_edge_x[1], contact_edge_y[1]) * 1.5
     ax.set_xlim(-lim, lim)
@@ -1299,5 +1316,5 @@ if __name__ == "__main__":
     # test_contact_kinematics()
     # test_contact_coordinates()
     # test_characteristic_angle()
-    # test_force_calculation()
-    test_force_calculation_animation()
+    test_force_calculation()
+    # test_force_calculation_animation()

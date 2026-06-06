@@ -303,7 +303,7 @@ def foot_contact_forces_raw_hybrid(
         .reshape(env.num_envs, -1)
     )
     forces = forces.reshape(env.num_envs, -1)
-    forces = forces * (forces > threshold).float()
+    # forces = forces * (forces > threshold).float()
 
     return forces
 

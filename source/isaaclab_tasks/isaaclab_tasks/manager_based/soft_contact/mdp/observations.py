@@ -72,3 +72,49 @@ def foot_contact_forces_raw_hybrid(
     forces = forces * mask.float()
 
     return forces
+
+def contact_angle(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    tilt_angle = action_term.contact_solver.torch_contact_point_tilt_angle
+    intrusion_angle = action_term.contact_solver.torch_contact_point_intrusion_angle
+    twist_angle = action_term.contact_solver.torch_contact_point_twist_angle
+    
+    # print("angle: ", torch.cat([tilt_angle, intrusion_angle, twist_angle], dim=-1).shape)
+    tilt_angle = tilt_angle.squeeze(1)
+    intrusion_angle = intrusion_angle.squeeze(1)
+    twist_angle = twist_angle.squeeze(1)
+
+    return torch.cat([tilt_angle, intrusion_angle, twist_angle], dim=-1) # (num_envs, 3*num_contacts)
+
+def contact_coordinate_dir(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    n_dir = action_term.contact_solver.torch_n_dir # (num_envs, num_body, num_contacts, 3)
+    r_dir = action_term.contact_solver.torch_r_dir
+    t_dir = action_term.contact_solver.torch_t_dir
+    v_dir = action_term.contact_solver.torch_v_dir
+    
+    # print("dir: ", torch.cat([n_dir, r_dir, t_dir], dim=2).shape)
+    n_dir = n_dir.squeeze(1)
+    r_dir = r_dir.squeeze(1)
+    t_dir = t_dir.squeeze(1)
+    v_dir = v_dir.squeeze(1)
+
+    return torch.cat([n_dir, r_dir, t_dir, v_dir], dim=1) # (num_envs, 3*num_contacts, 3)
+
+def contact_point_pos(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    contact_point_pos = action_term.contact_solver.torch_contact_point_pos
+    
+    return contact_point_pos.squeeze(1) # (num_envs, num_contacts, 3)

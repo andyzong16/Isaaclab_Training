@@ -297,14 +297,13 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         # self.scene.terrain.terrain_generator = None
 
         self.scene.terrain = vel_mdp.SoftTerrain
-        self.scene.rigid_floor = vel_mdp.RigidPatch
+        # self.scene.rigid_floor = vel_mdp.RigidPatch
 
         # select contact solver backend
         # self.actions.physics_callback.disable = True
-        # # 3D RFT
-        # self.actions.physics_callback.backend = "3D"
-        self.actions.physics_callback.backend = "3D-warp"
-        # self.actions.physics_callback.backend = "2D-warp"
+
+        # self.actions.physics_callback.backend = "3D-warp"
+        self.actions.physics_callback.backend = "2D-warp"
         self.events.randomize_stiffness.params["stiffness_range"] = (0.4, 0.4)
         self.events.randomize_material_density.params["bulk_density_range"] = (1100.0, 1100.0)
         self.events.randomize_material_density.params["packing_ratio_range"] = (1.0, 1.0)
@@ -330,7 +329,7 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
         self.commands.base_velocity.heading_command = False
-        self.commands.base_velocity.rel_standing_envs = 0.0
+        self.commands.base_velocity.rel_standing_envs = 1
         self.commands.base_velocity.resampling_time_range = (self.episode_length_s, self.episode_length_s)
         self.commands.base_velocity.debug_vis = False
 

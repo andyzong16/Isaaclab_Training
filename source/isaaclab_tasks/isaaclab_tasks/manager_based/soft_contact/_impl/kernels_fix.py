@@ -226,7 +226,7 @@ def box_contact_points(
     pos = wp.vec3f(0.0, 0.0, 0.0)
     nrm = wp.vec3f(0.0, 0.0, 0.0)
 
-    # face 0: -Z  (bottom)
+    # face 0: -Z
     if face_id == 0:
         pos = wp.vec3f(
             x_min + u * (x_max - x_min),
@@ -234,7 +234,7 @@ def box_contact_points(
             z_min,
         )
         nrm = wp.vec3f(0.0, 0.0, -1.0)
-    # face 1: +Z  (top)
+    # face 1: +Z
     elif face_id == 1:
         pos = wp.vec3f(
             x_min + u * (x_max - x_min),
@@ -242,7 +242,7 @@ def box_contact_points(
             z_max,
         )
         nrm = wp.vec3f(0.0, 0.0, 1.0)
-    # face 2: -Y  (front)
+    # face 2: -Y
     elif face_id == 2:
         pos = wp.vec3f(
             x_min + u * (x_max - x_min),
@@ -250,7 +250,7 @@ def box_contact_points(
             z_min + v * (z_max - z_min),
         )
         nrm = wp.vec3f(0.0, -1.0, 0.0)
-    # face 3: +Y  (back)
+    # face 3: +Y
     elif face_id == 3:
         pos = wp.vec3f(
             x_min + u * (x_max - x_min),
@@ -258,7 +258,7 @@ def box_contact_points(
             z_min + v * (z_max - z_min),
         )
         nrm = wp.vec3f(0.0, 1.0, 0.0)
-    # face 4: -X  (left)
+    # face 4: -X 
     elif face_id == 4:
         pos = wp.vec3f(
             x_min,
@@ -266,7 +266,7 @@ def box_contact_points(
             z_min + v * (z_max - z_min),
         )
         nrm = wp.vec3f(-1.0, 0.0, 0.0)
-    # face 5: +X  (right)
+    # face 5: +X 
     elif face_id == 5:
         pos = wp.vec3f(
             x_max,
@@ -431,6 +431,84 @@ def compute_t_direction_w(
 angle calculation kernels
 """
 
+# @wp.kernel
+# def compute_intrusion_angle(
+#     z_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     v_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     r_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     intrusion_angle: wp.array3d(dtype=wp.float32),  # (N, B, C)
+# ):
+
+#     env_id, body_id, contact_point_id = wp.tid()
+#     z_element = z_direction_w[env_id, body_id, contact_point_id]
+#     v_element = v_direction_w[env_id, body_id, contact_point_id]
+#     r_element = r_direction_w[env_id, body_id, contact_point_id]
+
+#     vdotr = wp.dot(v_element, r_element)
+#     vdotz = wp.dot(v_element, z_element)
+#     intrusion_angle[env_id, body_id, contact_point_id] = wp.acos(vdotr) * (
+#         wp.float32(vdotz < 0.0) - wp.float32(vdotz >= 0.0)
+#     )
+
+
+# @wp.kernel
+# def compute_tilt_angle(
+#     z_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     n_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     r_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     t_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     tilt_angle: wp.array3d(dtype=wp.float32),  # (N, B, C)
+# ):
+
+#     env_id, body_id, contact_point_id = wp.tid()
+#     z_element = z_direction_w[env_id, body_id, contact_point_id]
+#     n_element = n_direction_w[env_id, body_id, contact_point_id]
+#     r_element = r_direction_w[env_id, body_id, contact_point_id]
+#     t_element = t_direction_w[env_id, body_id, contact_point_id]
+
+#     ndotr = wp.dot(n_element, r_element)
+#     ndott = wp.dot(n_element, t_element)
+#     ndotz = wp.dot(n_element, z_element)
+#     n_rtz = wp.vec3f(ndotr, ndott, ndotz)
+#     reflection_matrix = 1.0 - 2.0 * wp.float32(ndotr < 0.0)
+#     n_rtz = n_rtz * reflection_matrix
+#     tilt_angle[env_id, body_id, contact_point_id] = -wp.acos(n_rtz[2]) + wp.PI * wp.float32(n_rtz[2] < 0.0)
+
+
+# @wp.kernel
+# def compute_twist_angle(
+#     z_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     n_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     r_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     t_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     n_rtz_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
+#     twist_angle: wp.array3d(dtype=wp.float32),  # (N, B, C)
+# ):
+
+#     env_id, body_id, contact_point_id = wp.tid()
+#     z_element = z_direction_w[env_id, body_id, contact_point_id]
+#     n_element = n_direction_w[env_id, body_id, contact_point_id]
+#     r_element = r_direction_w[env_id, body_id, contact_point_id]
+#     t_element = t_direction_w[env_id, body_id, contact_point_id]
+
+#     ndotr = wp.dot(n_element, r_element)
+#     ndott = wp.dot(n_element, t_element)
+#     ndotz = wp.dot(n_element, z_element)
+#     n_rtz = wp.vec3f(ndotr, ndott, ndotz)
+#     reflection_matrix = 1.0 - 2.0 * wp.float32(ndotr < 0.0)
+#     n_rtz = n_rtz * reflection_matrix
+#     n_rtz_norm = wp.length(n_rtz)
+#     n_rtz = n_rtz / (n_rtz_norm + 1e-6)
+
+#     thresh = 1e-10
+#     mask = wp.float32(n_rtz_norm < thresh)
+#     n_rtz = (1.0 - mask) * n_rtz + mask * r_element
+
+#     n_rtz_direction_w[env_id, body_id, contact_point_id] = n_rtz
+#     # twist_angle[env_id, body_id, contact_point_id] = wp.atan2(wp.abs(n_rtz[1]), n_rtz[0])
+#     twist_angle[env_id, body_id, contact_point_id] = wp.atan2(n_rtz[1], n_rtz[0])
+
+
 @wp.kernel
 def compute_intrusion_angle(
     z_direction_w: wp.array3d(dtype=wp.vec3f),  # (N, B, C, 3)
@@ -446,9 +524,11 @@ def compute_intrusion_angle(
 
     vdotr = wp.dot(v_element, r_element)
     vdotz = wp.dot(v_element, z_element)
-    intrusion_angle[env_id, body_id, contact_point_id] = wp.acos(vdotr) * (
-        wp.float32(vdotz < 0.0) - wp.float32(vdotz >= 0.0)
-    )
+    
+    if vdotz <= 0.0: 
+        intrusion_angle[env_id, body_id, contact_point_id] = wp.acos(vdotr)
+    elif vdotz > 0.0:
+        intrusion_angle[env_id, body_id, contact_point_id] = -wp.acos(vdotr)
 
 
 @wp.kernel
@@ -465,14 +545,20 @@ def compute_tilt_angle(
     n_element = n_direction_w[env_id, body_id, contact_point_id]
     r_element = r_direction_w[env_id, body_id, contact_point_id]
     t_element = t_direction_w[env_id, body_id, contact_point_id]
-
-    ndotr = wp.dot(n_element, r_element)
-    ndott = wp.dot(n_element, t_element)
-    ndotz = wp.dot(n_element, z_element)
-    n_rtz = wp.vec3f(ndotr, ndott, ndotz)
-    reflection_matrix = 1.0 - 2.0 * wp.float32(ndotr < 0.0)
-    n_rtz = n_rtz * reflection_matrix
-    tilt_angle[env_id, body_id, contact_point_id] = -wp.acos(n_rtz[2]) + wp.PI * wp.float32(n_rtz[2] < 0.0)
+    
+    n_dot_z = wp.dot(n_element, z_element)
+    n_dot_r = wp.dot(n_element, r_element)
+    
+    # TODO: Is this correct??
+    # beta should not fluctuate too much on the same plane
+    if n_dot_r >= 0.0 and n_dot_z >= 0.0: 
+        tilt_angle[env_id, body_id, contact_point_id] = -wp.acos(n_dot_z)
+    elif n_dot_r >= 0.0 and n_dot_z < 0.0: 
+        tilt_angle[env_id, body_id, contact_point_id] = wp.PI -wp.acos(n_dot_z)
+    elif n_dot_r < 0.0 and n_dot_z >= 0.0: 
+        tilt_angle[env_id, body_id, contact_point_id] = wp.acos(n_dot_z)
+    elif n_dot_r < 0.0 and n_dot_z < 0.0: 
+        tilt_angle[env_id, body_id, contact_point_id] = -wp.PI + wp.acos(n_dot_z)
 
 
 @wp.kernel
@@ -490,23 +576,15 @@ def compute_twist_angle(
     n_element = n_direction_w[env_id, body_id, contact_point_id]
     r_element = r_direction_w[env_id, body_id, contact_point_id]
     t_element = t_direction_w[env_id, body_id, contact_point_id]
-
-    ndotr = wp.dot(n_element, r_element)
-    ndott = wp.dot(n_element, t_element)
-    ndotz = wp.dot(n_element, z_element)
-    n_rtz = wp.vec3f(ndotr, ndott, ndotz)
-    reflection_matrix = 1.0 - 2.0 * wp.float32(ndotr < 0.0)
-    n_rtz = n_rtz * reflection_matrix
-    n_rtz_norm = wp.length(n_rtz)
-    n_rtz = n_rtz / (n_rtz_norm + 1e-6)
-
-    thresh = 1e-10
-    mask = wp.float32(n_rtz_norm < thresh)
-    n_rtz = (1.0 - mask) * n_rtz + mask * r_element
-
-    n_rtz_direction_w[env_id, body_id, contact_point_id] = n_rtz
-    twist_angle[env_id, body_id, contact_point_id] = wp.atan2(wp.abs(n_rtz[1]), n_rtz[0])
-
+    
+    n_rt_norm = wp.norm_l2(n_element - wp.dot(n_element, z_element) * z_element)
+    if n_rt_norm < 1e-6: 
+        twist_angle[env_id, body_id, contact_point_id] = 0.0
+    else: 
+        n_rt = (n_element - wp.dot(n_element, z_element) * z_element) / n_rt_norm
+        n_rt_dot_t = wp.dot(n_rt, t_element)
+        n_rt_dot_r = wp.dot(n_rt, r_element)
+        twist_angle[env_id, body_id, contact_point_id] = wp.atan2(n_rt_dot_t, n_rt_dot_r)
 
 """
 force kernels
@@ -632,7 +710,7 @@ def _friction_cone_check(
     psi: wp.float32,
     mu_surf: wp.float32,
     alpha_rtz: wp.vec3f,
-):
+) -> wp.vec3f:
     # get normal vector in rtz coordinate
     n_rtz = wp.vec3f(
         wp.sin(beta) * wp.cos(psi), wp.sin(beta) * wp.sin(psi), -wp.cos(beta)
@@ -645,34 +723,53 @@ def _friction_cone_check(
     alpha_rtz_cone = alpha_n + cone_coef * alpha_tan
     return alpha_rtz_cone
 
+@wp.func
+def _scale_generic_force(
+    rho_c: wp.float32, 
+    mu_int: wp.float32, 
+    alpha_gen: wp.vec3f, 
+) -> wp.vec3f:
+    g = 9.81
+    xi = rho_c * g * (894.0 * (mu_int**3.0) - 386.0 * (mu_int**2.0) + 89.0 * mu_int)
+    alpha = xi * alpha_gen
+    return alpha
+
 
 @wp.kernel
-def compute_resistive_force(
+def compute_contact_force(
     foot_pos_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     foot_velocity_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     foot_velocity_prev_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
+    
     beta: wp.array2d(dtype=wp.float32),  # (N, M)
     gamma: wp.array2d(dtype=wp.float32),  # (N, M)
     psi: wp.array2d(dtype=wp.float32),  # (N, M)
+    
     r_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     t_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     z_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
-    n_rtz_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
+    
     # sand parameters
     rho_c: wp.array1d(dtype=wp.float32),  # (N,)
     mu_int: wp.array1d(dtype=wp.float32),  # (N,)
     dynamic_friction_coeff: wp.array1d(dtype=wp.float32),  # (N,)
+    kf: wp.array1d(dtype=wp.float32), # (N,)
+    
+    
     # 3d RFT polynomial fit coefficients
     coef_1: wp.array1d(dtype=wp.float32),  # (20,)
     coef_2: wp.array1d(dtype=wp.float32),  # (20,)
     coef_3: wp.array1d(dtype=wp.float32),  # (20,)
+    
     # emf filter cache
     tau_r: wp.array2d(dtype=wp.float32),  # (N, M)
     c_r: wp.float32,
     enable_ema: wp.int32, # 1 = use EMA output, 0 = use raw force_gm
+    
     # intruder parameters
     dA: wp.array1d(dtype=wp.float32),  # (C,) per-contact-point area element
     num_cp: wp.int32,  # number of contact points per body (C)
+    
     # output
     alpha_unfiltered: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     alpha_filtered: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
@@ -695,7 +792,7 @@ def compute_resistive_force(
     depth = -foot_pos_w[env_id, body_id][2]
     is_contact = wp.float32(depth > 0.0)
 
-    # NOTE: orthogonal base is {r, t, z} here.
+    # NOTE: alpha_gen is in {r, t, z} coordinate here.
     alpha_gen = _compute_elementary_force(beta_element, gamma_element, psi_element, coef_1, coef_2, coef_3)
 
     # friction cone check
@@ -703,23 +800,7 @@ def compute_resistive_force(
     alpha_gen_cone = _friction_cone_check(beta_element, gamma_element, psi_element, dynamic_friction_coeff_element, alpha_gen)
 
     # scale generic resistive force 
-    g = 9.81
-    rho_c_element = rho_c[env_id]
-    mu_int_element = mu_int[env_id]
-    xi = rho_c_element * g * (894.0 * (mu_int_element**3.0) - 386.0 * (mu_int_element**2.0) + 89.0 * mu_int_element)
-    alpha = xi * alpha_gen_cone
-
-    # n = wp.vec3f(
-    #     wp.sin(beta_element) * wp.cos(psi_element), wp.sin(beta_element) * wp.sin(psi_element), -wp.cos(beta_element)
-    # )
-    # alpha_n = wp.dot(alpha, n) * n
-    # alpha_n_norm = wp.length(alpha_n)
-    # alpha_tan = alpha - alpha_n
-    # alpha_tan_norm = wp.length(alpha_tan)
-
-    # # friction cone check
-    # cone_coef = wp.min(wp.vec2f(1.0, (dynamic_friction_coeff_element * alpha_n_norm) / (alpha_tan_norm + 1e-6)))
-    # alpha = alpha_n + cone_coef * alpha_tan
+    alpha = _scale_generic_force(rho_c[env_id], mu_int[env_id], alpha_gen_cone)
 
     # apply EMA filtering
     coef = 0.8
@@ -733,32 +814,45 @@ def compute_resistive_force(
     tau_r[env_id, body_id] = tau_r_update
 
     alpha_unfiltered[env_id, body_id] = alpha
-    # filter all axis
-    alpha_filtered[env_id, body_id] = (
-        (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id] + coef * tau_r_update * alpha_filtered[env_id, body_id]
-    )
-    # # filter z only
-    # alpha_filtered[env_id, body_id] = alpha
-    # alpha_filtered[env_id, body_id][2] = (
-    #     (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id][2] + coef * tau_r_update * alpha_filtered[env_id, body_id][2]
+    
+    ### filtering strategy ####
+    # # option1: filter all axis
+    # alpha_filtered[env_id, body_id] = (
+    #     (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id] + coef * tau_r_update * alpha_filtered[env_id, body_id]
     # )
+    # option2: filter z only
+    alpha_filtered[env_id, body_id] = alpha_unfiltered[env_id, body_id]
+    alpha_filtered[env_id, body_id][2] = (
+        (1.0 - coef * tau_r_update) * alpha_unfiltered[env_id, body_id][2] + coef * tau_r_update * alpha_filtered[env_id, body_id][2]
+    )
 
     if enable_ema == 0:
         alpha_out = alpha_unfiltered[env_id, body_id] * depth_mask
     else:
         alpha_out = alpha_filtered[env_id, body_id] * depth_mask
 
-    # NOTE: orthogonal base is {x, y, z} here.
+    # NOTE: transform alpha in rtz space to cartesian space (xyz)
     cp_id = body_id % num_cp  # contact point index within body
     dA_element = dA[cp_id]
     force_vec = alpha_out * depth * dA_element * is_contact
-    sign_fy = 1.0 - 2.0 * wp.float32(n_rtz_direction_w[env_id, body_id][1] < 0.0)
-    # resistive_force[env_id, body_id] = (
-    #     force_vec[0] * r_element + sign_fy * force_vec[1] * t_element + force_vec[2] * z_element
-    # )
-    resistive_force[env_id, body_id] = (
-        force_vec[0] * r_element + force_vec[1] * t_element + force_vec[2] * z_element
-    )
+    resistive_force_cartesian = force_vec[0] * r_element + force_vec[1] * t_element + force_vec[2] * z_element
+    
+    # # NOTE: deal with close to static velocity
+    # # v_norm = wp.norm_l2(foot_velocity_element)
+    # v_norm = wp.sqrt(foot_velocity_element[0] * foot_velocity_element[0] + foot_velocity_element[1] * foot_velocity_element[1])
+    # v_static_threshold = 0.015
+    # if v_norm < v_static_threshold:
+    #     vt_x = foot_velocity_element[0]
+    #     vt_y = foot_velocity_element[1]
+    #     vt_norm = wp.sqrt(vt_x * vt_x + vt_y * vt_y)
+    #     fz = resistive_force_cartesian[2]
+    #     ft = wp.min(dynamic_friction_coeff_element * fz, kf[env_id] * vt_norm)
+    #     vt_dir = wp.vec3f(vt_x / (vt_norm + 1.0e-6), vt_y / (vt_norm + 1.0e-6), wp.float32(0))
+    #     ft_vec = - ft * vt_dir
+    #     resistive_force_cartesian[0] = ft_vec[0]
+    #     resistive_force_cartesian[1] = ft_vec[1]
+        
+    resistive_force[env_id, body_id] = resistive_force_cartesian
 
 
 @wp.kernel
@@ -875,7 +969,7 @@ def _compute_elementary_force_2d(
 
 
 @wp.kernel
-def compute_resistive_force_2d(
+def compute_contact_force_2d(
     foot_pos_w: wp.array2d(dtype=wp.vec3f),           # (N, M)
     foot_velocity_w: wp.array2d(dtype=wp.vec3f),       # (N, M)
     foot_velocity_prev_w: wp.array2d(dtype=wp.vec3f),  # (N, M)

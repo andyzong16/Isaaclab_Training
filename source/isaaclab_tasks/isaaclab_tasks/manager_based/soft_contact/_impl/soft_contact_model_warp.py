@@ -17,8 +17,10 @@ from .kernels_fix import (
     compute_intrusion_angle,
     compute_normal_direction_w,
     compute_r_direction_w,
-    compute_resistive_force,
-    compute_resistive_force_2d,
+    # compute_resistive_force,
+    # compute_resistive_force_2d,
+    compute_contact_force,
+    compute_contact_force_2d,
     compute_spring_damper_force,
     compute_t_direction_w,
     compute_tilt_angle,
@@ -208,6 +210,7 @@ class RFT_3D:
         self.coef_1 = wp.array1d(self.cfg.coef_1, dtype=wp.float32, device=self.device)
         self.coef_2 = wp.array1d(self.cfg.coef_2, dtype=wp.float32, device=self.device)
         self.coef_3 = wp.array1d(self.cfg.coef_3, dtype=wp.float32, device=self.device)
+        self.kf = wp.full(self.num_envs, self.cfg.kf, dtype=wp.float32, device=self.device)
 
         # timestamps
         self._timestamp = torch.zeros(self.num_envs, dtype=torch.float32, device=self.device)
@@ -224,6 +227,17 @@ class RFT_3D:
         self.torch_friction_coef = wp.to_torch(self.dynamic_friction_coef)
         self.torch_rho_c = wp.to_torch(self.rho_c)
         self.torch_mu_int = wp.to_torch(self.mu_int)
+
+        # extra angles 
+        self.torch_contact_point_tilt_angle = wp.to_torch(self.contact_point_tilt_angle)
+        self.torch_contact_point_intrusion_angle = wp.to_torch(self.contact_point_intrusion_angle)
+        self.torch_contact_point_twist_angle = wp.to_torch(self.contact_point_twist_angle)
+
+        # extra local coordinate
+        self.torch_n_dir = wp.to_torch(self.n_dir)
+        self.torch_r_dir = wp.to_torch(self.r_dir)
+        self.torch_t_dir = wp.to_torch(self.t_dir)
+        self.torch_v_dir = wp.to_torch(self.v_dir)
 
 
     def initialize_data(self) -> None:
@@ -319,6 +333,13 @@ class RFT_3D:
         self._timestamp += self.dt
         self._update_data(torch.arange(self.num_envs, device=self.device))
         self._timestamp_last_update[:] = self._timestamp[:]
+
+        # print("ang vel: ", body_ang_vel[0, 0])
+        # print("beta angle: ", self.torch_contact_point_tilt_angle[0, 0] * 180.0 / torch.pi)
+        # print("gamma angle: ", self.torch_contact_point_intrusion_angle[0, 0] * 180.0 / torch.pi)
+        # print("psi angle: ", self.torch_contact_point_twist_angle[0, 0] * 180.0 / torch.pi)
+        # print("velocity dir: ", self.torch_v_dir[0, 0])
+        # print("contact point force: ", self.torch_contact_point_force[0, 0])
 
     def randomize_ground_stiffness(self, env_ids: torch.Tensor, mu_int: torch.Tensor) -> None:
         """
@@ -606,31 +627,70 @@ class RFT_3D:
         # step4: compute resistive force alpha (N/m^3) and point forces (N)
         # see eq.1 in https://www.pnas.org/doi/10.1073/pnas.2214017120
 
+        # wp.launch(
+        #     kernel=compute_resistive_force,
+        #     dim=(self.num_envs, self.num_bodies * self.num_contact_points),
+        #     inputs=[
+        #         self.contact_point_pos.reshape((self.num_envs, -1)),
+        #         self.contact_point_lin_vel.reshape((self.num_envs, -1)),
+        #         self.contact_point_lin_vel_prev.reshape((self.num_envs, -1)),
+        #         self.contact_point_tilt_angle.reshape((self.num_envs, -1)),
+        #         self.contact_point_intrusion_angle.reshape((self.num_envs, -1)),
+        #         self.contact_point_twist_angle.reshape((self.num_envs, -1)),
+        #         self.r_dir.reshape((self.num_envs, -1)),
+        #         self.t_dir.reshape((self.num_envs, -1)),
+        #         self.z_dir.reshape((self.num_envs, -1)),
+        #         self.n_rtz_dir.reshape((self.num_envs, -1)),
+        #         self.rho_c,
+        #         self.mu_int,
+        #         self.dynamic_friction_coef,
+        #         self.coef_1,
+        #         self.coef_2,
+        #         self.coef_3,
+        #         self.tau_r,
+        #         self.c_r,
+        #         wp.int32(1 if self.enable_ema_filter else 0),
+        #         self.collider.dA,
+        #         self.num_contact_points,
+        #         self.alpha_unfiltered,
+        #         self.alpha_filtered,
+        #         self.resitive_force,
+        #     ],
+        # )
+        
         wp.launch(
-            kernel=compute_resistive_force,
+            kernel=compute_contact_force,
             dim=(self.num_envs, self.num_bodies * self.num_contact_points),
             inputs=[
                 self.contact_point_pos.reshape((self.num_envs, -1)),
                 self.contact_point_lin_vel.reshape((self.num_envs, -1)),
                 self.contact_point_lin_vel_prev.reshape((self.num_envs, -1)),
+                
                 self.contact_point_tilt_angle.reshape((self.num_envs, -1)),
                 self.contact_point_intrusion_angle.reshape((self.num_envs, -1)),
                 self.contact_point_twist_angle.reshape((self.num_envs, -1)),
+                
                 self.r_dir.reshape((self.num_envs, -1)),
                 self.t_dir.reshape((self.num_envs, -1)),
                 self.z_dir.reshape((self.num_envs, -1)),
-                self.n_rtz_dir.reshape((self.num_envs, -1)),
+                
+                # self.n_rtz_dir.reshape((self.num_envs, -1)),
+                
                 self.rho_c,
                 self.mu_int,
                 self.dynamic_friction_coef,
+                self.kf, 
+                
                 self.coef_1,
                 self.coef_2,
                 self.coef_3,
+                
                 self.tau_r,
                 self.c_r,
                 wp.int32(1 if self.enable_ema_filter else 0),
                 self.collider.dA,
                 self.num_contact_points,
+                
                 self.alpha_unfiltered,
                 self.alpha_filtered,
                 self.resitive_force,
@@ -884,6 +944,17 @@ class RFT_2D:
         self.torch_dynamic_friction_coef = wp.to_torch(self.dynamic_friction_coef)
         self.torch_rho_c = wp.to_torch(self.rho_c)
         self.torch_mu_int = wp.to_torch(self.mu_int)
+        
+        # extra angles 
+        self.torch_contact_point_tilt_angle = wp.to_torch(self.contact_point_tilt_angle)
+        self.torch_contact_point_intrusion_angle = wp.to_torch(self.contact_point_intrusion_angle)
+        self.torch_contact_point_twist_angle = torch.zeros_like(self.torch_contact_point_tilt_angle)
+
+        # extra local coordinate
+        self.torch_n_dir = wp.to_torch(self.n_dir)
+        self.torch_r_dir = wp.to_torch(self.r_dir)
+        self.torch_t_dir = wp.to_torch(self.t_dir)
+        self.torch_v_dir = wp.to_torch(self.v_dir)
 
     def initialize_data(self) -> None:
         """Initialize soft contact data."""
@@ -1171,8 +1242,45 @@ class RFT_2D:
         )
 
         # step 4: 2D RFT resistive force per contact point
+        # wp.launch(
+        #     kernel=compute_resistive_force_2d,
+        #     dim=(self.num_envs, self.num_bodies * self.num_contact_points),
+        #     inputs=[
+        #         self.contact_point_pos.reshape((self.num_envs, -1)),
+        #         self.contact_point_lin_vel.reshape((self.num_envs, -1)),
+        #         self.contact_point_lin_vel_prev.reshape((self.num_envs, -1)),
+        #         self.contact_point_tilt_angle.reshape((self.num_envs, -1)),
+        #         self.contact_point_intrusion_angle.reshape((self.num_envs, -1)),
+        #         self.z_dir.reshape((self.num_envs, -1)),
+        #         self.rho,
+        #         self.lam,
+        #         self.dynamic_friction_coef,
+        #         self.kf,
+        #         self.rho_c,
+        #         self.mu_int,
+        #         wp.float32(self.cfg.A00),
+        #         wp.float32(self.cfg.A10),
+        #         wp.float32(self.cfg.B11),
+        #         wp.float32(self.cfg.B01),
+        #         wp.float32(self.cfg.B_11),
+        #         wp.float32(self.cfg.C11),
+        #         wp.float32(self.cfg.C01),
+        #         wp.float32(self.cfg.C_11),
+        #         wp.float32(self.cfg.D10),
+        #         self.force_gm,
+        #         self.force_ema,
+        #         self.tau_r,
+        #         self.c_r,
+        #         wp.int32(1 if self.enable_ema_filter else 0),
+        #         self.collider.dA,
+        #         self.num_contact_points,
+        #         self.resitive_force,
+        #     ],
+        #     device=self.device,
+        # )
+        
         wp.launch(
-            kernel=compute_resistive_force_2d,
+            kernel=compute_contact_force_2d,
             dim=(self.num_envs, self.num_bodies * self.num_contact_points),
             inputs=[
                 self.contact_point_pos.reshape((self.num_envs, -1)),

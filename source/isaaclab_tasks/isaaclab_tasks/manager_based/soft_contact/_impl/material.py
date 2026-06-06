@@ -146,47 +146,12 @@ class GenericMaterialCfg(MaterialCfg):
     static_friction_coef: float = 1.0  # TODO remove
     dynamic_friction_coef: float = 0.5
 
-    kf: float = 10.0
+    kf: float = 10.0 # tangential force gain (ft = -k*vt)
 
     # horizontal stroke resistive force model parameters
     kh: float = 50.0
     beta_d: float = 0.5
     bh: float = 1.0
-
-
-"""
-Spring-damper contact model parameters.
-"""
-
-
-@configclass
-class SpringDamperCfg:
-    """
-    Material configuration for spring-damper contact model.
-
-    Normal force per contact point: fz = max((k * depth - b * vn) * dA, 0)
-    Tangential force: ft = min(mu * fz, kf * vt)
-
-    k: spring stiffness density (N/m^3) — scales with contact area element dA.
-    b: damping density (N*s/m^3) — scales with contact area element dA.
-    dynamic_friction_coef: Coulomb friction coefficient.
-    kf: tangential viscous cap coefficient (N*s/m).
-    """
-
-    k: float = MISSING  # type: ignore  # spring stiffness density (N/m^3)
-    b: float = MISSING  # type: ignore  # damping density (N*s/m^3)
-    static_friction_coef: float = MISSING  # type: ignore
-    dynamic_friction_coef: float = MISSING  # type: ignore
-    kf: float = MISSING  # type: ignore  # tangential viscous cap (N*s/m)
-
-
-@configclass
-class DefaultSpringDamperCfg(SpringDamperCfg):
-    k: float = 1.0e5   # N/m^3  (soft ground, similar order to granular media)
-    b: float = 1.0e3   # N*s/m^3
-    static_friction_coef: float = 1.0
-    dynamic_friction_coef: float = 0.5
-    kf: float = 10.0   # N*s/m
 
 
 """
@@ -282,3 +247,39 @@ class Material3DRFTCfg:
     dynamic_friction_coef: float = 0.3
     mu_int: float = 0.3  # media internal friction coefficient
     rho_c: float = 3000.0  # critical media density (effective media density = packing fraction * grain density)
+    kf: float = 10.0 # tangential force gain (ft = -k*vt)
+
+
+"""
+Spring-damper contact model parameters.
+"""
+
+
+@configclass
+class SpringDamperCfg:
+    """
+    Material configuration for spring-damper contact model.
+
+    Normal force per contact point: fz = max((k * depth - b * vn) * dA, 0)
+    Tangential force: ft = min(mu * fz, kf * vt)
+
+    k: spring stiffness density (N/m^3) — scales with contact area element dA.
+    b: damping density (N*s/m^3) — scales with contact area element dA.
+    dynamic_friction_coef: Coulomb friction coefficient.
+    kf: tangential viscous cap coefficient (N*s/m).
+    """
+
+    k: float = MISSING  # type: ignore  # spring stiffness density (N/m^3)
+    b: float = MISSING  # type: ignore  # damping density (N*s/m^3)
+    static_friction_coef: float = MISSING  # type: ignore
+    dynamic_friction_coef: float = MISSING  # type: ignore
+    kf: float = MISSING  # type: ignore  # tangential viscous cap (N*s/m)
+
+
+@configclass
+class DefaultSpringDamperCfg(SpringDamperCfg):
+    k: float = 1.0e5   # N/m^3  (soft ground, similar order to granular media)
+    b: float = 1.0e3   # N*s/m^3
+    static_friction_coef: float = 1.0
+    dynamic_friction_coef: float = 0.5
+    kf: float = 10.0   # N*s/m
