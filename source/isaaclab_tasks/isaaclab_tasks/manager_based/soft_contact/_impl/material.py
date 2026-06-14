@@ -203,3 +203,8 @@ class Material3DRFTCfg:
     dynamic_friction_coef: float = 0.3
     mu_int: float = 0.3  # media internal friction coefficient
     rho_c: float = 3000.0  # critical media density (effective media density = packing fraction * grain density)
+
+    # soft (log-based) symmetric bound on the raw polynomial-fit RFT coefficients (alpha_r, alpha_t, alpha_z).
+    # Keeps a bad extrapolation of the cubic fit from blowing up to +/-inf during hard impacts, while
+    # remaining smooth (no zero-gradient plateau like a hard clamp would have).
+    alpha_limit: float = 2.0

@@ -627,6 +627,7 @@ class RFT_3D:
                 self.coef_1,
                 self.coef_2,
                 self.coef_3,
+                self.cfg.alpha_limit,
                 self.tau_r,
                 self.c_r,
                 self.collider.dA,

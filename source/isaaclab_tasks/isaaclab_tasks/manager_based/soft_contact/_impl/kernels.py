@@ -495,6 +495,20 @@ force kernels
 
 
 @wp.func
+def _soft_clamp(x: wp.float32, limit: wp.float32) -> wp.float32:
+    """Smoothly bound `x` to roughly +/-`limit`.
+
+    Identity for |x| <= limit (gradient 1). Beyond that, the magnitude grows
+    logarithmically instead of linearly, so a bad polynomial extrapolation can't
+    blow up to +/-inf while keeping a smooth, nonzero gradient (unlike a hard clamp).
+    """
+    abs_x = wp.abs(x)
+    if abs_x <= limit:
+        return x
+    return wp.sign(x) * (limit + wp.log(1.0 + abs_x - limit))
+
+
+@wp.func
 def _compute_elementary_force(
     beta: wp.float32,
     gamma: wp.float32,
@@ -502,6 +516,7 @@ def _compute_elementary_force(
     coef_1: wp.array(dtype=wp.float32),
     coef_2: wp.array(dtype=wp.float32),
     coef_3: wp.array(dtype=wp.float32),
+    alpha_limit: wp.float32,
 ) -> wp.vec3f:
 
     p1 = wp.sin(gamma)
@@ -604,6 +619,12 @@ def _compute_elementary_force(
     alpha_t = f1 * wp.sin(beta) * wp.sin(psi)
     alpha_z = -f1 * wp.cos(beta) - f2 * wp.sin(gamma) - f3
 
+    # NOTE: bound the raw polynomial-fit coefficients so an extrapolation outside the fitted
+    # range (e.g. during a hard jump impact) can't send the resistive force to +/-inf.
+    alpha_r = _soft_clamp(alpha_r, alpha_limit)
+    alpha_t = _soft_clamp(alpha_t, alpha_limit)
+    alpha_z = _soft_clamp(alpha_z, alpha_limit)
+
     return wp.vec3f(alpha_r, alpha_t, alpha_z)
 
 
@@ -627,6 +648,7 @@ def compute_resistive_force(
     coef_1: wp.array1d(dtype=wp.float32),  # (20,)
     coef_2: wp.array1d(dtype=wp.float32),  # (20,)
     coef_3: wp.array1d(dtype=wp.float32),  # (20,)
+    alpha_limit: wp.float32,  # soft symmetric bound on (alpha_r, alpha_t, alpha_z)
     # emf filter cache
     tau_r: wp.array2d(dtype=wp.float32),  # (N, M)
     c_r: wp.float32,
@@ -656,7 +678,7 @@ def compute_resistive_force(
     is_contact = wp.float32(depth > 0.0)
 
     # NOTE: orthogonal base is {r, t, z} here.
-    alpha_gen = _compute_elementary_force(beta_element, gamma_element, psi_element, coef_1, coef_2, coef_3)
+    alpha_gen = _compute_elementary_force(beta_element, gamma_element, psi_element, coef_1, coef_2, coef_3, alpha_limit)
 
     # media specific params
     g = 9.81
