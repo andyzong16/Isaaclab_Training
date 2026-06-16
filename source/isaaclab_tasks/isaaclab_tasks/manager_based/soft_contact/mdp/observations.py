@@ -55,6 +55,7 @@ def foot_contact_forces_raw_hybrid(
 
     rigid_contact_forces = rigid_contact_sensor.data.net_forces_w[:, rigid_contact_sensor_cfg.body_ids, :]
     soft_contact_forces = soft_contact_sensor.contact_wrench[:, :, :3]
+    # soft_contact_forces = soft_contact_sensor.contact_wrench_b[:, :, :3]
 
     is_soft = soft_contact_sensor.data.is_sensor_active  # [B, N_feet]
 
@@ -118,3 +119,33 @@ def contact_point_pos(
     contact_point_pos = action_term.contact_solver.torch_contact_point_pos
     
     return contact_point_pos.squeeze(1) # (num_envs, num_contacts, 3)
+
+def contact_point_vel(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    contact_point_vel = action_term.contact_solver.torch_contact_point_vel
+    
+    return contact_point_vel.squeeze(1) # (num_envs, num_contacts, 3)
+
+def root_lin_vel(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    contact_point_vel = action_term.contact_solver.body_lin_vel_torch
+    
+    return contact_point_vel # (num_envs, 3)
+
+def contact_point_force(
+    env: ManagerBasedRLEnv,
+    action_term_name: str = "physics_callback",
+) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    action_term = env.action_manager.get_term(action_term_name)
+    contact_point_wrench = action_term.contact_solver.torch_contact_point_force
+    
+    return contact_point_wrench.squeeze(1) # (num_envs, num_contacts, 3)

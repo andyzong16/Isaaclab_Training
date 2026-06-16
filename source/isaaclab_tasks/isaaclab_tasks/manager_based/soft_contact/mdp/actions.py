@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
 class VelocityStage(TypedDict):
     step: int = 0
-    # lin_vel_x: tuple[float, float] | None
-    # lin_vel_y: tuple[float, float] | None
+    lin_vel_x: tuple[float, float] | None
+    lin_vel_y: tuple[float, float] | None
     lin_vel_z: tuple[float, float] | None
     ang_vel_z: tuple[float, float] | None
 

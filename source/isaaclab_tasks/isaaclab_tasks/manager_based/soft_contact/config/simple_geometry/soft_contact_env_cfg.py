@@ -44,10 +44,13 @@ class SoftcontactEnvCfg(ManagerBasedRLEnvCfg):
     def __post_init__(self):
         """Post initialization."""
         # general settings
-        self.decimation = 10
-        self.episode_length_s = 4.0
+        # self.decimation = 10
+        self.episode_length_s = 2.0
         # simulation settings
         self.sim.dt = 1/500
+        self.decimation = 10
+        # self.sim.dt = 1/200
+        # self.decimation = 4
         self.sim.render_interval = self.decimation
         self.sim.physics_material = self.scene.terrain.physics_material
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
@@ -69,10 +72,10 @@ class SoftcontactEnvCfg(ManagerBasedRLEnvCfg):
         #     resolution=(1920, 1080),
         # )
         self.viewer = ViewerCfg(
-            # eye=(-0.0, -0.7, 0.1),
-            # lookat=(0.0, -0.0, 0.0),
-            eye=(1.5, 0.0, 0.1),
-            lookat=(0.0, 0.0, 0.0),
+            eye=(-0.0, -1.5, 0.1),
+            lookat=(0.0, -0.0, 0.0),
+            # eye=(1.5, 0.0, 0.1),
+            # lookat=(0.0, 0.0, 0.0),
             resolution=(1920, 1080),
             # origin_type="asset_root",
             # asset_name="robot",

@@ -87,8 +87,8 @@ class G1ActionsCfg:
     physics_callback = PhysicsCallbackActionCfg(
         asset_name="robot",
         body_names=[".*_ankle_roll_link"],
-        backend="2D-warp",
-        # backend="3D-warp",
+        # backend="2D-warp",
+        backend="3D-warp",
         intruder_geometry_cfg=collider_cfg,
         # enable_ema_filter=True,
         enable_ema_filter=False,

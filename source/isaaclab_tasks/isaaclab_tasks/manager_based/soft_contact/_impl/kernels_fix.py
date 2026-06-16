@@ -734,6 +734,37 @@ def _scale_generic_force(
     alpha = xi * alpha_gen
     return alpha
 
+@wp.func
+def _transform_force_rtz_to_xyz(
+    alpha_rtz: wp.vec3f,
+    r_direction_w: wp.vec3f,
+    t_direction_w: wp.vec3f,
+    z_direction_w: wp.vec3f,
+) -> wp.vec3f:
+    alpha_xyz = alpha_rtz[0] * r_direction_w + alpha_rtz[1] * t_direction_w + alpha_rtz[2] * z_direction_w
+    return alpha_xyz
+
+
+# @wp.func
+# def _static_condition_check(
+#     beta: wp.float32,
+#     gamma: wp.float32,
+#     psi: wp.float32,
+#     lin_vel: wp.vec3f, 
+#     alpha_rtz: wp.vec3f,
+# ) -> wp.vec3f:
+#     # get normal vector in rtz coordinate
+#     n_rtz = wp.vec3f(
+#         wp.sin(beta) * wp.cos(psi), wp.sin(beta) * wp.sin(psi), -wp.cos(beta)
+#     )
+#     alpha_n = wp.dot(alpha_rtz, -n_rtz) * (-n_rtz)
+#     alpha_n_norm = wp.norm_l2(alpha_n)
+#     alpha_tan = alpha_rtz - alpha_n
+#     alpha_tan_norm = wp.norm_l2(alpha_tan)
+#     cone_coef = wp.min(wp.float32(1.0), (mu_surf * alpha_n_norm) / (alpha_tan_norm + 1e-6))
+#     alpha_rtz_cone = alpha_n + cone_coef * alpha_tan
+#     return alpha_rtz_cone
+
 
 @wp.kernel
 def compute_contact_force(
@@ -748,6 +779,7 @@ def compute_contact_force(
     r_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     t_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     z_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
+    n_direction_w: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
     
     # sand parameters
     rho_c: wp.array1d(dtype=wp.float32),  # (N,)
@@ -776,6 +808,10 @@ def compute_contact_force(
     resistive_force: wp.array2d(dtype=wp.vec3f),  # (N, M, 3)
 ):
     env_id, body_id = wp.tid()
+    
+    # get finite element surface area
+    cp_id = body_id % num_cp  # contact point index within body
+    dA_element = dA[cp_id]
 
     # extract element-wise data
     foot_velocity_element = foot_velocity_w[env_id, body_id]
@@ -784,13 +820,17 @@ def compute_contact_force(
     r_element = r_direction_w[env_id, body_id]
     z_element = z_direction_w[env_id, body_id]
     t_element = t_direction_w[env_id, body_id]
+    n_element = n_direction_w[env_id, body_id]
 
     beta_element = beta[env_id, body_id]
     gamma_element = gamma[env_id, body_id]
     psi_element = psi[env_id, body_id]
 
     depth = -foot_pos_w[env_id, body_id][2]
-    is_contact = wp.float32(depth > 0.0)
+    is_contact = depth > 0.0
+    
+    v_dir = foot_velocity_element / (wp.norm_l2(foot_velocity_element) + 1e-6)
+    is_leading_edge = wp.dot(n_element, v_dir) >= 0.0
 
     # NOTE: alpha_gen is in {r, t, z} coordinate here.
     alpha_gen = _compute_elementary_force(beta_element, gamma_element, psi_element, coef_1, coef_2, coef_3)
@@ -827,20 +867,23 @@ def compute_contact_force(
     )
 
     if enable_ema == 0:
-        alpha_out = alpha_unfiltered[env_id, body_id] * depth_mask
+        # alpha_out = alpha_unfiltered[env_id, body_id] * depth_mask
+        alpha_out = alpha_unfiltered[env_id, body_id]
     else:
-        alpha_out = alpha_filtered[env_id, body_id] * depth_mask
+        # alpha_out = alpha_filtered[env_id, body_id] * depth_mask
+        alpha_out = alpha_filtered[env_id, body_id]
 
     # NOTE: transform alpha in rtz space to cartesian space (xyz)
-    cp_id = body_id % num_cp  # contact point index within body
-    dA_element = dA[cp_id]
-    force_vec = alpha_out * depth * dA_element * is_contact
-    resistive_force_cartesian = force_vec[0] * r_element + force_vec[1] * t_element + force_vec[2] * z_element
+    if is_contact and is_leading_edge:
+        force_vec = alpha_out * depth * dA_element
+    else:
+        force_vec = wp.vec3f(0.0, 0.0, 0.0)
+    resistive_force_cartesian = _transform_force_rtz_to_xyz(force_vec, r_element, t_element, z_element)
     
     # # NOTE: deal with close to static velocity
     # # v_norm = wp.norm_l2(foot_velocity_element)
     # v_norm = wp.sqrt(foot_velocity_element[0] * foot_velocity_element[0] + foot_velocity_element[1] * foot_velocity_element[1])
-    # v_static_threshold = 0.015
+    # v_static_threshold = 0.03
     # if v_norm < v_static_threshold:
     #     vt_x = foot_velocity_element[0]
     #     vt_y = foot_velocity_element[1]

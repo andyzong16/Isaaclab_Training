@@ -146,7 +146,7 @@ class GenericMaterialCfg(MaterialCfg):
     static_friction_coef: float = 1.0  # TODO remove
     dynamic_friction_coef: float = 0.5
 
-    kf: float = 10.0 # tangential force gain (ft = -k*vt)
+    kf: float = 100.0 # tangential force gain (ft = -k*vt)
 
     # horizontal stroke resistive force model parameters
     kh: float = 50.0

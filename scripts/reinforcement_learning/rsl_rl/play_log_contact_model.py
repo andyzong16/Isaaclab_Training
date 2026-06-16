@@ -203,7 +203,15 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     if args_cli.log:
         max_episode_length = int(env_cfg.episode_length_s / (env_cfg.decimation * env_cfg.sim.dt))
         # log_item = ["obs"]
-        log_item = ["obs", "contact_angle", "contact_vectors", "contact_point_pos"]
+        log_item = [
+            "obs", 
+            "contact_angle", 
+            "contact_vectors", 
+            "contact_point_pos", 
+            "contact_point_vel", 
+            "root_lin_vel",
+            "contact_point_force",
+            ]
         logger = DictBenchmarkLogger(
             log_dir=log_dir,
             tag=args_cli.tag,
@@ -231,12 +239,18 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             contact_angles = obs["contact_angles"]  # only log necessary data
             contact_vectors = obs["contact_vectors"]  # only log necessary data
             contact_point_pos = obs["contact_point_pos"]  # only log necessary data
+            contact_point_vel = obs["contact_point_vel"]  # only log necessary data
+            root_lin_vel = obs["root_lin_vel"]  # only log necessary data
+            contact_point_force = obs["contact_point_force"]  # only log necessary data
             # privileged_obs = obs["privileged"]  # only log necessary data
             item_dict = {
                 "obs": log_obs.cpu().numpy(),
                 "contact_angle": contact_angles.cpu().numpy(),
                 "contact_vectors": contact_vectors.cpu().numpy(),
                 "contact_point_pos": contact_point_pos.cpu().numpy(),
+                "contact_point_vel": contact_point_vel.cpu().numpy(),
+                "root_lin_vel": root_lin_vel.cpu().numpy(),
+                "contact_point_force": contact_point_force.cpu().numpy(),
                 # "logging": privileged_obs.cpu().numpy(),
             }
             logger.log(item_dict)

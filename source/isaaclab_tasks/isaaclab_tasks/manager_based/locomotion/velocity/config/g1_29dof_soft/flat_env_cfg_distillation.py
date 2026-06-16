@@ -329,7 +329,7 @@ class G1FlatEnvStudentCfg_PLAY(G1FlatStudentEnvCfg):
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
 
         self.commands.base_velocity.heading_command = False
-        self.commands.base_velocity.rel_standing_envs = 1
+        self.commands.base_velocity.rel_standing_envs = 0.0
         self.commands.base_velocity.resampling_time_range = (self.episode_length_s, self.episode_length_s)
         self.commands.base_velocity.debug_vis = False
 

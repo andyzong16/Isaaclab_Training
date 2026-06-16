@@ -17,8 +17,6 @@ from .kernels_fix import (
     compute_intrusion_angle,
     compute_normal_direction_w,
     compute_r_direction_w,
-    # compute_resistive_force,
-    # compute_resistive_force_2d,
     compute_contact_force,
     compute_contact_force_2d,
     compute_spring_damper_force,
@@ -218,6 +216,7 @@ class RFT_3D:
 
         # Bind torch buffers to warp buffers
         self.torch_contact_point_pos = wp.to_torch(self.contact_point_pos)
+        self.torch_contact_point_vel = wp.to_torch(self.contact_point_lin_vel)
         self.torch_contact_force = wp.to_torch(self.contact_force)
         self.torch_contact_torque = wp.to_torch(self.contact_torque)
         self.torch_contact_force_b = wp.to_torch(self.contact_force_b)
@@ -333,13 +332,6 @@ class RFT_3D:
         self._timestamp += self.dt
         self._update_data(torch.arange(self.num_envs, device=self.device))
         self._timestamp_last_update[:] = self._timestamp[:]
-
-        # print("ang vel: ", body_ang_vel[0, 0])
-        # print("beta angle: ", self.torch_contact_point_tilt_angle[0, 0] * 180.0 / torch.pi)
-        # print("gamma angle: ", self.torch_contact_point_intrusion_angle[0, 0] * 180.0 / torch.pi)
-        # print("psi angle: ", self.torch_contact_point_twist_angle[0, 0] * 180.0 / torch.pi)
-        # print("velocity dir: ", self.torch_v_dir[0, 0])
-        # print("contact point force: ", self.torch_contact_point_force[0, 0])
 
     def randomize_ground_stiffness(self, env_ids: torch.Tensor, mu_int: torch.Tensor) -> None:
         """
@@ -673,8 +665,7 @@ class RFT_3D:
                 self.r_dir.reshape((self.num_envs, -1)),
                 self.t_dir.reshape((self.num_envs, -1)),
                 self.z_dir.reshape((self.num_envs, -1)),
-                
-                # self.n_rtz_dir.reshape((self.num_envs, -1)),
+                self.n_dir.reshape((self.num_envs, -1)),
                 
                 self.rho_c,
                 self.mu_int,
@@ -935,6 +926,7 @@ class RFT_2D:
 
         # torch views into warp buffers
         self.torch_contact_point_pos = wp.to_torch(self.contact_point_pos)
+        self.torch_contact_point_vel = wp.to_torch(self.contact_point_lin_vel)
         self.torch_contact_force = wp.to_torch(self.contact_force)
         self.torch_contact_torque = wp.to_torch(self.contact_torque)
         self.torch_contact_force_b = wp.to_torch(self.contact_force_b)
@@ -1187,8 +1179,8 @@ class RFT_2D:
                 self.body_lin_vel,
                 self.body_ang_vel,
                 self.contact_point_pos,
-                self.contact_point_lin_vel,
             ],
+            outputs=[self.contact_point_lin_vel],
             device=self.device,
         )
 

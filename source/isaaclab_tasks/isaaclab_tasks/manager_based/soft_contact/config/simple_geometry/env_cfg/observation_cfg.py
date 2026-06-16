@@ -38,8 +38,10 @@ class ObservationsCfg:
         # observation terms (order preserved)
         root_pos = ObsTerm(func=mdp.root_pos_w)
         root_quat = ObsTerm(func=mdp.root_quat_w)
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
+        root_lin_vel = ObsTerm(func=mdp.root_lin_vel_w)
+        root_ang_vel = ObsTerm(func=mdp.root_ang_vel_w)
+        # base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+        # base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
         # contact_forces = ObsTerm(func=contact_mdp.foot_contact_forces_raw,
         #                          params={
         #                              "action_term_name": "physics_callback",
@@ -91,6 +93,43 @@ class ObservationsCfg:
             },
         )
         
+    @configclass
+    class ContactPointVelCfg(ObsGroup):
+        """Observations for logging group."""
+
+        # observation terms (order preserved)
+        contact_angle = ObsTerm(
+            func=contact_mdp.contact_point_vel,
+            params={
+                "action_term_name": "physics_callback",
+            },
+        )
+        
+    @configclass
+    class RootVelCfg(ObsGroup):
+        """Observations for logging group."""
+
+        # observation terms (order preserved)
+        root_lin_vel = ObsTerm(
+            func=contact_mdp.root_lin_vel,
+            params={
+                "action_term_name": "physics_callback",
+            },
+        )
+        # root_lin_vel = ObsTerm(func=mdp.root_lin_vel_w)
+        
+    @configclass
+    class ContactPointForceCfg(ObsGroup):
+        """Observations for logging group."""
+
+        # observation terms (order preserved)
+        contact_angle = ObsTerm(
+            func=contact_mdp.contact_point_force,
+            params={
+                "action_term_name": "physics_callback",
+            },
+        )
+        
     # observation groups
     policy: PolicyCfg = PolicyCfg(enable_corruption=True, concatenate_terms=True)
     critic: CriticCfg = CriticCfg(enable_corruption=False, concatenate_terms=True)
@@ -98,3 +137,6 @@ class ObservationsCfg:
     contact_angles: ContactAnglesCfg = ContactAnglesCfg(enable_corruption=False, concatenate_terms=True)
     contact_vectors: ContactVectorsCfg = ContactVectorsCfg(enable_corruption=False, concatenate_terms=True)
     contact_point_pos: ContactPointPosCfg = ContactPointPosCfg(enable_corruption=False, concatenate_terms=True)
+    contact_point_vel: ContactPointVelCfg = ContactPointVelCfg(enable_corruption=False, concatenate_terms=True)
+    contact_point_force: ContactPointForceCfg = ContactPointForceCfg(enable_corruption=False, concatenate_terms=True)
+    root_lin_vel: RootVelCfg = RootVelCfg(enable_corruption=False, concatenate_terms=True)
