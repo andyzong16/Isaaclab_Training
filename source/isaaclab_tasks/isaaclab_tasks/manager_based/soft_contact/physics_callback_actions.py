@@ -225,11 +225,11 @@ class PhysicsCallbackAction(ActionTerm):
         self.contact_wrench = self.contact_solver.contact_wrench.clone()  # global wrench (num_envs, num_bodies, 6)
         self.contact_wrench_b = self.contact_solver.contact_wrench_b.clone()  # body wrench (num_envs, num_bodies, 6)
         
-        # self._asset.permanent_wrench_composer.set_forces_and_torques(
-        #     forces=self.contact_wrench_b[:, :, :3],
-        #     torques=self.contact_wrench_b[:, :, 3:6],
-        #     body_ids=self._body_ids,
-        # )
+        self._asset.permanent_wrench_composer.set_forces_and_torques(
+            forces=self.contact_wrench_b[:, :, :3],
+            torques=self.contact_wrench_b[:, :, 3:6],
+            body_ids=self._body_ids,
+        )
         # self._asset.permanent_wrench_composer.set_forces_and_torques(
         #     forces=self.contact_wrench[:, :, :3],
         #     torques=self.contact_wrench[:, :, 3:6],
@@ -238,7 +238,7 @@ class PhysicsCallbackAction(ActionTerm):
         # )
         
         # NOTE: wrench composer has bug, thus we directly use tensor api
-        body_ids = torch.tensor(self._body_ids, device=self.device)
+        # body_ids = torch.tensor(self._body_ids, device=self.device)
         # self._asset.root_physx_view.apply_forces_and_torques_at_position(
         #     force_data=self.contact_wrench_b[:, :, :3],
         #     torque_data=self.contact_wrench_b[:, :, 3:6],
@@ -246,13 +246,13 @@ class PhysicsCallbackAction(ActionTerm):
         #     indices=body_ids,
         #     is_global=False,
         #     )
-        self._asset.root_physx_view.apply_forces_and_torques_at_position(
-                    force_data=self.contact_wrench[:, :, :3],
-                    torque_data=self.contact_wrench[:, :, 3:6],
-                    position_data=None,
-                    indices=body_ids,
-                    is_global=True,
-                    )
+        # self._asset.root_physx_view.apply_forces_and_torques_at_position(
+        #             force_data=self.contact_wrench[:, :, :3],
+        #             torque_data=self.contact_wrench[:, :, 3:6],
+        #             position_data=None,
+        #             indices=body_ids,
+        #             is_global=True,
+        #             )
 
         # track if sensor if active or not
         self.contact_solver.data.is_sensor_active = (
