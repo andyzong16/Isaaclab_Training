@@ -10,7 +10,7 @@ import warp as wp
 from .soft_contact_model_data import SoftContactData
 from .material import Material3DRFTCfg, MaterialCfg, PoppySeedCPCfg, SpringDamperCfg
 from .collider import Collider, ColliderCfg, PlaneColliderCfg
-from .kernels_fix import (
+from .kernels import (
     compute_contact_point_lin_vel_w,
     compute_contact_point_pos_w,
     compute_contact_wrench,
@@ -618,37 +618,6 @@ class RFT_3D:
 
         # step4: compute resistive force alpha (N/m^3) and point forces (N)
         # see eq.1 in https://www.pnas.org/doi/10.1073/pnas.2214017120
-
-        # wp.launch(
-        #     kernel=compute_resistive_force,
-        #     dim=(self.num_envs, self.num_bodies * self.num_contact_points),
-        #     inputs=[
-        #         self.contact_point_pos.reshape((self.num_envs, -1)),
-        #         self.contact_point_lin_vel.reshape((self.num_envs, -1)),
-        #         self.contact_point_lin_vel_prev.reshape((self.num_envs, -1)),
-        #         self.contact_point_tilt_angle.reshape((self.num_envs, -1)),
-        #         self.contact_point_intrusion_angle.reshape((self.num_envs, -1)),
-        #         self.contact_point_twist_angle.reshape((self.num_envs, -1)),
-        #         self.r_dir.reshape((self.num_envs, -1)),
-        #         self.t_dir.reshape((self.num_envs, -1)),
-        #         self.z_dir.reshape((self.num_envs, -1)),
-        #         self.n_rtz_dir.reshape((self.num_envs, -1)),
-        #         self.rho_c,
-        #         self.mu_int,
-        #         self.dynamic_friction_coef,
-        #         self.coef_1,
-        #         self.coef_2,
-        #         self.coef_3,
-        #         self.tau_r,
-        #         self.c_r,
-        #         wp.int32(1 if self.enable_ema_filter else 0),
-        #         self.collider.dA,
-        #         self.num_contact_points,
-        #         self.alpha_unfiltered,
-        #         self.alpha_filtered,
-        #         self.resitive_force,
-        #     ],
-        # )
         
         wp.launch(
             kernel=compute_contact_force,
@@ -1232,44 +1201,6 @@ class RFT_2D:
             inputs=[self.z_dir, self.n_dir, self.r_dir, self.t_dir, self.contact_point_tilt_angle],
             device=self.device,
         )
-
-        # step 4: 2D RFT resistive force per contact point
-        # wp.launch(
-        #     kernel=compute_resistive_force_2d,
-        #     dim=(self.num_envs, self.num_bodies * self.num_contact_points),
-        #     inputs=[
-        #         self.contact_point_pos.reshape((self.num_envs, -1)),
-        #         self.contact_point_lin_vel.reshape((self.num_envs, -1)),
-        #         self.contact_point_lin_vel_prev.reshape((self.num_envs, -1)),
-        #         self.contact_point_tilt_angle.reshape((self.num_envs, -1)),
-        #         self.contact_point_intrusion_angle.reshape((self.num_envs, -1)),
-        #         self.z_dir.reshape((self.num_envs, -1)),
-        #         self.rho,
-        #         self.lam,
-        #         self.dynamic_friction_coef,
-        #         self.kf,
-        #         self.rho_c,
-        #         self.mu_int,
-        #         wp.float32(self.cfg.A00),
-        #         wp.float32(self.cfg.A10),
-        #         wp.float32(self.cfg.B11),
-        #         wp.float32(self.cfg.B01),
-        #         wp.float32(self.cfg.B_11),
-        #         wp.float32(self.cfg.C11),
-        #         wp.float32(self.cfg.C01),
-        #         wp.float32(self.cfg.C_11),
-        #         wp.float32(self.cfg.D10),
-        #         self.force_gm,
-        #         self.force_ema,
-        #         self.tau_r,
-        #         self.c_r,
-        #         wp.int32(1 if self.enable_ema_filter else 0),
-        #         self.collider.dA,
-        #         self.num_contact_points,
-        #         self.resitive_force,
-        #     ],
-        #     device=self.device,
-        # )
         
         wp.launch(
             kernel=compute_contact_force_2d,

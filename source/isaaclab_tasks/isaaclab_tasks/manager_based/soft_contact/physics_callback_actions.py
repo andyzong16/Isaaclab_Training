@@ -239,13 +239,20 @@ class PhysicsCallbackAction(ActionTerm):
         
         # NOTE: wrench composer has bug, thus we directly use tensor api
         body_ids = torch.tensor(self._body_ids, device=self.device)
+        # self._asset.root_physx_view.apply_forces_and_torques_at_position(
+        #     force_data=self.contact_wrench_b[:, :, :3],
+        #     torque_data=self.contact_wrench_b[:, :, 3:6],
+        #     position_data=None,
+        #     indices=body_ids,
+        #     is_global=False,
+        #     )
         self._asset.root_physx_view.apply_forces_and_torques_at_position(
-            force_data=self.contact_wrench_b[:, :, :3],
-            torque_data=self.contact_wrench_b[:, :, 3:6],
-            position_data=None,
-            indices=body_ids,
-            is_global=False,
-            )
+                    force_data=self.contact_wrench[:, :, :3],
+                    torque_data=self.contact_wrench[:, :, 3:6],
+                    position_data=None,
+                    indices=body_ids,
+                    is_global=True,
+                    )
 
         # track if sensor if active or not
         self.contact_solver.data.is_sensor_active = (

@@ -48,11 +48,11 @@ class SoftcontactEnvCfg(ManagerBasedRLEnvCfg):
         self.episode_length_s = 2.0
         # simulation settings
         self.sim.dt = 1/500
-        self.decimation = 10
+        self.decimation = 1
         # self.sim.dt = 1/200
         # self.decimation = 4
         self.sim.render_interval = self.decimation
-        self.sim.physics_material = self.scene.terrain.physics_material
+        # self.sim.physics_material = self.scene.terrain.physics_material
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
 
         # change terrain
@@ -60,6 +60,7 @@ class SoftcontactEnvCfg(ManagerBasedRLEnvCfg):
 
         # disable rigid contact
         self.scene.terrain.disable_collider = True
+        # self.scene.terrain = None
 
         # # disable soft contact 
         # self.actions.physics_callback.disable = True # disable soft contact
