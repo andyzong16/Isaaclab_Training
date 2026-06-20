@@ -13,6 +13,9 @@ from isaaclab.utils import configclass
 
 import isaaclab.envs.mdp as mdp
 import isaaclab_tasks.manager_based.wbc.mdp as wbc_mdp
+# TODO: bundle this mdp into vel_dmp or g1_mdp
+import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof.mdp as g1_mdp
+import isaaclab_tasks.manager_based.locomotion.velocity.config.g1_29dof_soft.mdp as g1_soft_mdp
 
 VELOCITY_RANGE = {
     "x": (-0.5, 0.5),
@@ -40,7 +43,7 @@ class G1EventCfg:
         },
     )
 
-    # # check this
+    # NOTE: robust policy randomization
     # add_joint_default_pos = EventTerm(
     #     func=wbc_mdp.randomize_joint_default_pos,
     #     mode="startup",
@@ -69,4 +72,31 @@ class G1EventCfg:
     #     params={"velocity_range": VELOCITY_RANGE},
     # )
     
-    # TODO: add terrain parameter randomization 
+    # NOTE: soft terrain specific terrain randomization
+    randomize_friction = EventTerm(
+        func=g1_mdp.randomize_terrain_friction,
+        mode="reset",
+        params={
+            "friction_range": (0.1, 1.0),
+            "contact_solver_name": "physics_callback",
+        },
+    )
+
+    randomize_stiffness = EventTerm(
+        func=g1_mdp.randomize_terrain_stiffness,
+        mode="reset",
+        params={
+            "stiffness_range": (0.2, 0.9),
+            "contact_solver_name": "physics_callback",
+        },
+    )
+
+    randomize_material_density = EventTerm(
+        func=g1_soft_mdp.randomize_material_density,
+        mode="reset",
+        params={
+            "packing_ratio_range": (0.5, 1.0),
+            "bulk_density_range": (1000.0, 3000.0),
+            "contact_solver_name": "physics_callback",
+        },
+    )

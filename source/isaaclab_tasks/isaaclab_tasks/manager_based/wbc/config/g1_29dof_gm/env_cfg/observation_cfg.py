@@ -22,12 +22,6 @@ class G1ObservationsCfg:
 
         # observation terms (order preserved)
         command = ObsTerm(func=mdp.generated_commands, params={"command_name": "motion"}) # ref joint pos
-        # motion_anchor_pos_b = ObsTerm(
-        #     func=wbc_mdp.motion_anchor_pos_b, params={"command_name": "motion"}, noise=Unoise(n_min=-0.25, n_max=0.25)
-        # ) # exclude
-        # motion_anchor_ori_b = ObsTerm(
-        #     func=wbc_mdp.motion_anchor_ori_b, params={"command_name": "motion"}, noise=Unoise(n_min=-0.05, n_max=0.05)
-        # )
 
         # base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.5, n_max=0.5)) # exclude
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))

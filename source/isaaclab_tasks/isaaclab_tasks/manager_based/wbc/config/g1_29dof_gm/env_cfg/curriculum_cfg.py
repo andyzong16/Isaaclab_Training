@@ -16,5 +16,8 @@ import isaaclab_tasks.manager_based.wbc.mdp as wbc_mdp
 @configclass
 class G1CurriculumCfg:
     """Curriculum terms for the MDP."""
-    # TODO: add success rate driven curriculum 
-    pass
+    
+    terrain_levels = CurrTerm(
+        func=wbc_mdp.terrain_levels_motion_success,
+        params={"command_name": "motion"}
+    )

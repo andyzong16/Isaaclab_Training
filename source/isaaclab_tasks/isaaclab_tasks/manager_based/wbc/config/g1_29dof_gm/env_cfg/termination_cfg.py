@@ -47,3 +47,8 @@ class G1TerminationsCfg:
         func=wbc_mdp.base_ang_vel_exceed,
         params={"threshold": 500 * math.pi / 180.0},
     )
+    
+    # TODO: add motion reference timeout term
+    # currently, motion command term handles termination condition 
+    # this is ok, but not really a clean way
+    # read personalab to learn how this is done

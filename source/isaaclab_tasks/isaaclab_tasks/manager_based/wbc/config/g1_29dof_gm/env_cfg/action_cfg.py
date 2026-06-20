@@ -63,7 +63,8 @@ class G1ActionsCfg:
             "right_wrist_pitch_joint", 
             "right_wrist_yaw_joint", 
         ],
-        scale=UNITREE_G1_29DOF_MIMIC_ACTION_SCALE, 
+        # scale=UNITREE_G1_29DOF_MIMIC_ACTION_SCALE, 
+        scale=1.0, # TODO: experiment with this scale
         use_default_offset=True, 
         preserve_order=True,
         )
