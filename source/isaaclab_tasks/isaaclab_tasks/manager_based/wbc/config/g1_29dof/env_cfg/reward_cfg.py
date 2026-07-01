@@ -18,45 +18,43 @@ class G1RewardsCfg:
     # -- task terms for tracking the motion
     motion_global_anchor_pos = RewTerm(
         func=wbc_mdp.motion_global_anchor_position_error_exp,
-        # weight=0.5,
-        weight=2.0,
-        params={"command_name": "motion", "std": 0.3},
+        weight=3.0,
+        params={"command_name": "motion", "std": 0.2},
     )
     motion_global_anchor_ori = RewTerm(
         func=wbc_mdp.motion_global_anchor_orientation_error_exp,
-        # weight=0.5,
-        weight=2.0,
-        params={"command_name": "motion", "std": 0.4},
+        weight=3.0,
+        params={"command_name": "motion", "std": 0.3},
     )
     motion_body_pos = RewTerm(
         func=wbc_mdp.motion_relative_body_position_error_exp,
-        weight=1.0,
-        params={"command_name": "motion", "std": 0.3},
+        weight=4.0,
+        params={"command_name": "motion", "std": 0.2},
     )
     motion_body_ori = RewTerm(
         func=wbc_mdp.motion_relative_body_orientation_error_exp,
-        weight=1.0,
-        params={"command_name": "motion", "std": 0.4},
+        weight=4.0,
+        params={"command_name": "motion", "std": 0.3},
     )
     motion_body_lin_vel = RewTerm(
         func=wbc_mdp.motion_global_body_linear_velocity_error_exp,
-        weight=1.0,
-        params={"command_name": "motion", "std": 1.0},
+        weight=2.0,
+        params={"command_name": "motion", "std": 0.5},
     )
     motion_body_ang_vel = RewTerm(
         func=wbc_mdp.motion_global_body_angular_velocity_error_exp,
-        weight=1.0,
-        params={"command_name": "motion", "std": 3.14},
+        weight=2.0,
+        params={"command_name": "motion", "std": 1.0},
     )
 
-    # -- penalties
-    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
-    joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-1e-5)
+    # -- penalties (minimized so they don't fight fast tracking corrections)
+    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-1e-8)
+    joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-1e-7)
     # action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.1) # beyond mimic
-    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
     joint_limit = RewTerm(
         func=mdp.joint_pos_limits,
-        weight=-10.0,
+        weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])},
     )
     undesired_contacts = RewTerm(
