@@ -49,13 +49,14 @@ CurriculumSoftTerrain = TerrainImporterCfg(
         dynamic_friction=1.0,
     ),
     visual_material=sim_utils.MdlFileCfg(
-        mdl_path=f"{ISAACLAB_NUCLEUS_DIR}/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+        mdl_path=f"{ISAACLAB_ASSETS_DATA_DIR}/texture/Ground_080/Ground080_4K.mdl",  # beach
         project_uvw=True,
         texture_scale=(0.25, 0.25),
         albedo_brightness=0.2,
     ),
     max_init_terrain_level=0,
-    # debug_vis=True,
+    debug_vis=False,
+    disable_collider=True,
 )
 
 # CurriculumSoftTerrainPlatform = TerrainImporterCfg(
@@ -177,7 +178,7 @@ MultiSoftTerrain = TerrainImporterCfg(
         albedo_brightness=0.2,
     ),
     max_init_terrain_level=3,
-    debug_vis=True,
+    debug_vis=False,
     disable_collider=True,
 )
 

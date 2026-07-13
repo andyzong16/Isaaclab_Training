@@ -131,7 +131,14 @@ class G1ObservationsCfg:
         motion_anchor_pos_b = ObsTerm(func=wbc_mdp.motion_anchor_pos_b, params={"command_name": "motion"})
         motion_anchor_ori_b = ObsTerm(func=wbc_mdp.motion_anchor_ori_b, params={"command_name": "motion"})
 
-        # privileged observations (for critic only)
+        # These are extra parameters needed to train the mocap data
+        # terrain state: lets the value function condition on the actual current ground
+        # material parameters and sink depth, which change across resets/terrain-curriculum levels
+        terrain_material_parameters = ObsTerm(func=wbc_mdp.terrain_material_parameters)
+        foot_height = ObsTerm(
+            func=wbc_mdp.foot_height,
+            params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link")},
+        )
         body_pos = ObsTerm(func=wbc_mdp.robot_body_pos_b, params={"command_name": "motion"})
         body_ori = ObsTerm(func=wbc_mdp.robot_body_ori_b, params={"command_name": "motion"})
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel)

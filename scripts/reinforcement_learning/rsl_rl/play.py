@@ -105,6 +105,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     agent_cfg: RslRlBaseRunnerCfg = cli_args.update_rsl_rl_cfg(agent_cfg, args_cli)
     env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
 
+    # always start motion playback from frame 0 during inference, regardless of task's train/play variant
+    if hasattr(env_cfg, "commands") and hasattr(env_cfg.commands, "motion"):
+        env_cfg.commands.motion.start_from_beginning = True
+
     # handle deprecated configurations
     agent_cfg = handle_deprecated_rsl_rl_cfg(agent_cfg, installed_version)
 

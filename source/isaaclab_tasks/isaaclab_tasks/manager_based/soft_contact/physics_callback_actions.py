@@ -224,7 +224,13 @@ class PhysicsCallbackAction(ActionTerm):
 
         self.contact_wrench = self.contact_solver.contact_wrench.clone()  # global wrench (num_envs, num_bodies, 6)
         self.contact_wrench_b = self.contact_solver.contact_wrench_b.clone()  # body wrench (num_envs, num_bodies, 6)
-        
+
+        # NaN/Inf guard only (no magnitude clamp) -- ensures log_std doesn't become NaN without
+        # capping legitimate large forces the RFT model needs to produce for a real jump
+        safe_bound = 1.0e6
+        self.contact_wrench = torch.nan_to_num(self.contact_wrench, nan=0.0, posinf=safe_bound, neginf=-safe_bound)
+        self.contact_wrench_b = torch.nan_to_num(self.contact_wrench_b, nan=0.0, posinf=safe_bound, neginf=-safe_bound)
+
         self._asset.permanent_wrench_composer.set_forces_and_torques(
             forces=self.contact_wrench_b[:, :, :3],
             torques=self.contact_wrench_b[:, :, 3:6],

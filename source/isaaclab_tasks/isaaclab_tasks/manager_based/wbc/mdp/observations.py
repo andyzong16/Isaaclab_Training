@@ -67,6 +67,38 @@ def robot_body_ori_b(env: ManagerBasedEnv, command_name: str) -> torch.Tensor:
     mat = matrix_from_quat(ori_b)
     return mat[..., :2].reshape(mat.shape[0], -1)
 
+# Added a terrain material function to help the environment adapt to changing terrain
+def terrain_material_parameters(
+    env: ManagerBasedEnv,
+    contact_solver_name: str = "physics_callback",
+) -> torch.Tensor:
+    """Current per-env soft-terrain material parameters (friction, density, stiffness), normalized.
+
+    Privileged (critic-only) observation: lets the value function condition on the actual
+    randomized/curriculum ground properties (which change across resets and terrain levels),
+    rather than having to infer them indirectly. Not fed to the policy, since a real robot has
+    no direct sensor for ground material parameters.
+    """
+    contact_solver = env.action_manager.get_term(contact_solver_name).contact_solver
+    friction = contact_solver.terrain_friction
+    density = contact_solver.terrain_density
+    stiffness = contact_solver.terrain_stiffness
+    return torch.stack([friction, density / 3000.0, stiffness], dim=-1).view(env.num_envs, -1)
+
+def foot_height(
+    env: ManagerBasedEnv,
+    asset_cfg,
+) -> torch.Tensor:
+    """Height of the given bodies (e.g. ankle links) above their env origin.
+
+    Privileged (critic-only) observation: directly reveals how deep the foot currently sits
+    relative to the nominal ground plane (which shifts with terrain curriculum level), giving
+    the critic a much more direct signal for the current sink depth than proprioception alone.
+    """
+    asset = env.scene[asset_cfg.name]
+    pos = asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - env.scene.env_origins[:, 2:3]
+    return pos.view(env.num_envs, -1)
+
 
 def motion_anchor_pos_b(env: ManagerBasedEnv, command_name: str) -> torch.Tensor:
     """

@@ -72,6 +72,29 @@ def bad_motion_body_pos_z_only(
     error = torch.abs(command.body_pos_relative_w[:, body_indexes, -1] - command.robot_body_pos_w[:, body_indexes, -1])
     return torch.any(error > threshold, dim=-1)
 
+# Just trying some stuff here to 
+def nan_state(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Terminate (and reset) environments whose robot state has become non-finite.
+
+    Safety net against simulation divergence (e.g. an extreme applied contact force driving the
+    physics integrator into NaN/Inf), which would otherwise silently corrupt observations and
+    crash training downstream (e.g. NaN propagating into the policy's std).
+    """
+    asset: Articulation = env.scene[asset_cfg.name]
+    state = torch.cat(
+        [
+            asset.data.joint_pos,
+            asset.data.joint_vel,
+            asset.data.root_pos_w,
+            asset.data.root_quat_w,
+            asset.data.root_lin_vel_w,
+            asset.data.root_ang_vel_w,
+        ],
+        dim=-1,
+    )
+    return ~torch.isfinite(state).all(dim=-1)
+
+
 def base_ang_vel_exceed(env: ManagerBasedRLEnv, threshold: float) -> torch.Tensor:
     """Check if the base angular velocity exceeds the threshold."""
     # extract the used quantities (to enable type-hinting)

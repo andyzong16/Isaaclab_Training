@@ -17,7 +17,7 @@ from isaaclab_tasks.manager_based.locomotion.velocity.mdp.symmetry import g1
 
 @configclass
 class G1PPORunnerCfg(RslRlOnPolicyRunnerCfg):
-    num_steps_per_env = 48
+    num_steps_per_env = 24
     max_iterations = 30_000
     save_interval = 500
     obs_groups = {"actor": ["policy"], "critic": ["critic"]}
@@ -25,7 +25,7 @@ class G1PPORunnerCfg(RslRlOnPolicyRunnerCfg):
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
-        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0, std_type="log"),
     )
     critic = RslRlMLPModelCfg(
         hidden_dims=[512, 256, 128],
@@ -36,10 +36,10 @@ class G1PPORunnerCfg(RslRlOnPolicyRunnerCfg):
         value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
-        entropy_coef=0.005,
-        num_learning_epochs=5,
+        entropy_coef=0.003,
+        num_learning_epochs=8,
         num_mini_batches=4,
-        learning_rate=1.0e-4,
+        learning_rate=1.0e-3,
         schedule="adaptive",
         gamma=0.99,
         lam=0.95,

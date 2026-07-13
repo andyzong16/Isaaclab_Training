@@ -64,10 +64,10 @@ class G1WBCEnvCfg(ManagerBasedRLEnvCfg):
         # self.scene.rigid_floor = vel_mdp.CurriculumSoftTerrainPlatform
 
         self.viewer = ViewerCfg(
-            eye=(-1.0, -10.5, 0.2), 
+            eye=(-1.0, -4.0, 0.2),
             lookat=(-1.0, -0.0, 0.0),
-            resolution=(1920, 1080), 
-            origin_type="asset_root", 
+            resolution=(1920, 1080),
+            origin_type="asset_root",
             asset_name="robot"
         )
 
@@ -88,11 +88,11 @@ class G1WBCEnvCfg_PLAY(G1WBCEnvCfg):
 
         self.commands.motion.start_from_beginning = True
         self.commands.motion.joint_position_range = (0.0, 0.0)
-        
+
         self.viewer = ViewerCfg(
-            eye=(-1.0, -3.5, 0.2), 
+            eye=(-1.0, -1.2, 0.2),
             lookat=(-1.0, -0.0, 0.0),
-            resolution=(1920, 1080), 
-            origin_type="asset_root", 
+            resolution=(1920, 1080),
+            origin_type="asset_root",
             asset_name="robot"
         )

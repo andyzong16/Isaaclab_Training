@@ -20,23 +20,23 @@ class G1RewardsCfg:
         func=wbc_mdp.motion_global_anchor_position_error_exp,
         # weight=0.5,
         weight=2.0,
-        params={"command_name": "motion", "std": 0.3},
+        params={"command_name": "motion", "std": 0.15},
     )
     motion_global_anchor_ori = RewTerm(
         func=wbc_mdp.motion_global_anchor_orientation_error_exp,
         # weight=0.5,
         weight=2.0,
-        params={"command_name": "motion", "std": 0.4},
+        params={"command_name": "motion", "std": 0.2},
     )
     motion_body_pos = RewTerm(
         func=wbc_mdp.motion_relative_body_position_error_exp,
         weight=1.0,
-        params={"command_name": "motion", "std": 0.3},
+        params={"command_name": "motion", "std": 0.15},
     )
     motion_body_ori = RewTerm(
         func=wbc_mdp.motion_relative_body_orientation_error_exp,
         weight=1.0,
-        params={"command_name": "motion", "std": 0.4},
+        params={"command_name": "motion", "std": 0.2},
     )
     motion_body_lin_vel = RewTerm(
         func=wbc_mdp.motion_global_body_linear_velocity_error_exp,

@@ -86,7 +86,7 @@ def terrain_levels_motion_success(
 
     # Check if motion was completed before termination
     # Motion completes when time_steps >= motion.time_step_total and environment hasn't terminated
-    motion_completed = (motion_command.time_steps >= motion_command.motion.time_step_total) & \
+    motion_completed = (motion_command.time_steps[env_ids] >= motion_command.motion.time_step_total) & \
                        ~env.termination_manager.terminated[env_ids]
 
     # Move up to harder terrain if motion was successfully completed
