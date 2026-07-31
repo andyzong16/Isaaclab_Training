@@ -85,7 +85,9 @@ class G1WBCEnvCfg_PLAY(G1WBCEnvCfg):
         self.terminations.anchor_ori = None # type: ignore
         self.terminations.ee_body_pos = None # type: ignore
         self.terminations.base_ang_vel_exceed = None # type: ignore
-
+        
+        # self.scene.terrain.disable_collider = False   # Rigid Ground
+        self.scene.terrain = vel_mdp.SoftTerrain
         self.commands.motion.start_from_beginning = True
         self.commands.motion.joint_position_range = (0.0, 0.0)
 

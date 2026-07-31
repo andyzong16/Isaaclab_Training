@@ -56,7 +56,7 @@ CurriculumSoftTerrain = TerrainImporterCfg(
     ),
     max_init_terrain_level=0,
     debug_vis=False,
-    disable_collider=True,
+    disable_collider=False,
 )
 
 # CurriculumSoftTerrainPlatform = TerrainImporterCfg(

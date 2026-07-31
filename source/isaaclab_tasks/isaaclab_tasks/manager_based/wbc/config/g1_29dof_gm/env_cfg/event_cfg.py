@@ -86,7 +86,7 @@ class G1EventCfg:
         func=g1_mdp.randomize_terrain_stiffness,
         mode="reset",
         params={
-            "stiffness_range": (0.4, 0.4),
+            "stiffness_range": (0.2, 0.9),
             "contact_solver_name": "physics_callback",
         },
     )

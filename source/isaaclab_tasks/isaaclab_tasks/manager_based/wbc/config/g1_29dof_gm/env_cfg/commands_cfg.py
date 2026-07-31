@@ -18,6 +18,7 @@ class G1CommandsCfg:
         resampling_time_range=(1.0e9, 1.0e9),
         # debug_vis=True,
         debug_vis=False,
+        start_from_beginning=True,
         pose_range={
             "x": (-0.05, 0.05),
             "y": (-0.05, 0.05),
